@@ -18,8 +18,9 @@ pipeline {
         stage('SAST - Semgrep') {
             steps {
                 sh '''
+                    cd "$WORKSPACE"
                     docker run --rm \
-                      -v "$WORKSPACE:/src" \
+                      -v "$PWD:/src" \
                       semgrep/semgrep \
                       semgrep --config=p/java --error
                 '''
