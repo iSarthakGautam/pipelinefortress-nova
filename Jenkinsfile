@@ -18,11 +18,10 @@ pipeline {
         stage('SAST - Semgrep') {
             steps {
                 sh '''
-                    cd "$WORKSPACE"
                     docker run --rm \
-                      -v "$PWD:/src" \
+                      -v jenkins_home:/src \
                       semgrep/semgrep \
-                      semgrep --config=p/java --error
+                      semgrep --config=p/java --error /src/workspace/employee-api-pipeline
                 '''
             }
         }
