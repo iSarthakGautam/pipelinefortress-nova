@@ -1,0 +1,42 @@
+---
+- name: Deploy Employee API to Kubernetes
+  hosts: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Check Kubernetes cluster
+      command: kubectl get nodes
+      register: kubernetes_nodes
+      changed_when: false
+
+    - name: Display Kubernetes nodes
+      debug:
+        var: kubernetes_nodes.stdout_lines
+
+    - name: Apply Employee API Deployment
+      command: kubectl apply -f "{{ playbook_dir }}/../k8s/deployment.yaml"
+
+    - name: Apply Employee API Service
+      command: kubectl apply -f "{{ playbook_dir }}/../k8s/service.yaml"
+
+    - name: Wait for Employee API rollout
+      command: kubectl rollout status deployment/employee-api --timeout=120s
+
+    - name: Show Employee API pods
+      command: kubectl get pods -l app=employee-api
+      register: employee_pods
+      changed_when: false
+
+    - name: Display Employee API pods
+      debug:
+        var: employee_pods.stdout_lines
+
+    - name: Show Employee API service
+      command: kubectl get service employee-api
+      register: employee_service
+      changed_when: false
+
+    - name: Display Employee API service
+      debug:
+        var: employee_service.stdout_lines
