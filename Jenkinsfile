@@ -113,5 +113,37 @@ pipeline {
                 '''
             }
         }
+    stage('API Smoke Test') {
+    steps {
+        echo 'Running Employee API smoke test...'
+
+        sh '''
+            echo "=========================================="
+            echo "Employee API Smoke Test"
+            echo "=========================================="
+
+            echo "Starting port-forward..."
+            kubectl port-forward service/employee-api 8081:8080 > /tmp/employee-api-port-forward.log 2>&1 &
+
+            PF_PID=$!
+
+            # Give port-forward time to establish
+            sleep 5
+
+            echo "Testing Actuator Health endpoint..."
+
+            curl --fail --silent --show-error \
+                 http://127.0.0.1:8081/actuator/health
+
+            echo ""
+            echo "=========================================="
+            echo "API Smoke Test PASSED"
+            echo "Employee API is responding successfully."
+            echo "=========================================="
+
+            kill $PF_PID || true
+        '''
+    }
+}
     }
 }
