@@ -26,7 +26,7 @@ public class EmployeeController {
             Map.of(
                 "id", 3,
                 "name", "Charlie",
-                "department", "DevOps"
+                "department", "DevSecOps"
             )
         );
     }
