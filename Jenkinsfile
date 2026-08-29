@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -11,7 +12,7 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                sh './mvnw clean test'
+                sh './mvnw clean package'
             }
         }
 
@@ -33,3 +34,4 @@ pipeline {
         }
     }
 }
+```
