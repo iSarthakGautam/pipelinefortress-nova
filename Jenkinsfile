@@ -11,10 +11,10 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                // Build the application, run tests, and create the JAR
+                echo 'Building and testing Employee API...'
+
                 sh './mvnw clean package'
 
-                // Verify that the JAR was created for the Docker build
                 sh 'ls -lh target/employee-api-*.jar'
             }
         }
@@ -53,11 +53,9 @@ pipeline {
                     echo "=========================================="
                     echo "Trivy Container Security Scan"
                     echo "=========================================="
+
                     echo "NOTE: HIGH/CRITICAL vulnerabilities will"
                     echo "be reported but will NOT block/fail the build."
-                    echo "but in production like env, as these findings should be"
-                    echo "reviewed and remediated so we can failed the build as well using the exit code"
-                    echo "=========================================="
 
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
@@ -70,6 +68,18 @@ pipeline {
                     echo "Trivy scan completed."
                     echo "Pipeline continues for demonstration."
                     echo "=========================================="
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Deploying Employee API to Kubernetes using Ansible...'
+
+                sh '''
+                    ansible-playbook \
+                      -i ansible/inventory.ini \
+                      ansible/deploy.yml
                 '''
             }
         }
