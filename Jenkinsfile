@@ -9,15 +9,20 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build and Test') {
             steps {
-                sh './mvnw clean package -DskipTests'
+                sh './mvnw clean test'
             }
         }
 
-        stage('Test') {
+        stage('SAST - Semgrep') {
             steps {
-                sh './mvnw test'
+                sh '''
+                    docker run --rm \
+                      -v "$WORKSPACE:/src" \
+                      semgrep/semgrep \
+                      semgrep --config=p/java --error
+                '''
             }
         }
 
