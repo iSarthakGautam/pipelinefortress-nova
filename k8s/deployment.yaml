@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: employee-api
-          image: employee-api:1.0
+          image: employee-api:jenkins
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
