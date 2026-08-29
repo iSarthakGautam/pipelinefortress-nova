@@ -11,8 +11,6 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                echo 'Building and testing Employee API...'
-
                 sh './mvnw clean package'
 
                 sh 'ls -lh target/employee-api-*.jar'
@@ -80,6 +78,38 @@ pipeline {
                     ansible-playbook \
                       -i ansible/inventory.ini \
                       ansible/deploy.yml
+                '''
+            }
+        }
+
+        stage('Deployment Verification') {
+            steps {
+                echo 'Verifying Employee API deployment...'
+
+                sh '''
+                    echo "=========================================="
+                    echo "Deployment Verification"
+                    echo "=========================================="
+
+                    echo "Checking Kubernetes deployment..."
+                    kubectl get deployment employee-api
+
+                    echo ""
+                    echo "Checking Employee API pods..."
+                    kubectl get pods -l app=employee-api
+
+                    echo ""
+                    echo "Checking Employee API service..."
+                    kubectl get service employee-api
+
+                    echo ""
+                    echo "Checking rollout status..."
+                    kubectl rollout status deployment/employee-api --timeout=120s
+
+                    echo ""
+                    echo "=========================================="
+                    echo "Deployment Verification PASSED"
+                    echo "=========================================="
                 '''
             }
         }
