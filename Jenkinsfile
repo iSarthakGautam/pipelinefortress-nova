@@ -11,7 +11,7 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                sh './mvnw clean package'
+                sh './mvnw clean test'
             }
         }
 
@@ -29,6 +29,20 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh 'docker build -t employee-api:jenkins .'
+            }
+        }
+
+        stage('Container Security - Trivy') {
+            steps {
+                sh '''
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      aquasec/trivy:latest \
+                      image \
+                      --severity HIGH,CRITICAL \
+                      --exit-code 1 \
+                      employee-api:jenkins
+                '''
             }
         }
     }
