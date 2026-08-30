@@ -103,6 +103,10 @@ pipeline {
                     kubectl get service employee-api
 
                     echo ""
+                    echo "Checking Employee API ServiceMonitor..."
+                    kubectl get servicemonitor employee-api -n monitoring 
+
+                    echo ""
                     echo "Checking rollout status..."
                     kubectl rollout status deployment/employee-api --timeout=120s
 
