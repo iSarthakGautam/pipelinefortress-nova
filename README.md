@@ -44,6 +44,22 @@ We are a team of 5 working full-time. We build for async by default:
 
 ---
 
+## Local Branch Protection (Mandatory)
+Because we are using a private repository on a free GitHub account, server-side branch protection rules are disabled. To fulfill the rubric requirement of "no direct pushes to main", **every team member must run this command immediately after cloning the repo**. 
+
+This installs a local git hook that physically prevents you from pushing directly to the `main` branch:
+
+```bash
+echo '#!/bin/bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$branch" = "main" ]; then
+  echo "❌ STOP: Direct pushes to main are forbidden by team contract. Please create a branch and open a PR."
+  exit 1
+fi' > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+```
+
+---
+
 ## Getting Started (Week 1 Foundation)
 - **R1**: Setup the `make bootstrap` process and basic `.github/workflows`.
 - **R2**: Propose the unified JSON finding schema.
