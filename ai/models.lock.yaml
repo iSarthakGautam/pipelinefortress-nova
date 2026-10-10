@@ -1,0 +1,16 @@
+models:
+  - family: "qwen2.5-coder"
+    version: "14b"
+    quantisation: "q4_K_M"
+    digest: "sha256:88a7b93a... (placeholder for actual ollama pull digest)"
+    provider: "ollama"
+    is_default: true
+    rationale: "Strongest small open code model. Selected as primary baseline."
+
+  - family: "llama3.1"
+    version: "8b"
+    quantisation: "q4_0"
+    digest: "sha256:1a2b3c4d... (placeholder for actual ollama pull digest)"
+    provider: "ollama"
+    is_default: false
+    rationale: "Bake-off candidate. Good reasoning per byte."
