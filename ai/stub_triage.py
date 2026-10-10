@@ -9,7 +9,12 @@ from datetime import datetime
 
 def main():
     try:
-        input_data = sys.stdin.read()
+        # Check if we are running in an interactive terminal to prevent hanging
+        if sys.stdin.isatty():
+            input_data = ""
+        else:
+            input_data = sys.stdin.read()
+            
         if not input_data.strip():
             # If no input, just use an empty array for the stub.
             findings = []
