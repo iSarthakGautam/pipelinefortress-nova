@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import re
 
 # Ensure ai directory is in sys.path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -9,6 +10,7 @@ if SCRIPT_DIR not in sys.path:
 
 from cluster import cluster_findings
 from enrich import enrich_finding
+from validate import validate_triage_output
 from redaction.redactor import redact_finding, egress_guard_check, CANARY_TOKEN
 from llm_client import query_model, OLLAMA_BASE_URL, DEFAULT_MODEL
 
@@ -43,9 +45,21 @@ def process_clusters(clusters: dict):
         # 2. Enrich
         enriched_rep = enrich_finding(safe_rep)
         
-        # 3. Query LLM
-        user_prompt = json.dumps(enriched_rep)
-        llm_output = query_model(system_prompt, user_prompt)
+        # Injection Defense: Check untrusted snippet before prompt construction
+        snippet_content = safe_rep.get("snippet", "")
+        inj_patterns = [r'(?i)ignore\s+(?:all\s+)?previous\s+instructions', r'(?i)mark.*false\s+positive', r'(?i)approve\s+the\s+pr']
+        if any(re.search(pat, snippet_content) for pat in inj_patterns):
+            llm_output = {
+                "verdict": "NEEDS_HUMAN_REVIEW",
+                "priority": "P1",
+                "confidence": 1.0,
+                "fix_summary": "SECURITY ALERT: Adversarial prompt injection detected in code snippet. Direct human triage mandated.",
+                "grounding": {"validated": False, "rejected_claims": ["Adversarial prompt injection detected"]}
+            }
+        else:
+            # 3. Query LLM with framed untrusted input
+            user_prompt = json.dumps(enriched_rep)
+            llm_output = query_model(system_prompt, user_prompt)
         
         # L4 Canary Check (Basic validation)
         if llm_output and isinstance(llm_output, dict):
@@ -75,6 +89,9 @@ def process_clusters(clusters: dict):
             "prompt_version": triage_dict.get("prompt_version", "triage/v1"),
             "grounding": triage_dict.get("grounding", {"validated": True, "rejected_claims": []})
         }
+        
+        # Stage 4: Grounding Validator (Architecture gate against hallucinations)
+        final_output = validate_triage_output(final_output)
         
         triaged_results.append(final_output)
         

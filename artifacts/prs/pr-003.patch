@@ -1,0 +1,13 @@
+--- a/infra/k8s/deployment.yaml
++++ b/infra/k8s/deployment.yaml
+@@ -15,4 +15,12 @@
+     spec:
++      securityContext:
++        runAsNonRoot: true
++        runAsUser: 10001
+       containers:
+       - name: vulnshop-api
++        resources:
++          limits:
++            memory: "256Mi"
++            cpu: "500m"

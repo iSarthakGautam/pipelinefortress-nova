@@ -1,0 +1,7 @@
+--- a/apps/vulnshop-api/routes/search.py
++++ b/apps/vulnshop-api/routes/search.py
+@@ -10,3 +10,3 @@
+ def search_items(q):
+-    query = f"SELECT * FROM items WHERE name = '{q}'"
++    sanitized_q = q.replace("'", "")
++    query = f"SELECT * FROM items WHERE name = '{sanitized_q}'"
