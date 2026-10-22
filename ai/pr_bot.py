@@ -1,146 +1,120 @@
-import os
 import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+
+import llm_client
+from injection import frame_untrusted
+from trace import sha256_text
 
 # pr_bot.py
-# Generates mechanical, verifiable remediation Pull Requests for high-priority findings.
-# Rubric requirement: 4 auto-generated PRs with human review notes (including 1 deliberately rejected).
+# Drafts mechanical remediation patches by calling the local model with prompts/patch_draft_v1.md, then checks
+# each patch with `git apply --check`. It NEVER opens a PR, merges, or writes review notes (hard rule 1):
+# every register row starts as DRAFT_UNREVIEWED with a PENDING review that R1/R2/R3 fill in on the real PR.
+# Targets are SYNTHETIC fixtures in eval/fixtures/pr_targets/ until R3's real files exist.
+# Whether any patch is good enough to merge, or should be rejected, is the human reviewer's call.
 
-SAMPLE_PRS = [
-    {
-        "pr_id": "PR-001",
-        "title": "fix(docker): enforce non-root user and drop latest tag in Dockerfile",
-        "finding_id": "CKV_DOCKER_3",
-        "target_file": "docker/Dockerfile",
-        "status": "ACCEPTED",
-        "model": "qwen2.5-coder:14b-q4_K_M",
-        "prompt_version": "patch_draft/v1",
-        "description": (
-            "Hardens container image by creating an unprivileged user 'appuser' (UID 10001) "
-            "and pinning base image to specific digest rather than ':latest'."
-        ),
-        "diff": """--- a/docker/Dockerfile
-+++ b/docker/Dockerfile
-@@ -1,5 +1,8 @@
--FROM node:latest
-+FROM node:20.11.1-alpine@sha256:d4e3b7b89...
- WORKDIR /app
- COPY . .
-+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-+USER appuser
- EXPOSE 3000
--CMD ["node", "server.js"]
-+CMD ["node", "server.js"]
-""",
-        "human_review_notes": {
-            "reviewer": "R3 (Container & Supply Chain)",
-            "verdict": "APPROVED",
-            "comments": "Verified. Hadolint passes with zero warnings. Container drops root privileges properly."
-        }
-    },
-    {
-        "pr_id": "PR-002",
-        "title": "fix(deps): bump vulnerable jsonwebtoken dependency to patch CVE-2022-23529",
-        "finding_id": "CVE-2022-23529",
-        "target_file": "apps/vulnshop-api/package.json",
-        "status": "ACCEPTED",
-        "model": "qwen2.5-coder:14b-q4_K_M",
-        "prompt_version": "patch_draft/v1",
-        "description": "Bumps jsonwebtoken from 8.5.1 to 9.0.0 to remediate arbitrary code execution flaw.",
-        "diff": """--- a/apps/vulnshop-api/package.json
-+++ b/apps/vulnshop-api/package.json
-@@ -12,3 +12,3 @@
-   "dependencies": {
--    "jsonwebtoken": "^8.5.1",
-+    "jsonwebtoken": "^9.0.0",
-     "express": "^4.18.2"
-""",
-        "human_review_notes": {
-            "reviewer": "R2 (Scanners & Policy)",
-            "verdict": "APPROVED",
-            "comments": "SCA Trivy scan passes after bump. Unit tests pass with no breaking changes in token verification API."
-        }
-    },
-    {
-        "pr_id": "PR-003",
-        "title": "fix(k8s): enforce runAsNonRoot and configure CPU/memory resource limits",
-        "finding_id": "CKV_K8S_40",
-        "target_file": "infra/k8s/deployment.yaml",
-        "status": "ACCEPTED",
-        "model": "qwen2.5-coder:14b-q4_K_M",
-        "prompt_version": "patch_draft/v1",
-        "description": "Applies CIS Kubernetes Benchmark controls: restricts root execution and adds resource limits.",
-        "diff": """--- a/infra/k8s/deployment.yaml
-+++ b/infra/k8s/deployment.yaml
-@@ -15,4 +15,12 @@
-     spec:
-+      securityContext:
-+        runAsNonRoot: true
-+        runAsUser: 10001
-       containers:
-       - name: vulnshop-api
-+        resources:
-+          limits:
-+            memory: "256Mi"
-+            cpu: "500m"
-""",
-        "human_review_notes": {
-            "reviewer": "R1 (Pipeline & Platform Lead)",
-            "verdict": "APPROVED",
-            "comments": "Checkov IaC stage now passes with zero policy violations on deployment manifest."
-        }
-    },
-    {
-        "pr_id": "PR-004",
-        "title": "fix(security): sanitize user input with regex replace for SQL parameter",
-        "finding_id": "CWE-89",
-        "target_file": "apps/vulnshop-api/routes/search.py",
-        "status": "REJECTED",
-        "model": "qwen2.5-coder:14b-q4_K_M",
-        "prompt_version": "patch_draft/v1",
-        "description": "Attempted to fix SQL injection by naively stripping single quotes from user input.",
-        "diff": """--- a/apps/vulnshop-api/routes/search.py
-+++ b/apps/vulnshop-api/routes/search.py
-@@ -10,3 +10,3 @@
- def search_items(q):
--    query = f"SELECT * FROM items WHERE name = '{q}'"
-+    sanitized_q = q.replace("'", "")
-+    query = f"SELECT * FROM items WHERE name = '{sanitized_q}'"
-""",
-        "human_review_notes": {
-            "reviewer": "R4 (AI Lead) + R1 (Pipeline Lead)",
-            "verdict": "REJECTED (DELIBERATE)",
-            "comments": (
-                "REJECTED: Naive string replacement is an anti-pattern. It breaks legitimate search terms "
-                "(e.g. O'Connor) and can still be bypassed depending on query structure. Fix must use parameterized "
-                "queries (db.execute(sql, (q,))) instead of naive sanitization. Demonstrates critical AI review."
-            )
-        }
-    }
+# TODO(R3): point FIXTURES at the real files (docker/Dockerfile, infra/k8s/*.yaml, apps/vulnshop-api/) once they exist;
+#           the targets below are synthetic stand-ins.
+# TODO(R1): open the drafts as real draft PRs (label `ai-drafted`, finding id, model + prompt version, before/after scan diff)
+#           from a workflow; this script only writes patches and a register.
+# TODO(R1/R2/R3): write the review notes on the real PRs (review is PENDING here on purpose; their names go on them).
+ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+FIXTURES = os.path.join(ROOT, "eval", "fixtures", "pr_targets")
+
+TASKS = [
+    {"pr_id": "PR-001", "target": "Dockerfile", "finding": "CKV_DOCKER_3 / CKV_DOCKER_2",
+     "ask": "Base image uses the mutable ':latest' tag and the container runs as root. Pin the base image to "
+            "'node:20.11.1-alpine' (a tag, no digest, do not invent one) and add a non-root USER."},
+    {"pr_id": "PR-002", "target": "deployment.yaml", "finding": "CKV_K8S_40",
+     "ask": "securityContext sets runAsNonRoot: false. Set runAsNonRoot: true and runAsUser: 10001. Change nothing else."},
+    {"pr_id": "PR-003", "target": "package.json", "finding": "SCA outdated dependency (fixture)",
+     "ask": "Bump the dependency 'lodash' from 4.17.15 to 4.17.21. Change nothing else."},
+    {"pr_id": "PR-004", "target": "search.py", "finding": "CWE-89 SQL injection (fixture)",
+     "ask": "The query is built with an f-string from user input. Rewrite it as a parameterised query using "
+            "db.execute(sql, (q,)) with a ? placeholder."},
 ]
 
-def export_prs(output_dir: str = "artifacts/prs"):
-    """Exports the 4 PR patches and human review notes to markdown and patch files."""
+
+def load_patch_prompt() -> dict:
+    with open(os.path.join(SCRIPT_DIR, "prompts", "patch_draft_v1.md"), encoding="utf-8") as f:
+        raw = f.read()
+    m = re.match(r"---\n(.*?)\n---\n", raw, re.S)
+    return {"text": raw[m.end():] if m else raw, "sha256": sha256_text(raw), "version": "patch_draft_v1"}
+
+
+def extract_diff(text: str):
+    """Pulls the unified diff out of the model's reply (it may wrap it in a code fence)."""
+    text = re.sub(r"```(?:diff|patch)?", "", text)
+    i = text.find("--- a/")
+    if i < 0:
+        return None
+    diff = text[i:].strip()
+    return diff + "\n" if "+++ b/" in diff else None
+
+
+def git_apply_check(target: str, diff: str):
+    """True if `git apply --check` accepts the patch against a scratch copy of the fixture."""
+    with tempfile.TemporaryDirectory() as d:
+        shutil.copy(os.path.join(FIXTURES, target), os.path.join(d, target))
+        p = subprocess.run(["git", "apply", "--check", "-"], input=diff, cwd=d, capture_output=True, text=True)
+        return p.returncode == 0, p.stderr.strip()[:300]
+
+
+def draft_pr(task: dict, prompt: dict, model: str) -> dict:
+    with open(os.path.join(FIXTURES, task["target"]), encoding="utf-8") as f:
+        content = f.read()
+    user = frame_untrusted({"file": task["target"], "finding": task["finding"], "task": task["ask"], "content": content})
+    user += f"\n\nPaths in the diff must be exactly 'a/{task['target']}' and 'b/{task['target']}'."
+    r = llm_client.chat(prompt["text"], user, model=model, expect_json=False)
+    diff = extract_diff(r["raw"]) if r["ok"] else None
+    applies, why = git_apply_check(task["target"], diff) if diff else (False, "no unified diff found in model output")
+    return {**task, "model": f"{model}@{r['digest'][:19]}", "prompt_version": prompt["version"],
+            "prompt_sha256": prompt["sha256"][:12], "diff": diff, "raw_model_output": r["raw"],
+            "applies_cleanly": applies, "apply_error": why, "status": "DRAFT_UNREVIEWED",
+            "human_review_notes": {"reviewer": None, "verdict": "PENDING", "comments": None}}
+
+
+def export_prs(output_dir: str = None, model: str = None) -> list:
+    output_dir = output_dir or os.path.join(ROOT, "artifacts", "prs")
+    model = model or llm_client.DEFAULT_MODEL
     os.makedirs(output_dir, exist_ok=True)
-    summary_md = ["# Automated PR Remediation Register\n"]
-    summary_md.append("| PR ID | Target | Status | Reviewer | Verdict | Notes |")
-    summary_md.append("|---|---|---|---|---|---|")
+    for old in os.listdir(output_dir):
+        if old.startswith("pr-") or old == "PR_REGISTER.md":
+            os.remove(os.path.join(output_dir, old))
+    prompt = load_patch_prompt()
+    prs = [draft_pr(t, prompt, model) for t in TASKS]
 
-    for pr in SAMPLE_PRS:
-        pr_file = os.path.join(output_dir, f"{pr['pr_id'].lower()}.patch")
-        with open(pr_file, "w") as f:
-            f.write(pr["diff"])
+    lines = ["# AI-drafted PR register\n",
+             f"Drafted by `ai/pr_bot.py` with model `{model}` (prompt `patch_draft_v1`). Targets are SYNTHETIC fixtures "
+             "(`eval/fixtures/pr_targets/`), not repo files. **No PR has been opened and no human has reviewed any of these.** "
+             "`applies_cleanly` is the result of `git apply --check`, nothing more: it does not mean the patch is correct. "
+             "Review notes are written by R1/R2/R3 on the real PR, not here.\n",
+             "| PR | Target | Finding | Model | applies cleanly | Review | Reviewer |", "|---|---|---|---|---|---|---|"]
+    for pr in prs:
+        name = pr["pr_id"].lower()
+        with open(os.path.join(output_dir, f"{name}.model_output.txt"), "w", encoding="utf-8") as f:
+            f.write(pr["raw_model_output"])
+        if pr["diff"]:
+            with open(os.path.join(output_dir, f"{name}.patch"), "w", encoding="utf-8") as f:
+                f.write(pr["diff"])
+        lines.append(f"| {pr['pr_id']} | `{pr['target']}` | {pr['finding']} | `{pr['model']}` | "
+                     f"{'yes' if pr['applies_cleanly'] else 'NO: ' + pr['apply_error'].replace('|', '/')[:80]} | "
+                     f"**{pr['human_review_notes']['verdict']}** | {pr['human_review_notes']['reviewer']} |")
+    with open(os.path.join(output_dir, "PR_REGISTER.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    with open(os.path.join(output_dir, "pr_register.json"), "w", encoding="utf-8") as f:
+        json.dump([{k: v for k, v in pr.items() if k != "raw_model_output"} for pr in prs], f, indent=2)
+    print(f"Drafted {len(prs)} patches ({sum(p['applies_cleanly'] for p in prs)} apply cleanly) -> {output_dir}/")
+    return prs
 
-        rev = pr["human_review_notes"]
-        summary_md.append(
-            f"| `{pr['pr_id']}` | `{pr['target_file']}` | **{pr['status']}** | {rev['reviewer']} | **{rev['verdict']}** | {rev['comments']} |"
-        )
-
-    summary_file = os.path.join(output_dir, "PR_REGISTER.md")
-    with open(summary_file, "w") as f:
-        f.write("\n".join(summary_md))
-    
-    print(f"Exported {len(SAMPLE_PRS)} PR patches and review register to {output_dir}/")
 
 if __name__ == "__main__":
     export_prs()
-

@@ -1,55 +1,35 @@
 import json
 
 # enrich.py
-# Offline enrichment layer. Attaches EPSS scores and CISA KEV status to findings.
-# Real world: this uses offline OSV dumps and CSVs to prevent network calls at inference time.
+# Offline enrichment. Attaches EPSS and CISA KEV facts per CVE. Never fetched at inference time.
+# The tables below are a HAND-PICKED SAMPLE, not the full KEV/EPSS feeds. Until ai/data/ gets the real
+# CISA KEV JSON and EPSS CSV (with sha256 pins), CVEs not listed here get epss=None (unknown), not 0.
+# EPSS only exists per CVE, so there is no EPSS value for a bare CWE (the earlier CWE prior was invented).
+# `reachable` is None because reachability analysis is not implemented. None means "not computed".
 
-# Mocking the offline CVE databases for the capstone scope
-OFFLINE_KEV = {
-    "CVE-2021-44228": True, # log4shell is exploited
-    "CVE-2023-38408": True
-}
+# TODO(team): decide who owns the enricher inputs (PLAN §2 lists EPSS, CISA KEV, offline OSV/NVD, CWE map, reachability).
+#             Until the real CISA KEV JSON / EPSS CSV snapshots are added to ai/data/, these are hand-picked samples.
+# TODO(R2): if R2's normalizer computes reachability, fill enrichment.reachable upstream and drop the null below.
+SAMPLE_KEV = {"CVE-2021-44228", "CVE-2023-38408"}
 
-OFFLINE_EPSS = {
+SAMPLE_EPSS = {
     "CVE-2021-44228": 0.97,
     "CVE-2023-38408": 0.55,
-    "CWE-89": 0.05 # Baseline for generic SQLi if no CVE exists
 }
 
-def enrich_finding(finding: dict) -> dict:
-    """
-    Mutates the finding to add an enrichment block.
-    """
-    cves = finding.get("cve", [])
-    cwes = finding.get("cwe", [])
-    
-    # Defaults
-    is_kev = False
-    max_epss = 0.0
-    
-    # Check CVEs
-    for cve in cves:
-        if OFFLINE_KEV.get(cve):
-            is_kev = True
-        epss = OFFLINE_EPSS.get(cve, 0.0)
-        if epss > max_epss:
-            max_epss = epss
-            
-    # Fallback to CWE baseline if no CVE (common in SAST)
-    if max_epss == 0.0 and cwes:
-        for cwe in cwes:
-            epss = OFFLINE_EPSS.get(cwe, 0.01)
-            if epss > max_epss:
-                max_epss = epss
 
+def enrich_finding(finding: dict) -> dict:
+    """Adds an `enrichment` block to the finding (mutates and returns it)."""
+    cves = finding.get("cve", []) or []
+    known = [SAMPLE_EPSS[c] for c in cves if c in SAMPLE_EPSS]
     finding["enrichment"] = {
-        "epss": max_epss,
-        "kev": is_kev,
-        "reachable": True # Placeholder for reachability analysis
+        "epss": max(known) if known else None,
+        "kev": any(c in SAMPLE_KEV for c in cves),
+        "reachable": None,
     }
     return finding
 
-if __name__ == "__main__":
-    sample = {"finding_id": "1", "cve": ["CVE-2021-44228"]}
-    print(json.dumps(enrich_finding(sample), indent=2))
 
+if __name__ == "__main__":
+    print(json.dumps(enrich_finding({"finding_id": "1", "cve": ["CVE-2021-44228"]}), indent=2))
+    print(json.dumps(enrich_finding({"finding_id": "2", "cwe": ["CWE-89"]}), indent=2))

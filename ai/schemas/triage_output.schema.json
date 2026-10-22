@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Model output for one finding cluster (triage_v2)",
+  "description": "Everything the model may say. Priority, model name and prompt version are NOT here: code sets them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "confidence", "fix_summary", "claims"],
+  "properties": {
+    "verdict": {"type": "string", "enum": ["TRUE_POSITIVE", "FALSE_POSITIVE", "NEEDS_HUMAN_REVIEW"]},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "fix_summary": {"type": "string", "maxLength": 1000},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cves", "cwes", "package", "fixed_version", "file", "line"],
+      "properties": {
+        "cves": {"type": "array", "items": {"type": "string"}},
+        "cwes": {"type": "array", "items": {"type": "string"}},
+        "package": {"type": ["string", "null"]},
+        "fixed_version": {"type": ["string", "null"]},
+        "file": {"type": ["string", "null"]},
+        "line": {"type": ["integer", "null"]}
+      }
+    }
+  }
+}

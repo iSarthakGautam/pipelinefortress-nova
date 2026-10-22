@@ -1,0 +1,147 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "components": [
+    {
+      "type": "machine-learning-model",
+      "name": "llama3:latest",
+      "version": "8.0B",
+      "licenses": [
+        {
+          "license": {
+            "name": "Meta Llama 3 Community License"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://ollama.com/library/llama3"
+        }
+      ],
+      "properties": [
+        {
+          "name": "quantisation",
+          "value": "Q4_0"
+        },
+        {
+          "name": "installed",
+          "value": "true"
+        },
+        {
+          "name": "osi_approved",
+          "value": "false"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1"
+        }
+      ]
+    },
+    {
+      "type": "machine-learning-model",
+      "name": "gemma2:latest",
+      "version": "9.2B",
+      "licenses": [
+        {
+          "license": {
+            "name": "Gemma Terms of Use"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://ollama.com/library/gemma2"
+        }
+      ],
+      "properties": [
+        {
+          "name": "quantisation",
+          "value": "Q4_0"
+        },
+        {
+          "name": "installed",
+          "value": "true"
+        },
+        {
+          "name": "osi_approved",
+          "value": "false"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ff02c3702f322b9e075e9568332d96c0a7028002f1a5a056e0a6784320a4db0b"
+        }
+      ]
+    },
+    {
+      "type": "machine-learning-model",
+      "name": "llama3.1:8b",
+      "version": "8B",
+      "licenses": [
+        {
+          "license": {
+            "name": "Llama 3.1 Community License (verify before citing)"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://ollama.com/library/llama3.1"
+        }
+      ],
+      "properties": [
+        {
+          "name": "quantisation",
+          "value": "unverified"
+        },
+        {
+          "name": "installed",
+          "value": "false"
+        },
+        {
+          "name": "osi_approved",
+          "value": "false"
+        }
+      ]
+    },
+    {
+      "type": "machine-learning-model",
+      "name": "qwen2.5-coder:14b",
+      "version": "14B",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 (verify on the model card before citing)"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://ollama.com/library/qwen2.5-coder"
+        }
+      ],
+      "properties": [
+        {
+          "name": "quantisation",
+          "value": "unverified"
+        },
+        {
+          "name": "installed",
+          "value": "false"
+        },
+        {
+          "name": "osi_approved",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}

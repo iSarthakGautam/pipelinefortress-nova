@@ -1,7 +1,7 @@
---- a/apps/vulnshop-api/routes/search.py
-+++ b/apps/vulnshop-api/routes/search.py
-@@ -10,3 +10,3 @@
- def search_items(q):
+--- a/search.py
++++ b/search.py
+@@ -1,7 +1,7 @@
+ def search_items(db, q):
 -    query = f"SELECT * FROM items WHERE name = '{q}'"
-+    sanitized_q = q.replace("'", "")
-+    query = f"SELECT * FROM items WHERE name = '{sanitized_q}'"
++    query = "SELECT * FROM items WHERE name = ?"
+     return db.execute(query, (q,)).fetchall()
