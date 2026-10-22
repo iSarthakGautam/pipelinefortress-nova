@@ -94,6 +94,13 @@ def test_extract_only_the_binary():
         ih.extract_binary(tar_gz({"evil/../../x": b"nope"}), "x.tar.gz")
 
 
+@pytest.mark.parametrize("url", ["file:///etc/passwd", "https://evil.example/gitleaks.tar.gz",
+                                 "https://github.com/gitleaks/gitleaks/releases/download/v9.9.9/x"])
+def test_download_refuses_unexpected_urls(url):
+    with pytest.raises(ih.InstallError, match="unexpected URL"):
+        ih.download(url)
+
+
 def test_tampered_download_is_not_installed(tmp_path):
     key = ih.platform_key()
     with pytest.raises(ih.InstallError, match="checksum mismatch"):

@@ -124,7 +124,10 @@ def extract_binary(archive: bytes, asset_name: str) -> bytes:
 
 
 def download(url: str) -> bytes:
-    with urllib.request.urlopen(url, timeout=120) as r:  # noqa: S310 (fixed https URL)
+    # Only the pinned release URL; urllib would also accept file:// or other hosts
+    if not url.startswith(_BASE + "/"):
+        raise InstallError(f"refusing to download from unexpected URL: {url}")
+    with urllib.request.urlopen(url, timeout=120) as r:
         return r.read()
 
 
