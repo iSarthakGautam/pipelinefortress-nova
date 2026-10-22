@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install -r requirements-dev.txt
+      - run: pip install --require-hashes -r requirements-dev.txt
       - run: python -m pytest tests -q
 
   scan-and-gate:
@@ -58,8 +58,13 @@ jobs:
 
       - name: Install scanners (pinned, checksum-verified)
         run: |
-          pip install "semgrep==${SEMGREP_VERSION}" -r requirements-dev.txt
+          pip install --require-hashes -r requirements-dev.txt
           bin="$RUNNER_TEMP/bin"; mkdir -p "$bin"; cd "$RUNNER_TEMP"
+
+          # Semgrep in its own venv so its dependencies can't change the hash-locked ones above
+          python -m venv "$RUNNER_TEMP/semgrep-venv"
+          "$RUNNER_TEMP/semgrep-venv/bin/pip" install --quiet "semgrep==${SEMGREP_VERSION}"
+          ln -s "$RUNNER_TEMP/semgrep-venv/bin/semgrep" "$bin/semgrep"
 
           f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"

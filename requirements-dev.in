@@ -1,0 +1,7 @@
+# Direct dev/test dependencies for scanners/ and tests/. Edit THIS file, then regenerate the lock:
+#   uv pip compile requirements-dev.in --universal --generate-hashes --python-version 3.12 \
+#     --exclude-newer <today minus 14 days> -o requirements-dev.txt
+# Install with: pip install --require-hashes -r requirements-dev.txt
+jsonschema>=4.18
+PyYAML>=6.0
+pytest>=8.0
