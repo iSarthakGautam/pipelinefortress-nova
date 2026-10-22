@@ -99,12 +99,15 @@ jobs:
             -o artifacts/findings.json
 
       - name: Security gate (new findings only)
+        env:
+          # On PRs github.sha is a temporary merge commit; record the real head commit.
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set +e
           python scanners/baseline/baseline.py check \
             --findings artifacts/findings.json \
             --baseline scanners/baseline/security-baseline.json \
-            --repo . --commit "$GITHUB_SHA" \
+            --repo . --commit "$HEAD_SHA" \
             -o artifacts/findings.diffed.json --report artifacts/gate-report.json \
             > artifacts/gate-summary.txt
           rc=$?

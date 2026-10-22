@@ -1,0 +1,28 @@
+{
+  "created_commit": "930ab36",
+  "entries": [
+    {
+      "file": ".github/workflows/baseline-pipeline.yml",
+      "finding_id": "4085ffaba4f28119",
+      "first_seen_commit": "930ab36",
+      "line": 14,
+      "match_key": "8aea1e2172949588",
+      "package": null,
+      "rule_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "severity_norm": "MEDIUM",
+      "tool": "semgrep"
+    },
+    {
+      "file": "ai/llm_client.py",
+      "finding_id": "3022982b4a419bf0",
+      "first_seen_commit": "930ab36",
+      "line": 53,
+      "match_key": "b32cf6568f6ecba3",
+      "package": null,
+      "rule_id": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+      "severity_norm": "MEDIUM",
+      "tool": "semgrep"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

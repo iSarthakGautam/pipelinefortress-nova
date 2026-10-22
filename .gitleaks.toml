@@ -1,0 +1,15 @@
+# gitleaks config. Owner: R2. Extends the default ruleset.
+# Allowlist entries are EXACT known-fake values, never paths or whole rules, so a real
+# or planted secret in the same file is still caught. Every entry needs a reason.
+title = "PipelineFortress gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "R4 L4 canary token (ai/redaction/redactor.py). A tripwire that must look like a secret."
+regexes = ['''^CANARY_[0-9a-f]{6}_SECRET$''']
+
+[[allowlists]]
+description = "Public jwt.io example token (John Doe, iat 1516239022) used as a redaction test fixture."
+regexes = ['''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ\.''']
