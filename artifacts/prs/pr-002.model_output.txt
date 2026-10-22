@@ -1,0 +1,7 @@
+--- a/deployment.yaml
++++ b/deployment.yaml
+@@ -14,7 +14,7 @@
+          securityContext:
+-            runAsNonRoot: false
++            runAsNonRoot: true
++            runAsUser: 10001

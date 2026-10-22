@@ -1,0 +1,5 @@
+{"ts": "2026-10-22T16:47:21Z", "host": "localhost", "body_sha256": "aaa261dce453c61ea6c30d7227ddcc15fc34ba88396d7807d05a868468fddc18", "decision": "allowed"}
+{"ts": "2026-10-22T16:47:24Z", "host": "localhost", "body_sha256": "", "decision": "allowed"}
+{"ts": "2026-10-22T16:47:24Z", "host": "localhost", "body_sha256": "f91d9bfd6ca75f77497f75cfab537169f75e4610f371f24eb74af61c2465409f", "decision": "allowed"}
+{"ts": "2026-10-22T16:47:27Z", "host": "localhost", "body_sha256": "d8cf75541bffce78b752f10672c46adf66e7caab26792a6ec493b710ffd92656", "decision": "allowed"}
+{"ts": "2026-10-22T16:47:29Z", "host": "localhost", "body_sha256": "fabec43c0d8941e9d8f4f716bcb0b3e57c1f173e899b3df52b8311abfb229401", "decision": "allowed"}

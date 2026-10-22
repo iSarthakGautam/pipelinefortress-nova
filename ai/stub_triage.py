@@ -19,7 +19,10 @@ def main():
             # If no input, just use an empty array for the stub.
             findings = []
         else:
-            findings = json.loads(input_data)
+            try:
+                findings = json.loads(input_data)
+            except json.JSONDecodeError:  # also accept JSON Lines (one finding per line)
+                findings = [json.loads(ln) for ln in input_data.splitlines() if ln.strip()]
     except Exception as e:
         print(f"Error reading input: {e}", file=sys.stderr)
         sys.exit(1)
@@ -51,8 +54,18 @@ def main():
         }
     }
 
-    # If we received an array of findings, mock a response array.
-    results = [mocked_output] if isinstance(findings, list) else mocked_output
+    # One fake triaged finding per input finding (keeps the caller's id/tool/location), or one default if none given.
+    def fake_for(f):
+        out = json.loads(json.dumps(mocked_output))
+        if isinstance(f, dict):
+            out["finding_id"] = f.get("finding_id", out["finding_id"])
+            out["tool"] = f.get("tool", out["tool"])
+            out["location"] = f.get("location") or out["location"]
+            out["cwe"] = f.get("cwe", out["cwe"])
+        return out
+    if isinstance(findings, dict):
+        findings = [findings]
+    results = [fake_for(f) for f in findings] or [mocked_output]
     
     print(json.dumps(results, indent=2))
 

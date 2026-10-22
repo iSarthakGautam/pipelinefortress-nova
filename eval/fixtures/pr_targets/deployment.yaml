@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulnshop-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vulnshop-api
+  template:
+    metadata:
+      labels:
+        app: vulnshop-api
+    spec:
+      containers:
+        - name: vulnshop-api
+          image: vulnshop-api:1.0.0
+          ports:
+            - containerPort: 3000
+          securityContext:
+            runAsNonRoot: false

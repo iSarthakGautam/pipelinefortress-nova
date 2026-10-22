@@ -1,16 +1,58 @@
+# Pinned models. `digest` is the Ollama manifest digest from `curl localhost:11434/api/tags` (full sha256).
+# ai/llm_client.py compares the live digest to this file and records both in the trace.
+# Models marked installed: false are the plan's intended models; they are NOT pulled on the capture machine,
+# so they have no digest yet and have NEVER been evaluated. Do not cite results for them.
+# TODO(R3): copy the licence rows into docs/LICENSES.md and merge `python3 eval/stubs/r3_model_sbom_stub.py` output into the SBOM.
+# TODO(R4): pull qwen2.5-coder and llama3.1:8b, pin their digests, then run eval/run_eval.py with them.
 models:
-  - family: "qwen2.5-coder"
-    version: "14b"
-    quantisation: "q4_K_M"
-    digest: "sha256:88a7b93a... (placeholder for actual ollama pull digest)"
+  - tag: "llama3:latest"
+    family: "llama3"
+    parameters: "8.0B"
+    quantisation: "Q4_0"
+    digest: "sha256:365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1"
     provider: "ollama"
+    installed: true
     is_default: true
-    rationale: "Strongest small open code model. Selected as primary baseline."
+    license: "Meta Llama 3 Community License"
+    license_osi_approved: false
+    source_url: "https://ollama.com/library/llama3"
+    rationale: "Installed locally; used for every run recorded in eval/results/."
 
-  - family: "llama3.1"
-    version: "8b"
-    quantisation: "q4_0"
-    digest: "sha256:1a2b3c4d... (placeholder for actual ollama pull digest)"
+  - tag: "gemma2:latest"
+    family: "gemma2"
+    parameters: "9.2B"
+    quantisation: "Q4_0"
+    digest: "sha256:ff02c3702f322b9e075e9568332d96c0a7028002f1a5a056e0a6784320a4db0b"
     provider: "ollama"
+    installed: true
     is_default: false
-    rationale: "Bake-off candidate. Good reasoning per byte."
+    license: "Gemma Terms of Use"
+    license_osi_approved: false
+    source_url: "https://ollama.com/library/gemma2"
+    rationale: "Second bake-off candidate, installed locally."
+
+  - tag: "llama3.1:8b"
+    family: "llama3.1"
+    parameters: "8B"
+    quantisation: "unverified"
+    digest: "unpinned (not installed)"
+    provider: "ollama"
+    installed: false
+    is_default: false
+    license: "Llama 3.1 Community License (verify before citing)"
+    license_osi_approved: false
+    source_url: "https://ollama.com/library/llama3.1"
+    rationale: "Planned bake-off candidate. Pull it, then pin the digest."
+
+  - tag: "qwen2.5-coder:14b"
+    family: "qwen2.5-coder"
+    parameters: "14B"
+    quantisation: "unverified"
+    digest: "unpinned (not installed)"
+    provider: "ollama"
+    installed: false
+    is_default: false
+    license: "Apache-2.0 (verify on the model card before citing)"
+    license_osi_approved: true
+    source_url: "https://ollama.com/library/qwen2.5-coder"
+    rationale: "Planned primary candidate. Pull it, then pin the digest."

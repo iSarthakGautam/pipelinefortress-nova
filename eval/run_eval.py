@@ -1,171 +1,260 @@
-import os
-import sys
+import argparse
+import glob
+import hashlib
 import json
+import os
+import statistics
+import subprocess
+import sys
+import time
 
-# Ensure ai directory is in path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "ai")))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "ai"))
 
-from validate import validate_triage_output
+from triage import triage_findings
+from validate import check_claims, extract_claims
 
-def evaluate_predictions(ground_truth_records: list, predictions: list) -> dict:
-    """Computes Precision, Recall, F1, and Grounding metrics."""
-    tp, fp, tn, fn = 0, 0, 0, 0
-    abstentions = 0
-    hallucinated_cves = 0
+# run_eval.py
+# Real evaluation. Every number in results.md comes from a model actually called through ai/triage.py.
+#   python3 eval/run_eval.py --models llama3:latest gemma2:latest   # calls the models, freezes eval/results/*.jsonl
+#   python3 eval/run_eval.py --report-only                          # rebuilds results.md from the frozen files
+#   python3 eval/run_eval.py --smoke                                # unit-checks the metric code, writes nothing
+# Configs per model: full pipeline x2 runs (determinism). Primary model also: JSON mode, no format constraint.
+# "No validator" is a counterfactual computed from the SAME run (the model's pre-validator verdicts), since the
+# validator is deterministic and does not change what the model said.
 
-    for gt, pred in zip(ground_truth_records, predictions):
-        expected = gt.get("ground_truth")
-        actual = pred.get("triage", {}).get("verdict", "NEEDS_HUMAN_REVIEW")
-        
-        # Check grounding rejection
-        grounding = pred.get("triage", {}).get("grounding", {})
-        if not grounding.get("validated", True):
-            for claim in grounding.get("rejected_claims", []):
-                if "CVE" in claim:
-                    hallucinated_cves += 1
+RESULTS_DIR = os.path.join(HERE, "results")
 
-        if actual == "NEEDS_HUMAN_REVIEW":
-            abstentions += 1
-            # Treated conservatively as non-blocking
+# TODO(R3): build ground_truth/planted.yaml (R3, not R4, so the held-out eval stays honest) and add an adapter here that turns
+#           it into eval rows. Until then the rows below are SYNTHETIC stand-ins.
+# TODO(R5): coordinate labelling across all five (~30 findings each), compute kappa, and freeze a time split. Today there is
+#           one labeller, no kappa and no split, so results.md calls this a smoke set.
+GT_PATH = os.path.join(HERE, "ground_truth.jsonl")
+
+
+def load_ground_truth() -> list:
+    with open(GT_PATH, encoding="utf-8") as f:
+        return [json.loads(ln) for ln in f if ln.strip()]
+
+
+def scanner_input(row: dict) -> dict:
+    """Strip the labels so nothing label-shaped is ever near the pipeline."""
+    return {k: v for k, v in row.items() if k not in ("ground_truth", "priority")}
+
+
+def slug(model: str) -> str:
+    return model.replace(":", "_").replace("/", "_")
+
+
+def result_path(model: str, config: str) -> str:
+    return os.path.join(RESULTS_DIR, f"{slug(model)}__{config}.jsonl")
+
+
+# ---------------------------------------------------------------- running
+def ollama_ps() -> str:
+    try:
+        return subprocess.run(["ollama", "ps"], capture_output=True, text=True, timeout=10).stdout.strip()
+    except Exception:
+        return "unavailable"
+
+
+def run_config(model: str, config: str, format_mode: str, records: list) -> None:
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    start = time.time()
+    results, traces = triage_findings([scanner_input(r) for r in records], model=model, format_mode=format_mode)
+    by_id = {r["finding_id"]: r for r in results}
+    rows = []
+    for rec, tr in zip(records, traces):
+        # ungrounded claims the model PRODUCED, counted before the validator touches them
+        scanner = scanner_input(rec)
+        claims = extract_claims({"claims": tr.get("claims", {}), "fix_summary": tr.get("fix_summary_model", "")})
+        produced = check_claims(scanner, claims)
+        out = by_id[rec["finding_id"]]["triage"]
+        rows.append({
+            "finding_id": rec["finding_id"], "expected": rec["ground_truth"],
+            "verdict_model": tr["verdict_model"], "verdict_final": out["verdict"],
+            "validated": out["grounding"]["validated"], "rejected_claims": out["grounding"]["rejected_claims"],
+            "produced_ungrounded_claims": produced, "outcome": tr["outcome"], "latency_s": tr.get("latency_s"),
+            "fix_summary_model": tr.get("fix_summary_model", ""), "fix_summary_final": out["fix_summary"],
+            "digest": tr.get("digest"), "lock_digest": tr.get("lock_digest"), "prompt_sha256": tr["prompt_sha256"],
+            "format_mode": format_mode, "priority": out["priority"],
+        })
+    meta = {"_meta": {"model": model, "config": config, "format_mode": format_mode, "n": len(rows),
+                      "wall_s": round(time.time() - start, 1), "captured": time.strftime("%Y-%m-%d %H:%M:%S"),
+                      "ground_truth_sha256": hashlib.sha256(open(GT_PATH, "rb").read()).hexdigest(),
+                      "ollama_ps": ollama_ps()}}
+    with open(result_path(model, config), "w", encoding="utf-8") as f:
+        f.write(json.dumps(meta) + "\n")
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    print(f"  {model} / {config}: {len(rows)} rows in {meta['_meta']['wall_s']}s -> {os.path.relpath(result_path(model, config))}")
+
+
+# ---------------------------------------------------------------- metrics
+def metrics(rows: list, verdict_key: str = "verdict_final") -> dict:
+    tp = fp = tn = fn = abst = confidently_wrong = 0
+    exp_tp = sum(1 for r in rows if r["expected"] == "TRUE_POSITIVE")
+    for r in rows:
+        got, exp = r[verdict_key], r["expected"]
+        if got == "NEEDS_HUMAN_REVIEW":
+            abst += 1
             continue
-
-        if actual == "TRUE_POSITIVE":
-            if expected == "TRUE_POSITIVE":
-                tp += 1
-            else:
-                fp += 1
-        elif actual == "FALSE_POSITIVE":
-            if expected == "FALSE_POSITIVE":
-                tn += 1
-            else:
-                fn += 1
-
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-    total = len(ground_truth_records)
-
-    return {
-        "total": total,
-        "tp": tp, "fp": fp, "tn": tn, "fn": fn,
-        "precision": round(precision, 3),
-        "recall": round(recall, 3),
-        "f1": round(f1, 3),
-        "abstention_rate": round(abstentions / total, 3) if total > 0 else 0.0,
-        "hallucinated_cves": hallucinated_cves
-    }
-
-def run_heuristic_baseline(records: list) -> list:
-    """Rule-based heuristic baseline without any LLM."""
-    preds = []
-    for r in records:
-        pred = {"triage": {}}
-        snippet = r.get("evidence", {}).get("snippet_raw", "")
-        # Naive rule: flags if 'f-string' or 'SELECT' or 'latest'
-        if any(kw in snippet for kw in ["f\"", "SELECT", "latest", "AKIA"]):
-            pred["triage"]["verdict"] = "TRUE_POSITIVE"
-            pred["triage"]["priority"] = "P1"
+        if got != exp:
+            confidently_wrong += 1
+        if got == "TRUE_POSITIVE":
+            tp, fp = (tp + 1, fp) if exp == "TRUE_POSITIVE" else (tp, fp + 1)
         else:
-            pred["triage"]["verdict"] = "FALSE_POSITIVE"
-            pred["triage"]["priority"] = "UNASSIGNED"
-        pred["triage"]["grounding"] = {"validated": True, "rejected_claims": []}
-        preds.append(pred)
-    return preds
+            tn, fn = (tn + 1, fn) if exp == "FALSE_POSITIVE" else (tn, fn + 1)
+    n = len(rows)
+    p = tp / (tp + fp) if tp + fp else 0.0
+    r_ = tp / exp_tp if exp_tp else 0.0  # abstaining on a real TP counts as a miss
+    answered = n - abst
+    lat = [r["latency_s"] for r in rows if r.get("latency_s")]
+    return {"n": n, "tp": tp, "fp": fp, "tn": tn, "fn": fn, "precision": round(p, 3), "recall": round(r_, 3),
+            "f1": round(2 * p * r_ / (p + r_), 3) if p + r_ else 0.0, "abstention": round(abst / n, 3) if n else 0.0,
+            "accuracy_answered": round((tp + tn) / answered, 3) if answered else 0.0,
+            "confidently_wrong": confidently_wrong,
+            "unusable": sum(1 for r in rows if r["outcome"] == "llm_unavailable_or_malformed"),
+            "p50_latency_s": round(statistics.median(lat), 2) if lat else None}
 
-def run_model_simulation(records: list, model_name: str, with_validator: bool = True, with_grammar: bool = True) -> list:
-    """Simulates/evaluates model predictions with and without ablations."""
-    preds = []
+
+def hallucination(rows: list) -> dict:
+    produced = sum(len(r["produced_ungrounded_claims"]) for r in rows)
+    # reaches a human only if the finding was NOT overridden by the validator
+    reach_with = sum(len(r["produced_ungrounded_claims"]) for r in rows if r["validated"])
+    return {"produced": produced, "reaching_human_with_validator": reach_with, "reaching_human_without_validator": produced}
+
+
+def heuristic_baseline(records: list) -> list:
+    """Keyword baseline, no LLM. Its keywords were chosen by looking at the same 10 rows: treat it as an upper-ish
+    bound for what a keyword rule can do on this smoke set, not as a fair held-out baseline."""
+    rows = []
     for r in records:
-        pred = {"finding_id": r["finding_id"], "triage": {}}
-        rule = r.get("rule_id", "")
-        cve = r.get("cve", [])
-        cwe = r.get("cwe", [])
-        location = r.get("location", {})
+        s = r.get("evidence", {}).get("snippet_raw", "")
+        v = "TRUE_POSITIVE" if any(k in s for k in ['f"', "SELECT", "latest", "AKIA"]) else "FALSE_POSITIVE"
+        rows.append({"expected": r["ground_truth"], "verdict_final": v, "outcome": "ok", "latency_s": None})
+    return rows
 
-        # Simulate model outputs based on ground truth + model characteristics
-        if not with_grammar and r["finding_id"] == "gt-004":
-            # Without JSON grammar, model emits malformed text/json
-            pred["triage"]["verdict"] = "NEEDS_HUMAN_REVIEW"
-            pred["triage"]["fix_summary"] = "Syntax error in model generation"
-        elif r["finding_id"] == "gt-006":
-            # gt-006 has hallucinated CVE-2099-99999
-            pred["cve"] = cve
-            pred["cwe"] = cwe
-            pred["location"] = location
-            pred["triage"]["verdict"] = "TRUE_POSITIVE"
-            pred["triage"]["priority"] = "P1"
-        else:
-            pred["triage"]["verdict"] = r["ground_truth"]
-            pred["triage"]["priority"] = r.get("priority", "P2")
-            pred["cve"] = cve
-            pred["cwe"] = cwe
-            pred["location"] = location
 
-        # Apply grounding validator if enabled
-        if with_validator:
-            pred = validate_triage_output(pred)
+def load_rows(model: str, config: str):
+    path = result_path(model, config)
+    if not os.path.exists(path):
+        return None, None
+    with open(path, encoding="utf-8") as f:
+        lines = [json.loads(ln) for ln in f if ln.strip()]
+    return lines[0]["_meta"], lines[1:]
 
-        preds.append(pred)
-    return preds
+
+def identical_fraction(a: list, b: list) -> float:
+    same = sum(1 for x, y in zip(a, b) if (x["verdict_model"], x["fix_summary_model"]) == (y["verdict_model"], y["fix_summary_model"]))
+    return round(same / len(a), 3) if a else 0.0
+
+
+# ---------------------------------------------------------------- report
+def build_report(models: list) -> str:
+    records = load_ground_truth()
+    gt_sha = hashlib.sha256(open(GT_PATH, "rb").read()).hexdigest()[:12]
+    out = ["# Evaluation results (generated by `python3 eval/run_eval.py --report-only`)\n",
+           "> **Read this first.** n = %d synthetic findings written by the same person who built the pipeline, labelled by one "
+           "person, with no inter-rater agreement and no time split. This is a **smoke set, not a held-out evaluation**. "
+           "Differences of one finding are noise. Real scanner output and the planted-vulnerability ground truth are not "
+           "available yet (R2/R3 deliverables).\n" % len(records),
+           f"Ground truth: `eval/ground_truth.jsonl` (sha256 `{gt_sha}…`). Raw per-finding outputs: `eval/results/*.jsonl`. "
+           "Models: only those installed locally were run; `qwen2.5-coder:14b` and `llama3.1:8b` from the plan were **not** run.\n"]
+    table = ["| Configuration | Precision | Recall | F1 | Abstain | Confidently wrong | Unusable output | p50 latency (s) | Ungrounded claims produced → reaching a human |",
+             "|---|---|---|---|---|---|---|---|---|"]
+
+    def add(name, m, h=None):
+        hh = f"{h[0]} → {h[1]}" if h else "n/a"
+        table.append(f"| {name} | {m['precision']} | {m['recall']} | {m['f1']} | {m['abstention']} | {m['confidently_wrong']} | "
+                     f"{m['unusable']} | {m['p50_latency_s'] if m['p50_latency_s'] is not None else 'n/a'} | {hh} |")
+
+    add("Heuristic keyword baseline (no LLM)", metrics(heuristic_baseline(records)))
+    primary = models[0] if models else None
+    det_lines = []
+    for model in models:
+        meta, rows = load_rows(model, "full")
+        if not rows:
+            continue
+        h = hallucination(rows)
+        add(f"{model}, full pipeline (schema decoding + validator)", metrics(rows), (h["produced"], h["reaching_human_with_validator"]))
+        if model == primary:
+            add(f"{model}, **no validator** (counterfactual, same run)", metrics(rows, "verdict_model"),
+                (h["produced"], h["reaching_human_without_validator"]))
+        _, rows2 = load_rows(model, "full_run2")
+        if rows2:
+            det_lines.append(f"- `{model}`: {identical_fraction(rows, rows2) * 100:.0f}% of findings identical (verdict + fix text) across two runs")
+    for cfg, label in [("json_mode", "JSON mode, no schema"), ("no_format", "no format constraint")]:
+        if primary:
+            meta, rows = load_rows(primary, cfg)
+            if rows:
+                h = hallucination(rows)
+                add(f"{primary}, {label}", metrics(rows), (h["produced"], h["reaching_human_with_validator"]))
+    out += ["## Bake-off and ablations\n"] + table
+    out += ["\nDefinitions: precision = TP/(TP+FP) over answered findings; **recall = TP / all expected TPs (an abstention on a real "
+            "TP counts as a miss)**; *confidently wrong* = answered, not abstained, and wrong; *unusable* = the model's output "
+            "could not be parsed. Abstaining (`NEEDS_HUMAN_REVIEW`) is a reported success outcome, not an error.\n"]
+    if det_lines:
+        out += ["## Determinism (temperature 0, seed 42)\n"] + det_lines + [""]
+
+    if primary:
+        meta, rows = load_rows(primary, "full")
+        if rows:
+            out += [f"## Per-finding results: {primary}, full pipeline\n",
+                    "| Finding | Expected | Model said | After validator | Validator rejected | Note |", "|---|---|---|---|---|---|"]
+            for r in rows:
+                wrong = r["verdict_model"] not in ("NEEDS_HUMAN_REVIEW", r["expected"])
+                note = "**confidently wrong**" if wrong else ("false abstain" if r["verdict_final"] == "NEEDS_HUMAN_REVIEW" and r["expected"] != "NEEDS_HUMAN_REVIEW" else "")
+                rej = "; ".join(r["rejected_claims"]) or "-"
+                out.append(f"| {r['finding_id']} | {r['expected']} | {r['verdict_model']} | {r['verdict_final']} | {rej} | {note} |")
+            out += ["", f"Run: {meta['captured']}, wall {meta['wall_s']}s. `ollama ps` after the run:\n", "```", meta["ollama_ps"], "```\n"]
+
+    out += ["## Honest limitations\n",
+            "- n = %d, one labeller, synthetic rows: no confidence intervals are meaningful.\n" % len(records) +
+            "- The validator only proves claims against the scanner record, the MITRE CWE catalogue (v4.20) and a 7-CVE sample "
+            "registry. It rejects real-but-unlisted CVEs on purpose (fail closed), which can produce false abstains.\n"
+            "- Priority is computed in code from severity/KEV/EPSS; the ground-truth rows carry no `severity_norm`, so priority is "
+            "not scored here.\n"
+            "- Models are small local models (8-9B, Q4). Confident errors happen (see the table); the human-review path exists for that.\n"
+            "- Peak RAM was not measured; only the `ollama ps` size above.\n"]
+    return "\n".join(out) + "\n"
+
+
+def smoke_test_metrics_code() -> None:
+    """Checks the metric arithmetic on hand-made rows. Output is NOT evaluation data and is never written to results."""
+    rows = [{"expected": "TRUE_POSITIVE", "verdict_final": "TRUE_POSITIVE", "outcome": "ok", "latency_s": 1.0},
+            {"expected": "TRUE_POSITIVE", "verdict_final": "NEEDS_HUMAN_REVIEW", "outcome": "ok", "latency_s": 1.0},
+            {"expected": "FALSE_POSITIVE", "verdict_final": "TRUE_POSITIVE", "outcome": "ok", "latency_s": 1.0},
+            {"expected": "FALSE_POSITIVE", "verdict_final": "FALSE_POSITIVE", "outcome": "ok", "latency_s": 1.0}]
+    m = metrics(rows)
+    assert (m["tp"], m["fp"], m["tn"], m["fn"]) == (1, 1, 1, 0), m
+    assert m["precision"] == 0.5 and m["recall"] == 0.5 and m["abstention"] == 0.25 and m["confidently_wrong"] == 1, m
+    print("metric code OK (smoke test, synthetic rows, not results):", m)
+
 
 def main():
-    gt_path = os.path.join(os.path.dirname(__file__), "ground_truth.jsonl")
-    records = []
-    with open(gt_path, "r") as f:
-        for line in f:
-            if line.strip():
-                records.append(json.loads(line.strip()))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--models", nargs="+", default=["llama3:latest", "gemma2:latest"])
+    ap.add_argument("--report-only", action="store_true")
+    ap.add_argument("--smoke", action="store_true")
+    args = ap.parse_args()
+    if args.smoke:
+        return smoke_test_metrics_code()
 
-    print(f"Loaded {len(records)} ground-truth records for frozen evaluation.\n")
+    if not args.report_only:
+        records = load_ground_truth()
+        print(f"Running {len(records)} ground-truth findings through the real pipeline...")
+        for i, model in enumerate(args.models):
+            run_config(model, "full", "schema", records)
+            run_config(model, "full_run2", "schema", records)
+            if i == 0:
+                run_config(model, "json_mode", "json", records)
+                run_config(model, "no_format", "none", records)
+    report = build_report(args.models)
+    with open(os.path.join(HERE, "results.md"), "w", encoding="utf-8") as f:
+        f.write(report)
+    print(report)
 
-    # 1. Heuristic Baseline
-    h_preds = run_heuristic_baseline(records)
-    h_metrics = evaluate_predictions(records, h_preds)
-
-    # 2. 14B Model (Full Pipeline)
-    m_preds = run_model_simulation(records, "qwen2.5-coder:14b", with_validator=True, with_grammar=True)
-    m_metrics = evaluate_predictions(records, m_preds)
-
-    # 3. 8B Model
-    m8_preds = run_model_simulation(records, "llama3.1:8b", with_validator=True, with_grammar=True)
-    m8_metrics = evaluate_predictions(records, m8_preds)
-
-    # 4. Ablation: Without JSON Grammar
-    abl_gram_preds = run_model_simulation(records, "qwen2.5-coder:14b", with_validator=True, with_grammar=False)
-    abl_gram_metrics = evaluate_predictions(records, abl_gram_preds)
-
-    # 5. Ablation: Without Grounding Validator
-    abl_val_preds = run_model_simulation(records, "qwen2.5-coder:14b", with_validator=False, with_grammar=True)
-    abl_val_metrics = evaluate_predictions(records, abl_val_preds)
-
-    # Generate Markdown Table for Report §6.2 / §7
-    table = [
-        "# Model Bake-Off & Ablation Table (Report §6.2)\n",
-        "| Configuration | Precision | Recall | F1 Score | Hallucinated CVEs | Abstention Rate | Notes |",
-        "|---|---|---|---|---|---|---|"
-    ]
-
-    configs = [
-        ("Heuristic baseline (no LLM)", h_metrics, "0 by construction; simple keyword matching"),
-        ("Llama 3.1 8B (q4)", m8_metrics, "Lightweight candidate; good reasoning per byte"),
-        ("Qwen2.5-Coder 14B q4 (Default)", m_metrics, "Strongest code model; validated via grounding gate"),
-        ("14B without JSON grammar (Ablation)", abl_gram_metrics, "Demonstrates failure when JSON output is unconstrained"),
-        ("14B without grounding validator (Ablation)", abl_val_metrics, "Proves validator prevents unproven CVE leakage to humans")
-    ]
-
-    for name, met, notes in configs:
-        table.append(
-            f"| **{name}** | {met['precision']} | {met['recall']} | {met['f1']} | {met['hallucinated_cves']} | {met['abstention_rate']} | {notes} |"
-        )
-
-    output_report = "\n".join(table)
-    print(output_report)
-
-    # Save to eval/results.md
-    with open(os.path.join(os.path.dirname(__file__), "results.md"), "w") as f:
-        f.write(output_report)
-    print("\nSaved evaluation results to eval/results.md")
 
 if __name__ == "__main__":
     main()
-

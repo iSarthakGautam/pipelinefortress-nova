@@ -1,7 +1,7 @@
 ---
 version: "1.0.0"
-model_tested: "qwen2.5-coder:14b-q4_K_M"
-eval_score: "F1: 1.0"
+model_tested: "none (prompt not yet run through a model)"
+eval_score: "not yet evaluated"
 changelog: "Initial prompt for 3-5 line remediation suggestion"
 ---
 

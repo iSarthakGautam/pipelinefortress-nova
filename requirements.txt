@@ -1,0 +1,5 @@
+# R4 (ai/, eval/, tests/) is pure standard library on Python 3.13 (tested). Nothing to install.
+# External requirement: Ollama on localhost:11434 with the models you want to run, e.g.
+#   ollama pull llama3 && ollama pull gemma2
+# The earlier optional `openai` SDK dependency was removed: ai/llm_client.py talks to Ollama over urllib so that
+# HTTP(S)_PROXY settings cannot reroute traffic and the egress guard sees every request.

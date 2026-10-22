@@ -1,0 +1,7 @@
+--- a/search.py
++++ b/search.py
+@@ -1,7 +1,7 @@
+ def search_items(db, q):
+-    query = f"SELECT * FROM items WHERE name = '{q}'"
++    query = "SELECT * FROM items WHERE name = ?"
+     return db.execute(query, (q,)).fetchall()

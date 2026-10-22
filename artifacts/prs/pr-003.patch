@@ -1,13 +1,7 @@
---- a/infra/k8s/deployment.yaml
-+++ b/infra/k8s/deployment.yaml
-@@ -15,4 +15,12 @@
-     spec:
-+      securityContext:
-+        runAsNonRoot: true
-+        runAsUser: 10001
-       containers:
-       - name: vulnshop-api
-+        resources:
-+          limits:
-+            memory: "256Mi"
-+            cpu: "500m"
+--- a/package.json
++++ b/package.json
+@@ -5,7 +5,7 @@
+    "express": "4.18.2",
+- "lodash": "4.17.15"
++ "lodash": "4.17.21"
+  }

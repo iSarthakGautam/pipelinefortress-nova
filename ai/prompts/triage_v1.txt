@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+model_tested: "llama3:latest (audit run 2026-10-21, 10 findings)"
+eval_score: "not yet evaluated"
+changelog: "Superseded by triage_v2 (no structured claims; model chose priority). Kept for history."
+---
 You are a DevSecOps AI Triage Assistant.
 Your job is to analyze security findings emitted by CI/CD scanners (like Semgrep, Trivy, Gitleaks, Checkov) and output a triaged verdict.
 
