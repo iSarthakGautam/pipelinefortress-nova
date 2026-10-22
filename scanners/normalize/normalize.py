@@ -5,6 +5,8 @@ Usage:
   python scanners/normalize/normalize.py \
       --semgrep artifacts/scans/semgrep.sarif \
       --trivy artifacts/scans/trivy.json \
+      --grype artifacts/scans/grype.json \
+      --osv artifacts/scans/osv.json \
       --gitleaks artifacts/scans/gitleaks.sarif \
       -o artifacts/findings.json
 
@@ -50,15 +52,53 @@ def normalize_severity(tool: str, raw) -> str:
     return smap["_default"]
 
 
-def norm_path(uri: str) -> str:
+def norm_path(uri: str, root: str = None) -> str:
+    """Repo-relative, forward-slash path. `root` strips absolute prefixes (OSV reports
+    absolute paths); a leading '/' is dropped (Grype reports '/apps/x' for dir: scans)."""
     p = (uri or "").replace("\\", "/")
     if p.startswith("file:///"):
         p = p[len("file:///"):]
     elif p.startswith("file://"):
         p = p[len("file://"):]
+    if root:
+        r = str(root).replace("\\", "/").rstrip("/") + "/"
+        if p.lower().startswith(r.lower()):
+            p = p[len(r):]
+    p = p.lstrip("/")
     while p.startswith("./"):
         p = p[2:]
     return p
+
+
+_ID_PRIORITY = ("CVE-", "GHSA-")
+
+
+def canonical_vuln_id(ids) -> str:
+    """One ID per vulnerability across tools: lowest CVE, else lowest GHSA, else lowest other.
+    Trivy, Grype and OSV lead with different IDs (CVE / GHSA / PYSEC) for the same flaw."""
+    ids = sorted({i for i in ids if i})
+    for prefix in _ID_PRIORITY:
+        hit = [i for i in ids if i.upper().startswith(prefix)]
+        if hit:
+            return hit[0]
+    return ids[0] if ids else "unknown"
+
+
+def cvss_bucket(score):
+    """CVSS base score -> qualitative rating (CVSS v3 table). None if not a number."""
+    try:
+        x = float(score)
+    except (TypeError, ValueError):
+        return None
+    if x >= 9.0:
+        return "CRITICAL"
+    if x >= 7.0:
+        return "HIGH"
+    if x >= 4.0:
+        return "MEDIUM"
+    if x > 0.0:
+        return "LOW"
+    return "INFO"
 
 
 def make_finding_id(tool, rule_id, file, line, pkg) -> str:
@@ -80,7 +120,8 @@ def extract_cves(values) -> list:
     return sorted({v for v in values or [] if _CVE_RE.match(str(v))})
 
 
-def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line, package, snippet, raw_ref):
+def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line, package, snippet, raw_ref,
+                  severity_norm=None):
     pkg = package or {"name": None, "version": None, "fixed_version": None}
     evidence = {"raw_ref": raw_ref}
     if snippet:
@@ -91,7 +132,7 @@ def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line,
         "tool": tool,
         "rule_id": rule_id,
         "severity_raw": str(severity_raw),
-        "severity_norm": normalize_severity(tool, severity_raw),
+        "severity_norm": severity_norm or normalize_severity(tool, severity_raw),
         "cwe": cwe,
         "cve": cve,
         "location": {"file": file, "line": line},
@@ -146,13 +187,14 @@ def parse_trivy(path: Path, ref: str = None) -> list:
         target = norm_path(result.get("Target", ""))
         for i, v in enumerate(result.get("Vulnerabilities") or []):
             vid = v.get("VulnerabilityID", "unknown")
+            ids = [vid] + list(v.get("VendorIDs") or [])
             findings.append(build_finding(
                 tool="trivy",
-                rule_id=vid,
+                rule_id=canonical_vuln_id(ids),
                 message=v.get("Title") or v.get("Description"),
                 severity_raw=v.get("Severity", "UNKNOWN"),
                 cwe=extract_cwes(v.get("CweIDs")),
-                cve=extract_cves([vid]),
+                cve=extract_cves(ids),
                 file=target,
                 line=0,
                 package={"name": v.get("PkgName"), "version": v.get("InstalledVersion"),
@@ -171,6 +213,86 @@ def parse_trivy(path: Path, ref: str = None) -> list:
                 file=target, line=int(line), package=None, snippet=None,
                 raw_ref=f"{ref}#/Results/{ri}/Misconfigurations/{i}",
             ))
+    return findings
+
+
+def parse_grype(path: Path, ref: str = None, root: str = None) -> list:
+    """Grype JSON (`grype dir:. -o json`)."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    ref = ref or path.as_posix()
+    findings = []
+    for i, m in enumerate(doc.get("matches") or []):
+        v = m.get("vulnerability", {})
+        art = m.get("artifact", {})
+        ids = [v.get("id")] + [r.get("id") for r in m.get("relatedVulnerabilities") or []]
+        locs = art.get("locations") or [{}]
+        fix = v.get("fix") or {}
+        fixed = ", ".join(fix.get("versions") or []) if fix.get("state") == "fixed" else ""
+        findings.append(build_finding(
+            tool="grype",
+            rule_id=canonical_vuln_id(ids),
+            message=v.get("description"),
+            severity_raw=v.get("severity", "Unknown"),
+            cwe=extract_cwes(c.get("cwe") for c in v.get("cwes") or []),
+            cve=extract_cves(ids),
+            file=norm_path(locs[0].get("path", ""), root),
+            line=0,
+            package={"name": art.get("name"), "version": art.get("version"), "fixed_version": fixed or None},
+            snippet=None,
+            raw_ref=f"{ref}#/matches/{i}",
+        ))
+    return findings
+
+
+def _osv_fixed_versions(vulns: list, pkg_name: str) -> list:
+    fixed = []
+    for v in vulns:
+        for aff in v.get("affected") or []:
+            if (aff.get("package") or {}).get("name", "").lower() != pkg_name.lower():
+                continue
+            for rng in aff.get("ranges") or []:
+                for ev in rng.get("events") or []:
+                    if ev.get("fixed") and ev["fixed"] not in fixed:
+                        fixed.append(ev["fixed"])
+    return fixed
+
+
+def parse_osv(path: Path, ref: str = None, root: str = None) -> list:
+    """OSV-Scanner v2 JSON (`osv-scanner scan source -r --format json`).
+    One finding per alias group: OSV already merges PYSEC/GHSA/CVE records for one flaw."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    ref = ref or path.as_posix()
+    findings = []
+    for ri, result in enumerate(doc.get("results") or []):
+        file = norm_path((result.get("source") or {}).get("path", ""), root)
+        for pi, pkg in enumerate(result.get("packages") or []):
+            meta = pkg.get("package") or {}
+            vulns = {v.get("id"): v for v in pkg.get("vulnerabilities") or []}
+            for gi, group in enumerate(pkg.get("groups") or []):
+                ids = list(group.get("ids") or []) + list(group.get("aliases") or [])
+                members = [vulns[i] for i in group.get("ids") or [] if i in vulns]
+                score = group.get("max_severity") or ""
+                bucket = cvss_bucket(score)
+                if bucket is None:   # no CVSS score: fall back to GHSA's qualitative label
+                    labels = [(v.get("database_specific") or {}).get("severity") for v in members]
+                    score = next((label for label in labels if label), "UNKNOWN")
+                cwes = [c for v in members for c in (v.get("database_specific") or {}).get("cwe_ids") or []]
+                fixed = _osv_fixed_versions(members, meta.get("name", ""))
+                findings.append(build_finding(
+                    tool="osv",
+                    rule_id=canonical_vuln_id(ids),
+                    message=next((v.get("summary") for v in members if v.get("summary")), None),
+                    severity_raw=str(score),
+                    severity_norm=bucket,
+                    cwe=extract_cwes(cwes),
+                    cve=extract_cves(ids),
+                    file=file,
+                    line=0,
+                    package={"name": meta.get("name"), "version": meta.get("version"),
+                             "fixed_version": ", ".join(fixed) or None},
+                    snippet=None,
+                    raw_ref=f"{ref}#/results/{ri}/packages/{pi}/groups/{gi}",
+                ))
     return findings
 
 
@@ -204,6 +326,10 @@ def main(argv=None) -> int:
     for t in SARIF_TOOLS:
         ap.add_argument(f"--{t}", type=Path, action="append", default=[], help=f"{t} SARIF file")
     ap.add_argument("--trivy", type=Path, action="append", default=[], help="Trivy JSON file")
+    ap.add_argument("--grype", type=Path, action="append", default=[], help="Grype JSON file")
+    ap.add_argument("--osv", type=Path, action="append", default=[], help="OSV-Scanner JSON file")
+    ap.add_argument("--root", default=str(Path.cwd()),
+                    help="repo root, stripped from absolute paths (default: cwd)")
     ap.add_argument("-o", "--output", type=Path, required=True)
     args = ap.parse_args(argv)
 
@@ -213,6 +339,10 @@ def main(argv=None) -> int:
             findings += parse_sarif(p, t)
     for p in args.trivy:
         findings += parse_trivy(p)
+    for p in args.grype:
+        findings += parse_grype(p, root=args.root)
+    for p in args.osv:
+        findings += parse_osv(p, root=args.root)
 
     findings = dedupe_exact(findings)
     validate(findings)

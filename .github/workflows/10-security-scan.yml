@@ -24,7 +24,10 @@ env:
   SEMGREP_VERSION: "1.179.0"
   TRIVY_VERSION: "0.75.0"
   GITLEAKS_VERSION: "8.30.1"
+  GRYPE_VERSION: "0.120.1"
+  OSV_SCANNER_VERSION: "2.6.0"
   PYTHON_VERSION: "3.12"
+  GRYPE_CHECK_FOR_APP_UPDATE: "false"
 
 jobs:
   unit-tests:
@@ -70,6 +73,18 @@ jobs:
           grep " $f\$" "trivy_${TRIVY_VERSION}_checksums.txt" | sha256sum -c -
           tar -xzf "$f" -C "$bin" trivy
 
+          f="grype_${GRYPE_VERSION}_linux_amd64.tar.gz"
+          base="https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}"
+          curl -sSfLO "$base/$f"; curl -sSfLO "$base/grype_${GRYPE_VERSION}_checksums.txt"
+          grep " $f\$" "grype_${GRYPE_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "$f" -C "$bin" grype
+
+          f="osv-scanner_linux_amd64"
+          base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
+          curl -sSfLO "$base/$f"; curl -sSfLO "$base/osv-scanner_SHA256SUMS"
+          grep " $f\$" osv-scanner_SHA256SUMS | sha256sum -c -
+          install -m 0755 "$f" "$bin/osv-scanner"
+
           echo "$bin" >> "$GITHUB_PATH"
 
       - name: Secrets (gitleaks, full history)
@@ -90,13 +105,43 @@ jobs:
           trivy fs --scanners vuln,misconfig --exit-code 0 --skip-dirs artifacts \
             --format json --output artifacts/scans/trivy.json .
 
+      - name: SCA cross-check (Grype)
+        run: |
+          grype version
+          grype dir:. --exclude './artifacts/**' --exclude './.git/**' \
+            -o json --file artifacts/scans/grype.json -q
+
+      - name: SCA cross-check (OSV-Scanner)
+        run: |
+          osv-scanner --version
+          set +e
+          osv-scanner scan source -r --format json --output-file artifacts/scans/osv.json .
+          rc=$?
+          set -e
+          # 0 = clean, 1 = vulnerabilities found, 128 = no packages found; anything else is an error
+          case "$rc" in
+            0|1) ;;
+            128) echo "osv-scanner: no packages found"; echo '{"results": []}' > artifacts/scans/osv.json ;;
+            *) echo "osv-scanner failed with exit code $rc"; exit "$rc" ;;
+          esac
+
       - name: Normalize findings
         run: |
           python scanners/normalize/normalize.py \
             --semgrep artifacts/scans/semgrep.sarif \
             --gitleaks artifacts/scans/gitleaks.sarif \
             --trivy artifacts/scans/trivy.json \
+            --grype artifacts/scans/grype.json \
+            --osv artifacts/scans/osv.json \
+            --root "$GITHUB_WORKSPACE" \
             -o artifacts/findings.json
+
+      - name: Detector overlap (metrics only, never gates)
+        run: |
+          python scanners/crosscheck/crosscheck.py --findings artifacts/findings.json \
+            --tools trivy,grype,osv \
+            -o artifacts/sca-crosscheck.json --markdown artifacts/sca-crosscheck.md
+          cat artifacts/sca-crosscheck.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Security gate (new findings only)
         env:
@@ -127,5 +172,7 @@ jobs:
             artifacts/findings.diffed.json
             artifacts/gate-report.json
             artifacts/gate-summary.txt
+            artifacts/sca-crosscheck.json
+            artifacts/sca-crosscheck.md
           retention-days: 14
           if-no-files-found: warn
