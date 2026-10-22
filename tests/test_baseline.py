@@ -193,7 +193,9 @@ def test_annotation_syntax_in_strings_and_docs_is_ignored(tmp_path):
 
 
 def test_trailing_comment_on_finding_line_applies(tmp_path):
-    lines = ["x"] * 9 + ["db.execute(q)  # security-exception: r.sqli expires:2026-11-30 owner:r2"]
+    # Built in two parts so this test file does not itself contain a "trailing comment" annotation
+    ann = "# " + "security-exception: r.sqli expires:2026-11-30 owner:r2"
+    lines = ["x"] * 9 + ["db.execute(q)  " + ann]
     write(tmp_path, "app/search.py", "\n".join(lines))
     _, rep = run_check([finding(line=10)], b.load_baseline(tmp_path / "none.json"), tmp_path)
     assert rep["result"] == "pass" and rep["counts"]["excepted"] == 1
