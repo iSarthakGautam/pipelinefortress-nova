@@ -1,0 +1,12 @@
+{
+  "version": "2.1.0",
+  "runs": [{
+    "tool": {"driver": {"name": "gitleaks", "rules": [{"id": "aws-access-token"}]}},
+    "results": [
+      {"ruleId": "aws-access-token", "level": "error",
+       "message": {"text": "aws-access-token has detected secret for file config/settings.py."},
+       "locations": [{"physicalLocation": {"artifactLocation": {"uri": "config/settings.py"},
+         "region": {"startLine": 9}}}]}
+    ]
+  }]
+}
