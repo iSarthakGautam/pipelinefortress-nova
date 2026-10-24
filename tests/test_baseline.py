@@ -96,6 +96,14 @@ def test_rebaseline_preserves_first_seen(tmp_path):
     assert seen == {"r.sqli": "c1", "r.xss": "c5"}
 
 
+def test_rebaseline_keeps_first_seen_when_lines_move(tmp_path):
+    first = b.build_baseline([finding(line=10), finding(line=30)], "c1")
+    moved = [finding(line=13), finding(line=33), finding(line=50)]   # 3 lines inserted above
+    second = b.build_baseline(moved, "c5", previous=first)
+    assert [(e["line"], e["first_seen_commit"]) for e in second["entries"]] == \
+        [(13, "c1"), (33, "c1"), (50, "c5")]
+
+
 def test_dependency_version_bump_keeps_match(tmp_path):
     dep = finding(tool="trivy", rule="CVE-2023-30861", file="requirements.txt", line=0, pkg="flask")
     base = b.build_baseline([dep], "c1")
