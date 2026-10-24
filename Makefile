@@ -30,4 +30,4 @@ prs:
 # End-to-end local demo with STUBS for R2 (normalizer) and R1 (CI job). Needs Ollama + llama3.
 demo-local:
 	$(PY) eval/stubs/r2_normalizer_stub.py artifacts/demo
-	LLM_MODEL=$${LLM_MODEL:-llama3:latest} eval/stubs/r1_ci_job_stub.sh artifacts/demo/findings.json artifacts/demo/out
+	LLM_MODEL=$${LLM_MODEL:-llama3:latest} FORMAT_MODE=$${FORMAT_MODE:-schema} eval/stubs/r1_ci_job_stub.sh artifacts/demo/findings.json artifacts/demo/out

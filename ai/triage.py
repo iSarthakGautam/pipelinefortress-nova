@@ -196,7 +196,7 @@ def triage_findings(raw_findings: list, model: str = None, format_mode: str = "s
 def main():
     ap = argparse.ArgumentParser(description="Triage scanner findings with a local LLM. Reads JSON on stdin.")
     ap.add_argument("--model", default=None)
-    ap.add_argument("--format-mode", choices=["schema", "json", "none"], default="schema")
+    ap.add_argument("--format-mode", choices=["schema", "json", "none"], default=os.getenv("FORMAT_MODE", "schema"))
     ap.add_argument("--no-validate", action="store_true", help="ablation only")
     ap.add_argument("--no-defence", action="store_true", help="ablation only: disables injection heuristic AND framing")
     ap.add_argument("--trace-dir", default=None)

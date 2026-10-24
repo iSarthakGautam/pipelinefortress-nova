@@ -13,6 +13,7 @@ mkdir -p "$OUT"
 env -i PATH="$PATH" HOME="$HOME" \
   ARTIFACTS_BASE="$(cd "$(dirname "$FINDINGS")" && pwd)" \
   LLM_MODEL="${LLM_MODEL:-llama3:latest}" \
+  FORMAT_MODE="${FORMAT_MODE:-schema}" \
   OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434/v1}" \
   LLM_TRACE_DIR="$OUT/llm_trace" EGRESS_LOG="$OUT/egress.log" \
   python3 "$ROOT/ai/triage.py" --comment-out "$OUT/pr_comment.md" --metrics-out "$OUT/metrics.prom" \

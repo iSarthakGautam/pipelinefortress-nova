@@ -115,6 +115,31 @@ def chat(system_prompt: str, user_prompt: str, model: str = None, format_mode: s
         result["ok"] = (not expect_json) or isinstance(result["parsed"], dict)
         if not result["ok"]:
             result["error"] = "model returned JSON that is not an object"
+    except urllib.error.HTTPError as e:
+        detail = ""
+        try:
+            detail = e.read().decode("utf-8", "ignore")
+        except Exception:
+            pass
+        # Fallback for Ollama versions where ChatRequest.format is string-only ("json"), not schema dict
+        if expect_json and format_mode == "schema" and "ChatRequest.format of type string" in detail:
+            body["format"] = "json"
+            retry_data = json.dumps(body, sort_keys=True).encode("utf-8")
+            try:
+                req = urllib.request.Request(root + "/api/chat", data=retry_data, headers={"Content-Type": "application/json"})
+                with _NO_PROXY_OPENER.open(req, timeout=TIMEOUT_S) as resp:
+                    raw = json.loads(resp.read().decode("utf-8"))["message"]["content"]
+                result["raw"] = raw
+                result["parsed"] = json.loads(raw)
+                result["ok"] = isinstance(result["parsed"], dict)
+                if not result["ok"]:
+                    result["error"] = "model returned JSON that is not an object"
+                result["latency_s"] = round(time.time() - start, 3)
+                result["digest"] = live_digest(model, base_url) if result["ok"] else result["digest"]
+                return result
+            except Exception as e2:
+                detail = f"{detail} -> fallback failed: {e2}"
+        result["error"] = f"HTTPError {e.code}: {detail or e.reason}"
     except (urllib.error.URLError, OSError, TimeoutError, KeyError, ValueError) as e:
         result["error"] = f"{type(e).__name__}: {e}"
     result["latency_s"] = round(time.time() - start, 3)
