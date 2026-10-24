@@ -1,70 +1,15 @@
-# PipelineFortress
+# Monitoring configuration
 
-**Secure CI/CD with GenAI-Assisted Triage**
+This configuration is a starting point for a local demo. It uses R4's existing metric names. The source metrics are snapshot gauges; therefore do not use `rate()`, counter semantics, p95 latency, or claim long-term trends from a single metrics file. For trends, repeated timestamped scrapes of an exporter are required.
 
-## Project Overview
+## Run (from this folder)
+1. Install Docker + Docker Compose.
+2. Copy the actual `artifacts/demo/out/metrics.prom` into this folder as `metrics.prom` or generate a new file using R4's pipeline.
+3. Run `docker compose up -d` inside `r5/monitoring/`.
+4. Push the metrics file to the local Pushgateway:
+   `python3 push_metrics.py metrics.prom http://localhost:9091/metrics/job/pipelinefortress_ai`
+5. Open Prometheus at `http://localhost:9090` and Grafana at `http://localhost:3000` (admin/admin for this local demo only; change for any shared environment).
+6. In Prometheus, confirm metrics appear; in Grafana, open the provisioned PipelineFortress dashboard.
+7. Capture evidence using `r5/evidence/SCREENSHOT_STANDARD.md`.
 
-PipelineFortress is a reference shift-left CI/CD pipeline designed to catch vulnerabilities before they are merged. It incorporates a suite of DevSecOps tools and leverages a GenAI assistant for intelligent triage of security findings. 
-
-The core target is a deliberately vulnerable application (OWASP Juice Shop) combined with a custom `vulnshop-api` that we will wrap in our secure CI/CD pipeline.
-
-**Core Grading Rubric Constraint:**
-*Anyone can rebuild this from the repo in under an hour, and every claim the model makes is checkable against evidence we also ship.*
-
----
-
-## The Async Contract
-We are a team of 5 working full-time. We build for async by default:
-- **Tuesday 30 min sync**: Unblock. What will stop you shipping by the weekend?
-- **Saturday 30 min sync**: Demo and plan. Teach-backs.
-- **One contract**: We agree on a unified `findings.json` schema on Day 1.
-- **Stub first**: Don't block others. Ship stubs (e.g., `stub_triage.py`) so consumers can build their parts immediately.
-
-## The Five Roles
-
-| Role | Focus |
-|---|---|
-| **R1 (Pipeline & Team Lead)** | CI/CD workflows, kind cluster, gating logic, repo governance. |
-| **R2 (Scanners & Policy)** | SAST, SCA, secrets, unified schema, baseline diffing, cross-check metrics. |
-| **R3 (Container & Supply Chain)** | Hardened Dockerfile, SBOM, IaC policies, builds the planted vulnerabilities. |
-| **R4 (AI & GenAI Lead)** | Local open-weight LLM triage, redaction layers, grounding validator, auto-PR bot. |
-| **R5 (Data, Metrics, Report)** | Ground truth, Grafana dashboard, evidence trail, final report integration. |
-
----
-
-## Project Structure (WIP)
-
-- `apps/`: Vulnerable target apps (`juice-shop` fork, `vulnshop-api`).
-- `.github/workflows/`: CI/CD pipeline definitions.
-- `infra/` & `docker/`: Kubernetes configurations and hardened Dockerfiles.
-- `scanners/`: Tool configurations and the baseline/security-baseline.json.
-- `ai/`: The GenAI triage subsystem (models.lock.yaml, llm_client, redaction, prompts).
-- `eval/`, `tests/`, `dashboards/`: Evaluation harnesses, test suites, and Grafana JSONs.
-- `docs/`: Project documentation, architecture decisions (ADRs), and evidence.
-
----
-
-## Local Branch Protection (Mandatory)
-Because we are using a private repository on a free GitHub account, server-side branch protection rules are disabled. To fulfill the rubric requirement of "no direct pushes to main", **every team member must run this command immediately after cloning the repo**. 
-
-This installs a local git hook that physically prevents you from pushing directly to the `main` branch:
-
-```bash
-echo '#!/bin/bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [ "$branch" = "main" ]; then
-  echo "❌ STOP: Direct pushes to main are forbidden by team contract. Please create a branch and open a PR."
-  exit 1
-fi' > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
-```
-
----
-
-## Getting Started (Week 1 Foundation)
-- **R1**: Setup the `make bootstrap` process and basic `.github/workflows`.
-- **R2**: Propose the unified JSON finding schema.
-- **R3**: Pin the Juice Shop fork and start `vulnshop-api`.
-- **R4**: Ship `stub_triage.py` returning fake JSON data matching R2's schema.
-- **R5**: Setup `WEEKLOG.md` and report skeletons.
-
-Check `docs/CONTRIBUTIONS.md` (to be created by R1) to track progress.
+Do not report the integration as working until these steps have been run and evidence saved. The included Compose setup is local-only.
