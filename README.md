@@ -44,19 +44,23 @@ We are a team of 5 working full-time. We build for async by default:
 
 ---
 
-## Local Branch Protection (Mandatory)
-Because we are using a private repository on a free GitHub account, server-side branch protection rules are disabled. To fulfill the rubric requirement of "no direct pushes to main", **every team member must run this command immediately after cloning the repo**. 
-
-This installs a local git hook that physically prevents you from pushing directly to the `main` branch:
+## Local Git Hooks (Mandatory)
+Because we are using a private repository on a free GitHub account, server-side branch protection rules are disabled. **Every team member must run this once after cloning** (Windows Git Bash, macOS or Linux):
 
 ```bash
-echo '#!/bin/bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [ "$branch" = "main" ]; then
-  echo "❌ STOP: Direct pushes to main are forbidden by team contract. Please create a branch and open a PR."
-  exit 1
-fi' > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+python scripts/install_hooks.py
 ```
+
+It installs two hooks:
+- **pre-push** refuses direct pushes to `main`. This is the team contract hook; the old copy-paste version is upgraded in place.
+- **pre-commit** runs gitleaks 8.30.1 on your *staged* changes and blocks the commit if it finds a secret. The binary is downloaded into `.git/hooks/bin/` and checked against SHA-256 values pinned in the script.
+
+If a commit is blocked:
+- A **real** secret gets removed and **rotated**, and you tell the team the same day.
+- A **known fake** (test fixture, canary) gets its exact value allowlisted in `.gitleaks.toml` through a PR. Inline `gitleaks:allow` comments are ignored, locally and in CI.
+- A **deliberately planted** secret (R3) is committed with `git commit --no-verify` and never allowlisted, because CI is meant to catch it.
+
+Re-run the script any time to update the hooks. `--uninstall` removes them.
 
 ---
 

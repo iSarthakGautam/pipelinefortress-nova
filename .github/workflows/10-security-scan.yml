@@ -96,7 +96,8 @@ jobs:
         run: |
           mkdir -p artifacts/scans
           gitleaks version
-          gitleaks git --redact --no-banner --exit-code 0 \
+          # --ignore-gitleaks-allow: suppressions only via reviewed exact values in .gitleaks.toml
+          gitleaks git --redact --no-banner --exit-code 0 --ignore-gitleaks-allow \
             --report-format sarif --report-path artifacts/scans/gitleaks.sarif .
 
       - name: SAST (Semgrep)
