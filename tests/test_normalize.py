@@ -63,6 +63,39 @@ def test_gitleaks_is_always_high():
     assert "snippet" not in out[0]["evidence"]    # gitleaks runs with --redact
 
 
+def test_bandit_json():
+    # Trimmed from real bandit 1.9.4 output
+    out = n.parse_bandit(FIX / "bandit.json", ref="artifacts/scans/bandit.json")
+    urlopen = by_rule(out, "B310")[0]
+    assert urlopen["location"] == {"file": "ai/llm_client.py", "line": 53}
+    assert urlopen["cwe"] == ["CWE-22"] and urlopen["severity_norm"] == "MEDIUM"
+    assert urlopen["evidence"]["snippet"] == "with urllib.request.urlopen(req, timeout=60) as resp:"
+    assert urlopen["evidence"]["raw_ref"] == "artifacts/scans/bandit.json#/results/0"
+    assert "(confidence: HIGH)" in urlopen["message"]
+    assert by_rule(out, "B105")[0]["severity_norm"] == "LOW"
+
+
+def test_bandit_low_confidence_drops_one_level():
+    sqli = by_rule(n.parse_bandit(FIX / "bandit.json"), "B608")[0]
+    assert (sqli["severity_raw"], sqli["severity_norm"]) == ("MEDIUM", "LOW")
+
+
+def test_checkov_level_is_not_severity_but_rule_overrides_are():
+    # Real checkov 3.3.26 SARIF: every failed check is level "error"
+    out = n.parse_sarif(FIX / "checkov.sarif", "checkov")
+    assert {f["severity_raw"] for f in out} == {"error"}
+    sev = {f["rule_id"]: f["severity_norm"] for f in out}
+    assert sev == {"CKV_K8S_16": "HIGH",          # privileged container: override
+                   "CKV_K8S_20": "MEDIUM",        # allowPrivilegeEscalation: default
+                   "CKV_DOCKER_3": "HIGH"}        # runs as root: override, matches Trivy DS-0002
+    assert by_rule(out, "CKV_K8S_16")[0]["location"] == {"file": "infra/pod.yaml", "line": 1}
+
+
+def test_rule_overrides_are_per_tool():
+    assert n.normalize_severity("checkov", "error", "CKV_K8S_16") == "HIGH"
+    assert n.normalize_severity("hadolint", "warning", "CKV_K8S_16") == "MEDIUM"
+
+
 def test_finding_id_is_stable_and_16_hex():
     a = n.make_finding_id("semgrep", "r", "a.py", 1, None)
     assert a == n.make_finding_id("semgrep", "r", "a.py", 1, None)
@@ -98,3 +131,10 @@ def test_cli_end_to_end_is_valid_and_deterministic(tmp_path):
     findings = json.loads(o1.read_text())
     assert len(findings) == 6                     # 2 semgrep + 1 gitleaks + 3 trivy
     assert len({f["finding_id"] for f in findings}) == 6
+
+
+def test_cli_accepts_bandit_and_checkov(tmp_path):
+    out = tmp_path / "f.json"
+    assert n.main(["--bandit", str(FIX / "bandit.json"), "--checkov", str(FIX / "checkov.sarif"),
+                   "-o", str(out)]) == 0
+    assert sorted({f["tool"] for f in json.loads(out.read_text())}) == ["bandit", "checkov"]

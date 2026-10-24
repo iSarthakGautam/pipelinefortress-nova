@@ -1,0 +1,9 @@
+# Python-based scanners for the scan-and-gate CI job. Installed into their own venv so their large
+# dependency trees can't change requirements-dev.txt. Edit THIS file, then regenerate the lock:
+#   uv pip compile requirements-scanners.in --generate-hashes --python-version 3.12 \
+#     --python-platform x86_64-manylinux_2_28 --exclude-newer <today minus 14 days> \
+#     -o requirements-scanners.txt
+# Install with: pip install --require-hashes -r requirements-scanners.txt
+# Semgrep is NOT here: it pins its own dependencies tightly and gets a separate venv.
+bandit
+checkov

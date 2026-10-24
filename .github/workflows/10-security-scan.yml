@@ -1,6 +1,7 @@
-# Security stages owned by R2: SAST (Semgrep), SCA + IaC (Trivy), secrets (gitleaks),
-# then normalize -> baseline diff -> gate. Scanners never fail the build by themselves;
-# only the gate decides (new findings >= HIGH, or bad exceptions).
+# Security stages owned by R2: SAST (Semgrep, Bandit), SCA (Trivy, Grype, OSV-Scanner),
+# IaC (Checkov, Trivy), secrets (gitleaks), then normalize -> baseline diff -> gate. Scanners
+# never fail the build by themselves; only the gate decides (new findings >= HIGH, or bad
+# exceptions).
 name: 10 Security scan + gate
 
 on:
@@ -28,6 +29,10 @@ env:
   OSV_SCANNER_VERSION: "2.6.0"
   PYTHON_VERSION: "3.12"
   GRYPE_CHECK_FOR_APP_UPDATE: "false"
+  # Deliberately vulnerable test data, not scan targets (eval/fixtures holds R4's synthetic
+  # stand-ins for R3's files). Every scanner except gitleaks skips these; gitleaks scans git
+  # history and handles fake secrets with exact allowlist values in .gitleaks.toml.
+  SCAN_EXCLUDE_DIRS: "artifacts tests/fixtures eval/fixtures"
 
 jobs:
   unit-tests:
@@ -66,6 +71,12 @@ jobs:
           "$RUNNER_TEMP/semgrep-venv/bin/pip" install --quiet "semgrep==${SEMGREP_VERSION}"
           ln -s "$RUNNER_TEMP/semgrep-venv/bin/semgrep" "$bin/semgrep"
 
+          # Bandit + Checkov: hash-locked, in their own venv
+          python -m venv "$RUNNER_TEMP/scanners-venv"
+          "$RUNNER_TEMP/scanners-venv/bin/pip" install --quiet --require-hashes -r requirements-scanners.txt
+          ln -s "$RUNNER_TEMP/scanners-venv/bin/bandit" "$bin/bandit"
+          ln -s "$RUNNER_TEMP/scanners-venv/bin/checkov" "$bin/checkov"
+
           f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
           curl -sSfLO "$base/$f"; curl -sSfLO "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
@@ -102,26 +113,47 @@ jobs:
 
       - name: SAST (Semgrep)
         run: |
-          semgrep scan --config p/default --metrics off --disable-version-check \
+          ex=(); for d in $SCAN_EXCLUDE_DIRS; do ex+=(--exclude "$d"); done
+          semgrep scan --config p/default --metrics off --disable-version-check "${ex[@]}" \
             --sarif --output artifacts/scans/semgrep.sarif
+
+      - name: SAST (Bandit, Python)
+        run: |
+          bandit --version | head -1
+          # tests/ too: bandit flags every pytest assert (B101)
+          ex="./.git,./tests"; for d in $SCAN_EXCLUDE_DIRS; do ex="$ex,./$d"; done
+          bandit -q -r . -x "$ex" -f json -o artifacts/scans/bandit.json --exit-zero
+
+      - name: IaC (Checkov)
+        run: |
+          checkov --version
+          ex=(); for d in $SCAN_EXCLUDE_DIRS; do ex+=(--skip-path "$d"); done
+          # secrets: gitleaks owns them. sca_*: needs a Prisma API key; Trivy/Grype/OSV cover SCA.
+          checkov -d . --quiet --compact --soft-fail --skip-download "${ex[@]}" \
+            --skip-framework secrets sca_package sca_image \
+            -o sarif --output-file-path artifacts/scans/checkov
+          mv artifacts/scans/checkov/results_sarif.sarif artifacts/scans/checkov.sarif
 
       - name: SCA + IaC (Trivy)
         run: |
           trivy --version
-          trivy fs --scanners vuln,misconfig --exit-code 0 --skip-dirs artifacts \
+          ex=(); for d in $SCAN_EXCLUDE_DIRS; do ex+=(--skip-dirs "$d"); done
+          trivy fs --scanners vuln,misconfig --exit-code 0 "${ex[@]}" \
             --format json --output artifacts/scans/trivy.json .
 
       - name: SCA cross-check (Grype)
         run: |
           grype version
-          grype dir:. --exclude './artifacts/**' --exclude './.git/**' \
+          ex=(); for d in $SCAN_EXCLUDE_DIRS; do ex+=(--exclude "./$d/**"); done
+          grype dir:. "${ex[@]}" --exclude './.git/**' \
             -o json --file artifacts/scans/grype.json -q
 
       - name: SCA cross-check (OSV-Scanner)
         run: |
           osv-scanner --version
+          ex=(); for d in $SCAN_EXCLUDE_DIRS; do ex+=(--experimental-exclude "g:$d/**"); done
           set +e
-          osv-scanner scan source -r --format json --output-file artifacts/scans/osv.json .
+          osv-scanner scan source -r "${ex[@]}" --format json --output-file artifacts/scans/osv.json .
           rc=$?
           set -e
           # 0 = clean, 1 = vulnerabilities found, 128 = no packages found; anything else is an error
@@ -135,6 +167,8 @@ jobs:
         run: |
           python scanners/normalize/normalize.py \
             --semgrep artifacts/scans/semgrep.sarif \
+            --bandit artifacts/scans/bandit.json \
+            --checkov artifacts/scans/checkov.sarif \
             --gitleaks artifacts/scans/gitleaks.sarif \
             --trivy artifacts/scans/trivy.json \
             --grype artifacts/scans/grype.json \

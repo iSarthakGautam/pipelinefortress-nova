@@ -4,6 +4,8 @@
 Usage:
   python scanners/normalize/normalize.py \
       --semgrep artifacts/scans/semgrep.sarif \
+      --bandit artifacts/scans/bandit.json \
+      --checkov artifacts/scans/checkov.sarif \
       --trivy artifacts/scans/trivy.json \
       --grype artifacts/scans/grype.json \
       --osv artifacts/scans/osv.json \
@@ -40,8 +42,11 @@ def _load_severity_map():
     return _severity_map
 
 
-def normalize_severity(tool: str, raw) -> str:
+def normalize_severity(tool: str, raw, rule_id: str = None) -> str:
     smap = _load_severity_map()
+    overrides = (smap.get("_rule_overrides") or {}).get(tool) or {}
+    if rule_id in overrides:
+        return overrides[rule_id]
     table = {str(k).lower(): v for k, v in (smap.get(tool) or {}).items()}
     key = str(raw).lower()
     if key in table:
@@ -132,7 +137,7 @@ def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line,
         "tool": tool,
         "rule_id": rule_id,
         "severity_raw": str(severity_raw),
-        "severity_norm": severity_norm or normalize_severity(tool, severity_raw),
+        "severity_norm": severity_norm or normalize_severity(tool, severity_raw, rule_id),
         "cwe": cwe,
         "cve": cve,
         "location": {"file": file, "line": line},
@@ -175,6 +180,41 @@ def parse_sarif(path: Path, tool: str, ref: str = None) -> list:
                 snippet=snippet,
                 raw_ref=f"{ref}#/runs/{ri}/results/{i}",
             ))
+    return findings
+
+
+_SEVERITY_ORDER = ("INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL")
+
+
+def parse_bandit(path: Path, ref: str = None) -> list:
+    """Bandit JSON (`bandit -f json`). rule_id is the test id (B310). Bandit rates confidence
+    separately from severity; a LOW-confidence result is one severity level lower."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    ref = ref or path.as_posix()
+    findings = []
+    for i, r in enumerate(doc.get("results", [])):
+        sev = normalize_severity("bandit", r.get("issue_severity"))
+        if str(r.get("issue_confidence")).upper() == "LOW" and sev in _SEVERITY_ORDER[1:]:
+            sev = _SEVERITY_ORDER[_SEVERITY_ORDER.index(sev) - 1]
+        line = int(r.get("line_number") or 0)
+        # `code` is a few numbered lines of context; keep only the flagged line
+        snippet = next((c.split(" ", 1)[1].strip() for c in (r.get("code") or "").splitlines()
+                        if c.split(" ", 1)[0] == str(line) and " " in c), None)
+        cwe_id = (r.get("issue_cwe") or {}).get("id")
+        findings.append(build_finding(
+            tool="bandit",
+            rule_id=r.get("test_id") or "unknown",
+            message=f"{r.get('issue_text', '')} (confidence: {r.get('issue_confidence')})",
+            severity_raw=r.get("issue_severity"),
+            severity_norm=sev,
+            cwe=[f"CWE-{int(cwe_id)}"] if cwe_id else [],
+            cve=[],
+            file=norm_path(r.get("filename", "")),
+            line=line,
+            package=None,
+            snippet=snippet,
+            raw_ref=f"{ref}#/results/{i}",
+        ))
     return findings
 
 
@@ -325,6 +365,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     for t in SARIF_TOOLS:
         ap.add_argument(f"--{t}", type=Path, action="append", default=[], help=f"{t} SARIF file")
+    ap.add_argument("--bandit", type=Path, action="append", default=[], help="Bandit JSON file")
     ap.add_argument("--trivy", type=Path, action="append", default=[], help="Trivy JSON file")
     ap.add_argument("--grype", type=Path, action="append", default=[], help="Grype JSON file")
     ap.add_argument("--osv", type=Path, action="append", default=[], help="OSV-Scanner JSON file")
@@ -337,6 +378,8 @@ def main(argv=None) -> int:
     for t in SARIF_TOOLS:
         for p in getattr(args, t):
             findings += parse_sarif(p, t)
+    for p in args.bandit:
+        findings += parse_bandit(p)
     for p in args.trivy:
         findings += parse_trivy(p)
     for p in args.grype:

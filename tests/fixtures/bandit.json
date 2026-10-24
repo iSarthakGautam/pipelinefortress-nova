@@ -1,0 +1,65 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "code": "52             )\n53             with urllib.request.urlopen(req, timeout=60) as resp:\n54                 resp_json = json.loads(resp.read().decode(\"utf-8\"))\n",
+      "col_offset": 17,
+      "end_col_offset": 56,
+      "filename": "./ai/llm_client.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 22,
+        "link": "https://cwe.mitre.org/data/definitions/22.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.",
+      "line_number": 53,
+      "line_range": [
+        53
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen",
+      "test_id": "B310",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "7 # L4 Canary token used to detect prompt leaks\n8 CANARY_TOKEN = \"CANARY_4bf3a9_SECRET\"\n9 \n",
+      "col_offset": 15,
+      "end_col_offset": 37,
+      "filename": "./ai/redaction/redactor.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'CANARY_4bf3a9_SECRET'",
+      "line_number": 8,
+      "line_range": [
+        8
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
+    },
+    {
+      "code": "1 def search_items(db, q):\n2     query = f\"SELECT * FROM items WHERE name = '{q}'\"\n3     return db.execute(query).fetchall()\n",
+      "col_offset": 14,
+      "end_col_offset": 48,
+      "filename": "./apps/vulnshop-api/search.py",
+      "issue_confidence": "LOW",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 2,
+      "line_range": [
+        2
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    }
+  ]
+}
