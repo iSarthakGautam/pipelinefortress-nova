@@ -38,11 +38,12 @@ grype:
   NEGLIGIBLE: INFO
   UNKNOWN: INFO
 
-osv:
-  CRITICAL: CRITICAL
+osv:                    # only used when a group has no CVSS score; numeric max_severity is
+  CRITICAL: CRITICAL    # bucketed with CVSS v3 ranges in normalize.cvss_bucket()
   HIGH: HIGH
   MODERATE: MEDIUM
   LOW: LOW
+  UNKNOWN: INFO
 
 gitleaks:               # gitleaks has no severity concept. A committed secret is always HIGH.
   "*": HIGH
