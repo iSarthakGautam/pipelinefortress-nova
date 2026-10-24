@@ -1,0 +1,18 @@
+{
+  "SchemaVersion": 2,
+  "Results": [
+    {"Target": "apps/vulnshop-api/requirements.txt", "Class": "lang-pkgs", "Type": "pip",
+     "Vulnerabilities": [
+       {"VulnerabilityID": "CVE-2023-30861", "PkgName": "flask", "InstalledVersion": "2.2.2",
+        "FixedVersion": "2.2.5", "Severity": "HIGH", "Title": "Flask session cookie disclosure",
+        "CweIDs": ["CWE-539"]},
+       {"VulnerabilityID": "GHSA-xxxx-yyyy-zzzz", "PkgName": "pyyaml", "InstalledVersion": "5.3",
+        "FixedVersion": "", "Severity": "UNKNOWN", "Title": "Advisory without CVE"}
+     ]},
+    {"Target": "infra/k8s/deployment.yaml", "Class": "config", "Type": "kubernetes",
+     "Misconfigurations": [
+       {"ID": "KSV017", "AVDID": "AVD-KSV-0017", "Title": "Privileged container", "Severity": "HIGH",
+        "CauseMetadata": {"StartLine": 21}}
+     ]}
+  ]
+}

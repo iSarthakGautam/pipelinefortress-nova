@@ -1,0 +1,59 @@
+# Maps each scanner's native severity to severity_norm (CRITICAL|HIGH|MEDIUM|LOW|INFO).
+# A Trivy HIGH is NOT a Semgrep ERROR: Semgrep has no CRITICAL, so its ERROR is capped at HIGH.
+# Keys are matched case-insensitively. Owner: R2. Changing a mapping changes gate behaviour, so
+# open a PR and note it in the channel.
+_default: MEDIUM        # used (with a stderr warning) when a scanner emits an unmapped value
+
+semgrep:                # JSON severity and SARIF level
+  ERROR: HIGH
+  WARNING: MEDIUM
+  INFO: LOW
+  note: LOW
+  error: HIGH
+  warning: MEDIUM
+  none: INFO
+
+bandit:
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+
+gosec:
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+
+trivy:
+  CRITICAL: CRITICAL
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+  UNKNOWN: INFO
+
+grype:
+  CRITICAL: CRITICAL
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+  NEGLIGIBLE: INFO
+  UNKNOWN: INFO
+
+osv:
+  CRITICAL: CRITICAL
+  HIGH: HIGH
+  MODERATE: MEDIUM
+  LOW: LOW
+
+gitleaks:               # gitleaks has no severity concept. A committed secret is always HIGH.
+  "*": HIGH
+
+checkov:                # Checkov SARIF levels; JSON has no severity in OSS
+  error: HIGH
+  warning: MEDIUM
+  note: LOW
+
+hadolint:
+  error: HIGH
+  warning: MEDIUM
+  info: LOW
+  style: INFO
