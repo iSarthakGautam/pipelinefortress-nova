@@ -1,8 +1,10 @@
-# Automated PR Remediation Register
+# AI-drafted PR register
 
-| PR ID | Target | Status | Reviewer | Verdict | Notes |
-|---|---|---|---|---|---|
-| `PR-001` | `docker/Dockerfile` | **ACCEPTED** | R3 (Container & Supply Chain) | **APPROVED** | Verified. Hadolint passes with zero warnings. Container drops root privileges properly. |
-| `PR-002` | `apps/vulnshop-api/package.json` | **ACCEPTED** | R2 (Scanners & Policy) | **APPROVED** | SCA Trivy scan passes after bump. Unit tests pass with no breaking changes in token verification API. |
-| `PR-003` | `infra/k8s/deployment.yaml` | **ACCEPTED** | R1 (Pipeline & Platform Lead) | **APPROVED** | Checkov IaC stage now passes with zero policy violations on deployment manifest. |
-| `PR-004` | `apps/vulnshop-api/routes/search.py` | **REJECTED** | R4 (AI Lead) + R1 (Pipeline Lead) | **REJECTED (DELIBERATE)** | REJECTED: Naive string replacement is an anti-pattern. It breaks legitimate search terms (e.g. O'Connor) and can still be bypassed depending on query structure. Fix must use parameterized queries (db.execute(sql, (q,))) instead of naive sanitization. Demonstrates critical AI review. |
+Drafted by `ai/pr_bot.py` with model `llama3:latest` (prompt `patch_draft_v1`). Targets are SYNTHETIC fixtures (`eval/fixtures/pr_targets/`), not repo files. **No PR has been opened and no human has reviewed any of these.** `applies_cleanly` is the result of `git apply --check`, nothing more: it does not mean the patch is correct. Review notes are written by R1/R2/R3 on the real PR, not here.
+
+| PR | Target | Finding | Model | applies cleanly | Review | Reviewer |
+|---|---|---|---|---|---|---|
+| PR-001 | `Dockerfile` | CKV_DOCKER_3 / CKV_DOCKER_2 | `llama3:latest@sha256:365c0bd3c000` | NO: error: corrupt patch at line 14 | **PENDING** | None |
+| PR-002 | `deployment.yaml` | CKV_K8S_40 | `llama3:latest@sha256:365c0bd3c000` | NO: error: corrupt patch at line 8 | **PENDING** | None |
+| PR-003 | `package.json` | SCA outdated dependency (fixture) | `llama3:latest@sha256:365c0bd3c000` | NO: error: corrupt patch at line 8 | **PENDING** | None |
+| PR-004 | `search.py` | CWE-89 SQL injection (fixture) | `llama3:latest@sha256:365c0bd3c000` | NO: error: corrupt patch at line 8 | **PENDING** | None |

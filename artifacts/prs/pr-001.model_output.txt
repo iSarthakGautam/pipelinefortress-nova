@@ -1,0 +1,13 @@
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -1,12 +1,12 @@
+-FROM node:latest
++FROM node:20.11.1-alpine
+ WORKDIR /app
+ COPY package.json .
+ RUN npm install
+ COPY . .
+ EXPOSE 3000
+ CMD ["node", "server.js"]
+-USER root
++USER 1001

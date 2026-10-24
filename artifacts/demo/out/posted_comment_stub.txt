@@ -1,0 +1,2 @@
+WOULD RUN: gh pr comment <PR_NUMBER> --body-file pr_comment.md
+(1460 bytes)

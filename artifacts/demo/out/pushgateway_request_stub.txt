@@ -1,0 +1,25 @@
+WOULD POST http://localhost:9091/metrics/job/pipelinefortress_ai
+
+# HELP pipelinefortress_ai_findings_total Findings received by the triage step
+# TYPE pipelinefortress_ai_findings_total gauge
+pipelinefortress_ai_findings_total 6
+# HELP pipelinefortress_ai_clusters_total Clusters (model calls needed) after dedupe
+# TYPE pipelinefortress_ai_clusters_total gauge
+pipelinefortress_ai_clusters_total 5
+# HELP pipelinefortress_ai_verdict_total Clusters by final verdict (NEEDS_HUMAN_REVIEW = abstentions)
+# TYPE pipelinefortress_ai_verdict_total gauge
+pipelinefortress_ai_verdict_total{verdict="NEEDS_HUMAN_REVIEW"} 1
+pipelinefortress_ai_verdict_total{verdict="TRUE_POSITIVE"} 4
+# HELP pipelinefortress_ai_validator_rejections_total Model claims dropped by the grounding validator
+# TYPE pipelinefortress_ai_validator_rejections_total gauge
+pipelinefortress_ai_validator_rejections_total{type="none"} 0
+# HELP pipelinefortress_ai_outcome_total Per-cluster pipeline outcome (ok, injection_detected, pre_egress_tripwire, llm_unavailable_or_malformed...)
+# TYPE pipelinefortress_ai_outcome_total gauge
+pipelinefortress_ai_outcome_total{outcome="injection_detected"} 1
+pipelinefortress_ai_outcome_total{outcome="ok"} 4
+# HELP pipelinefortress_ai_llm_latency_seconds_sum Total model latency
+# TYPE pipelinefortress_ai_llm_latency_seconds_sum gauge
+pipelinefortress_ai_llm_latency_seconds_sum 11.168
+# HELP pipelinefortress_ai_llm_calls_total Model calls made
+# TYPE pipelinefortress_ai_llm_calls_total gauge
+pipelinefortress_ai_llm_calls_total 4
