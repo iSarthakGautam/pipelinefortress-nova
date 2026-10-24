@@ -22,8 +22,10 @@ line-independent match_key (tool|rule_id|file|package). Within a group, exact fi
 matches are known first; remaining baseline slots then absorb moved findings in
 line order; whatever is left over is new.
 
-Exception annotation, on the finding's line or the line above it (any comment style):
-  # security-exception: <rule_id|finding_id> expires:YYYY-MM-DD owner:<name>
+Exception annotation: a comment on the finding's line or the line above it, of the form
+  security-exception: <rule_id|finding_id> expires:YYYY-MM-DD owner:<name>
+behind a comment leader (#, //, --, ;, /*, <!--) that starts the line or follows whitespace,
+so the syntax quoted in strings or docs is not mistaken for an annotation.
 For line-0 findings (dependency manifests) the annotation may sit anywhere in that file.
 Expired, malformed, or over-long exceptions fail the gate.
 """
@@ -44,6 +46,9 @@ SKIP_DIRS = {".git", "node_modules", "artifacts", ".venv", "venv", "__pycache__"
 MAX_SCAN_BYTES = 1_000_000
 
 ANNOTATION_MARKER = "security-exception:"
+# Comment leader at line start or after whitespace, then the marker. Excludes quoted text
+# such as "# security-exception: ..." inside a string literal.
+COMMENT_LEADER_RE = re.compile(r"(?:^|\s)(?:#|//|--|;|/\*|<!--)\s*security-exception:")
 ANNOTATION_RE = re.compile(
     r"security-exception:\s*(?P<id>\S+)\s+expires:(?P<expires>\S+)\s+owner:(?P<owner>\S+)")
 
@@ -168,7 +173,7 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
         if ANNOTATION_MARKER not in text:
             continue
         for lineno, line in enumerate(text.splitlines(), start=1):
-            if ANNOTATION_MARKER not in line:
+            if ANNOTATION_MARKER not in line or not COMMENT_LEADER_RE.search(line):
                 continue
             ann = {"file": rel, "line": lineno, "raw": line.strip()}
             m = ANNOTATION_RE.search(line)

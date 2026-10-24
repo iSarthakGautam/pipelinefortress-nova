@@ -13,28 +13,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Secrets Scanning (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # continue-on-error: true # Uncomment to prevent build failure during initial baseline
-
-      - name: SAST Scanning (Semgrep)
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: "p/default"
-        # continue-on-error: true
+      # Secrets/SAST/SCA scanning moved to 10-security-scan.yml (R2).
 
       - name: Build target application
         run: |
           echo "Building target app..."
           # cd target-app && npm install && npm run build
-          
-      - name: SCA & Container Scanning (Trivy)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'table'
-        # continue-on-error: true
-

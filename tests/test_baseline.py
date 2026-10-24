@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scanners" / "normalize"))
 sys.path.insert(0, str(ROOT / "scanners" / "baseline"))
@@ -179,3 +181,27 @@ def test_cli_create_then_check(tmp_path):
 def test_cli_bad_input_exits_2(tmp_path):
     assert b.main(["check", "--findings", str(tmp_path / "missing.json"),
                    "--baseline", str(tmp_path / "b.json")]) == 2
+
+
+# ------------------------------------------------------------------ annotation parsing
+
+def test_annotation_syntax_in_strings_and_docs_is_ignored(tmp_path):
+    write(tmp_path, "a.py", 'ANN = "# security-exception: r.sqli owner:r2"\n')
+    write(tmp_path, "b.json", '{"d": "\'# security-exception: <id> expires:<date> owner:<name>\'"}\n')
+    write(tmp_path, "c.md", "Use security-exception: <id> expires:YYYY-MM-DD owner:<name>\n")
+    assert b.scan_annotations(tmp_path, TODAY, 90) == []
+
+
+def test_trailing_comment_on_finding_line_applies(tmp_path):
+    # Built in two parts so this test file does not itself contain a "trailing comment" annotation
+    ann = "# " + "security-exception: r.sqli expires:2026-11-30 owner:r2"
+    lines = ["x"] * 9 + ["db.execute(q)  " + ann]
+    write(tmp_path, "app/search.py", "\n".join(lines))
+    _, rep = run_check([finding(line=10)], b.load_baseline(tmp_path / "none.json"), tmp_path)
+    assert rep["result"] == "pass" and rep["counts"]["excepted"] == 1
+
+
+@pytest.mark.parametrize("leader", ["#", "//", "--", "/*", "<!--", ";"])
+def test_common_comment_leaders(tmp_path, leader):
+    write(tmp_path, "f.txt", f"{leader} security-exception: r.x expires:2026-11-30 owner:r2\n")
+    assert [a["status"] for a in b.scan_annotations(tmp_path, TODAY, 90)] == ["valid"]
