@@ -10,7 +10,8 @@ import sys
 # so the pointer-following path (ai/sarif_ref.py) is exercised. The SARIF content is SYNTHETIC, not scanner output.
 #   python3 eval/stubs/r2_normalizer_stub.py <out_dir>     -> <out_dir>/findings.json + <out_dir>/scanners.sarif
 
-# TODO(R2): delete this stub when the real normalizer ships; keep the field names it emits (they follow PROJECT_PLAN §5).
+# Note: Retained as the deterministic offline fixture generator for tests/test_integration_stubs.py
+# and `make demo` (exercises SARIF pointer hydration, canary secret redaction, and prompt injection).
 HERE = os.path.dirname(os.path.abspath(__file__))
 AWS = "AKIA" + "IOSFODNN7EXAMPLE"  # AWS's published example key id, built from parts
 

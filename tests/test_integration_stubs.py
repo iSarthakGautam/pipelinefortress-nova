@@ -20,7 +20,7 @@ import triage
 # Contract tests against STUBS of the other roles' pieces (R2 normalizer output, R1 CI job, R5 metrics, R3 repo tree).
 # They prove R4's side of each hand-off; they do not prove the other roles' real implementations.
 
-# TODO(R2): once the real normalizer exists, run TestR2Contract against its output instead of eval/stubs/r2_normalizer_stub.py.
+# Note: TestR2Contract validates against ADR-001 finding.schema.json; r2_normalizer_stub provides the offline fixture.
 # TODO(R1): replace TestR1CommentAndCiJob's stub script with a run of the real workflow (e.g. via `act`).
 # TODO(R5): replace TestR5Metrics's format check with a real Prometheus ingest once R5 picks the path.
 PLAN_KEYS = {"finding_id", "tool", "severity_norm", "cwe", "cve", "location", "package", "evidence", "enrichment",
