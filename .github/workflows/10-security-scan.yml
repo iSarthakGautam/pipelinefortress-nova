@@ -73,7 +73,7 @@ jobs:
 
           # Bandit + Checkov: hash-locked, in their own venv
           python -m venv "$RUNNER_TEMP/scanners-venv"
-          "$RUNNER_TEMP/scanners-venv/bin/pip" install --quiet --require-hashes -r requirements-scanners.txt
+          "$RUNNER_TEMP/scanners-venv/bin/pip" install --quiet --require-hashes -r "$GITHUB_WORKSPACE/requirements-scanners.txt"
           ln -s "$RUNNER_TEMP/scanners-venv/bin/bandit" "$bin/bandit"
           ln -s "$RUNNER_TEMP/scanners-venv/bin/checkov" "$bin/checkov"
 
