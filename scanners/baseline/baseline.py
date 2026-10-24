@@ -71,11 +71,20 @@ def load_baseline(path: Path) -> dict:
 
 
 def build_baseline(findings: list, commit: str, previous: dict = None) -> dict:
-    """Snapshot current findings. first_seen_commit survives for findings already in `previous`."""
-    prev_first_seen = {e["finding_id"]: e.get("first_seen_commit")
-                       for e in (previous or {}).get("entries", [])}
+    """Snapshot current findings. first_seen_commit survives for findings already in `previous`,
+    matched the same way as apply_baseline: exact finding_id first, then moved lines by match_key."""
+    prev = (previous or {}).get("entries", [])
+    prev_first_seen = {e["finding_id"]: e.get("first_seen_commit") for e in prev}
+    current_ids = {f["finding_id"] for f in findings}
+    moved = defaultdict(list)
+    for e in sorted(prev, key=lambda e: e["line"]):
+        if e["finding_id"] not in current_ids:
+            moved[e["match_key"]].append(e.get("first_seen_commit"))
     entries = []
-    for f in findings:
+    for f in sorted(findings, key=lambda f: f["location"]["line"]):
+        first_seen = prev_first_seen.get(f["finding_id"])
+        if first_seen is None and moved[match_key(f)]:
+            first_seen = moved[match_key(f)].pop(0)
         entries.append({
             "finding_id": f["finding_id"],
             "match_key": match_key(f),
@@ -85,7 +94,7 @@ def build_baseline(findings: list, commit: str, previous: dict = None) -> dict:
             "line": f["location"]["line"],
             "package": (f.get("package") or {}).get("name"),
             "severity_norm": f["severity_norm"],
-            "first_seen_commit": prev_first_seen.get(f["finding_id"]) or commit,
+            "first_seen_commit": first_seen or commit,
         })
     entries.sort(key=lambda e: (e["file"], e["line"], e["tool"], e["rule_id"], e["finding_id"]))
     return {"schema_version": BASELINE_SCHEMA_VERSION, "created_commit": commit, "entries": entries}

@@ -1,16 +1,27 @@
 {
-  "created_commit": "df3890a",
+  "created_commit": "cd1b4b8",
   "entries": [
     {
       "file": ".github/workflows/baseline-pipeline.yml",
-      "finding_id": "4085ffaba4f28119",
+      "finding_id": "25b76ad92f724f75",
       "first_seen_commit": "930ab36",
-      "line": 14,
+      "line": 17,
       "match_key": "8aea1e2172949588",
       "package": null,
       "rule_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
       "severity_norm": "MEDIUM",
       "tool": "semgrep"
+    },
+    {
+      "file": "ai/llm_client.py",
+      "finding_id": "b17aae86f0ed7fbb",
+      "first_seen_commit": "cd1b4b8",
+      "line": 53,
+      "match_key": "f5833924fb7e2e4c",
+      "package": null,
+      "rule_id": "B310",
+      "severity_norm": "MEDIUM",
+      "tool": "bandit"
     },
     {
       "file": "ai/llm_client.py",
@@ -24,15 +35,158 @@
       "tool": "semgrep"
     },
     {
+      "file": "ai/redaction/redactor.py",
+      "finding_id": "fecb87e43f6df6fe",
+      "first_seen_commit": "cd1b4b8",
+      "line": 8,
+      "match_key": "f2a7c295e3e2c8ec",
+      "package": null,
+      "rule_id": "B105",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
+      "file": "requirements-scanners.txt",
+      "finding_id": "2cc2d02e21d408bb",
+      "first_seen_commit": "cd1b4b8",
+      "line": 0,
+      "match_key": "9c19f9741d531723",
+      "package": "asteval",
+      "rule_id": "CVE-2026-55244",
+      "severity_norm": "MEDIUM",
+      "tool": "grype"
+    },
+    {
+      "file": "requirements-scanners.txt",
+      "finding_id": "3a95b3165ea3d8f1",
+      "first_seen_commit": "cd1b4b8",
+      "line": 0,
+      "match_key": "2bd256cb555ace9b",
+      "package": "asteval",
+      "rule_id": "GHSA-9w56-46f6-3qhx",
+      "severity_norm": "MEDIUM",
+      "tool": "grype"
+    },
+    {
+      "file": "requirements-scanners.txt",
+      "finding_id": "733d94ef239353ce",
+      "first_seen_commit": "cd1b4b8",
+      "line": 0,
+      "match_key": "8c4bbdca041a13e5",
+      "package": "asteval",
+      "rule_id": "CVE-2026-102734",
+      "severity_norm": "MEDIUM",
+      "tool": "osv"
+    },
+    {
+      "file": "requirements-scanners.txt",
+      "finding_id": "7cfb930a3077f874",
+      "first_seen_commit": "cd1b4b8",
+      "line": 0,
+      "match_key": "358d77e2c9138fb8",
+      "package": "asteval",
+      "rule_id": "CVE-2026-55244",
+      "severity_norm": "MEDIUM",
+      "tool": "osv"
+    },
+    {
+      "file": "scanners/baseline/baseline.py",
+      "finding_id": "db9d3f9bf7815ba5",
+      "first_seen_commit": "cd1b4b8",
+      "line": 38,
+      "match_key": "f3d89427c68740e2",
+      "package": null,
+      "rule_id": "B404",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
+      "file": "scanners/baseline/baseline.py",
+      "finding_id": "fdbbfb81ebff8c43",
+      "first_seen_commit": "cd1b4b8",
+      "line": 147,
+      "match_key": "ad6b2f20fbdaf889",
+      "package": null,
+      "rule_id": "B603",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
+      "file": "scanners/baseline/baseline.py",
+      "finding_id": "856adaf87e451703",
+      "first_seen_commit": "cd1b4b8",
+      "line": 147,
+      "match_key": "fe8fbb744f34eaef",
+      "package": null,
+      "rule_id": "B607",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
       "file": "scripts/install_hooks.py",
-      "finding_id": "4a0e41216d7f3656",
+      "finding_id": "5d4a30da7cb90253",
+      "first_seen_commit": "cd1b4b8",
+      "line": 22,
+      "match_key": "0ce42aadcee6ba6e",
+      "package": null,
+      "rule_id": "B404",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
+      "file": "scripts/install_hooks.py",
+      "finding_id": "798396645dc99c8e",
+      "first_seen_commit": "cd1b4b8",
+      "line": 130,
+      "match_key": "0b2e4c0f78f779c6",
+      "package": null,
+      "rule_id": "B310",
+      "severity_norm": "MEDIUM",
+      "tool": "bandit"
+    },
+    {
+      "file": "scripts/install_hooks.py",
+      "finding_id": "86291a68875cc3d1",
       "first_seen_commit": "df3890a",
-      "line": 127,
+      "line": 130,
       "match_key": "f4a1e7f0a2fa15e3",
       "package": null,
       "rule_id": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
       "severity_norm": "MEDIUM",
       "tool": "semgrep"
+    },
+    {
+      "file": "scripts/install_hooks.py",
+      "finding_id": "ca777d59f53a1b8b",
+      "first_seen_commit": "cd1b4b8",
+      "line": 135,
+      "match_key": "55909628fb8a6d6f",
+      "package": null,
+      "rule_id": "B603",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
+      "file": "scripts/install_hooks.py",
+      "finding_id": "c182d2b484131683",
+      "first_seen_commit": "cd1b4b8",
+      "line": 135,
+      "match_key": "8fdd006032476877",
+      "package": null,
+      "rule_id": "B607",
+      "severity_norm": "LOW",
+      "tool": "bandit"
+    },
+    {
+      "file": "scripts/install_hooks.py",
+      "finding_id": "be6c167279762122",
+      "first_seen_commit": "cd1b4b8",
+      "line": 148,
+      "match_key": "55909628fb8a6d6f",
+      "package": null,
+      "rule_id": "B603",
+      "severity_norm": "LOW",
+      "tool": "bandit"
     }
   ],
   "schema_version": "1.0.0"

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Checkov",
+          "version": "3.3.26",
+          "informationUri": "https://checkov.io",
+          "rules": [
+            {
+              "id": "CKV_K8S_20",
+              "name": "Containers should not run with allowPrivilegeEscalation",
+              "shortDescription": {
+                "text": "Containers should not run with allowPrivilegeEscalation"
+              },
+              "fullDescription": {
+                "text": "Containers should not run with allowPrivilegeEscalation"
+              },
+              "help": {
+                "text": "Containers should not run with allowPrivilegeEscalation\nResource: Pod.shop.demo"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "CKV_K8S_16",
+              "name": "Container should not be privileged",
+              "shortDescription": {
+                "text": "Container should not be privileged"
+              },
+              "fullDescription": {
+                "text": "Container should not be privileged"
+              },
+              "help": {
+                "text": "Container should not be privileged\nResource: Pod.shop.demo"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "CKV_DOCKER_3",
+              "name": "Ensure that a user for the container has been created",
+              "shortDescription": {
+                "text": "Ensure that a user for the container has been created"
+              },
+              "fullDescription": {
+                "text": "Ensure that a user for the container has been created"
+              },
+              "help": {
+                "text": "Ensure that a user for the container has been created\nResource: /Dockerfile."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ],
+          "organization": "bridgecrew"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CKV_K8S_16",
+          "level": "error",
+          "attachments": [],
+          "message": {
+            "text": "Container should not be privileged"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "infra/pod.yaml"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 11,
+                  "snippet": {
+                    "text": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: demo\n  namespace: shop\nspec:\n  containers:\n    - name: app\n      image: nginx@sha256:0000000000000000000000000000000000000000000000000000000000000000\n      securityContext:\n        privileged: true\n"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CKV_K8S_20",
+          "level": "error",
+          "attachments": [],
+          "message": {
+            "text": "Containers should not run with allowPrivilegeEscalation"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "infra/pod.yaml"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 11,
+                  "snippet": {
+                    "text": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: demo\n  namespace: shop\nspec:\n  containers:\n    - name: app\n      image: nginx@sha256:0000000000000000000000000000000000000000000000000000000000000000\n      securityContext:\n        privileged: true\n"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CKV_DOCKER_3",
+          "level": "error",
+          "attachments": [],
+          "message": {
+            "text": "Ensure that a user for the container has been created"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 3,
+                  "snippet": {
+                    "text": "FROM python:3.12-slim\nCOPY app.py /app.py\nCMD [\"python\", \"/app.py\"]"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
