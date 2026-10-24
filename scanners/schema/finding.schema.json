@@ -62,9 +62,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "epss": { "type": "number", "minimum": 0, "maximum": 1 },
+        "epss": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
         "kev": { "type": "boolean" },
-        "reachable": { "type": "boolean" }
+        "reachable": { "type": ["boolean", "null"] }
       }
     },
     "baseline": {

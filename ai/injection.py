@@ -58,7 +58,7 @@ def scan_finding(raw_finding: dict) -> list:
     """Scans every attacker-controllable string: snippet, rule_id, file path, scanner message."""
     loc = raw_finding.get("location") or {}
     fields = {
-        "snippet": (raw_finding.get("evidence") or {}).get("snippet_raw", ""),
+        "snippet": (raw_finding.get("evidence") or {}).get("snippet") or (raw_finding.get("evidence") or {}).get("snippet_raw") or "",
         "rule_id": raw_finding.get("rule_id", ""),
         "file": loc.get("file", ""),
         "message": raw_finding.get("message", ""),

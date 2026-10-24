@@ -9,7 +9,6 @@ import json
 
 # TODO(team): decide who owns the enricher inputs (PLAN §2 lists EPSS, CISA KEV, offline OSV/NVD, CWE map, reachability).
 #             Until the real CISA KEV JSON / EPSS CSV snapshots are added to ai/data/, these are hand-picked samples.
-# TODO(R2): if R2's normalizer computes reachability, fill enrichment.reachable upstream and drop the null below.
 SAMPLE_KEV = {"CVE-2021-44228", "CVE-2023-38408"}
 
 SAMPLE_EPSS = {

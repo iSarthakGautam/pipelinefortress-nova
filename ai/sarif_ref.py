@@ -6,11 +6,11 @@ import os
 # R2's unified schema carries only `evidence.snippet_redacted` (a placeholder) and `evidence.raw_ref`, a pointer like
 # `artifacts/semgrep.sarif#/runs/0/results/17`. The triage step needs the real snippet and rule id to judge a finding,
 # so it follows the pointer on the runner. The raw text stays in memory: redaction runs on it before any prompt, and
-# `snippet_raw` is stripped from everything that is output. Never raises: unresolvable refs just leave the finding as is.
+# raw snippets are stripped from everything that is output. Never raises: unresolvable refs just leave the finding as is.
 # Paths are confined to the artifacts base dir (no absolute paths, no `..`).
 
-# TODO(R2): confirm the raw_ref format is always `<path>#<json pointer>` and tell me the base directory it is relative to
-#           (read from ARTIFACTS_BASE). eval/stubs/r2_normalizer_stub.py assumes `scanners.sarif#/runs/0/results/N`.
+# Raw_ref format confirmed in ADR-001 / finding.schema.json: `<path>#<json pointer>`,
+# e.g. `artifacts/scans/semgrep.sarif#/runs/0/results/17` (relative to ARTIFACTS_BASE or repo root).
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 
@@ -40,15 +40,15 @@ def resolve(raw_ref: str, base_dir: str = None):
 
 
 def hydrate(finding: dict, base_dir: str = None) -> dict:
-    """Fills evidence.snippet_raw / rule_id from raw_ref when the normalizer did not supply them."""
+    """Fills evidence.snippet / rule_id from raw_ref when the normalizer did not supply them."""
     evidence = finding.get("evidence") or {}
-    if evidence.get("snippet_raw") or not evidence.get("raw_ref"):
+    if evidence.get("snippet") or evidence.get("snippet_raw") or not evidence.get("raw_ref"):
         return finding
     found = resolve(evidence["raw_ref"], base_dir)
     if not found:
         return finding
     out = copy.deepcopy(finding)
-    out["evidence"]["snippet_raw"] = found["snippet"]
+    out["evidence"]["snippet"] = found["snippet"]
     if not out.get("rule_id") and found["rule_id"]:
         out["rule_id"] = found["rule_id"]
     return out

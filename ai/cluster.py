@@ -16,7 +16,8 @@ def normalise_path(path: str) -> str:
     return posixpath.normpath(path).lstrip("./") or "unknown_file"
 
 
-# TODO(R2): R2 owns dedupe keys. Once the normalizer always sets dedupe.cluster_id, the fallback key below is only a safety net.
+# In ADR-001 schema, dedupe block is written by cluster.py (R4).
+# If an upstream stage provides dedupe.cluster_id, it is honoured; otherwise computed below.
 def generate_cluster_key(finding: dict) -> str:
     # R2 owns dedupe keys (PLAN §5): if the normalizer already assigned a cluster id, honour it.
     dedupe = finding.get("dedupe") if isinstance(finding.get("dedupe"), dict) else {}

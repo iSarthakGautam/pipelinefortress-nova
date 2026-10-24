@@ -40,8 +40,20 @@ class TestTriage(unittest.TestCase):
         # regression (audit §4.5 #1): snippet_raw (with the AWS key) was copied into the output
         res, _, _ = run([finding(snippet=f"AWS_KEY = '{SECRET}'")], llm(GOOD))
         self.assertNotIn("snippet_raw", res[0]["evidence"])
+        self.assertNotIn("snippet", res[0]["evidence"])
         self.assertNotIn(SECRET, json.dumps(res))
         self.assertIn("snippet_redacted", res[0]["evidence"])
+
+    def test_evidence_snippet_adr001_supported_and_stripped(self):
+        # ADR-001 compliant input carrying evidence.snippet (rather than snippet_raw)
+        f = {"finding_id": "f2", "tool": "semgrep", "rule_id": "sqli", "severity_norm": "HIGH", "cwe": ["CWE-89"], "cve": [],
+             "location": {"file": "apps/api/db.py", "line": 10}, "evidence": {"snippet": f"AWS_KEY = '{SECRET}'", "raw_ref": "r"}}
+        res, _, chat = run([f], llm(GOOD))
+        self.assertNotIn("snippet", res[0]["evidence"])
+        self.assertNotIn("snippet_raw", res[0]["evidence"])
+        self.assertNotIn(SECRET, json.dumps(res))
+        self.assertIn("snippet_redacted", res[0]["evidence"])
+        self.assertNotIn(SECRET, chat.call_args[0][1])
 
     def test_raw_secret_never_in_prompt(self):
         _, _, chat = run([finding(snippet=f"AWS_KEY = '{SECRET}'")], llm(GOOD))

@@ -34,7 +34,8 @@ def build(out_dir: str) -> str:
                               "locations": [{"physicalLocation": {"artifactLocation": {"uri": file}, "region": {"startLine": line, "snippet": {"text": snippet}}}}]})
         fid = hashlib.sha256(f"{tool}|{rule}|{file}|{line}".encode()).hexdigest()[:16]
         findings.append({
-            "finding_id": fid, "tool": tool, "severity_norm": sev, "cwe": cwe, "cve": cve,
+            "schema_version": "1.0.0",
+            "finding_id": fid, "tool": tool, "severity_raw": sev, "severity_norm": sev, "cwe": cwe, "cve": cve,
             "location": {"file": file, "line": line},
             "package": pkg or {"name": None, "version": None, "fixed_version": None},
             "evidence": {"snippet_redacted": "<REDACTED:CODE>", "raw_ref": f"scanners.sarif#/runs/0/results/{i}"},
