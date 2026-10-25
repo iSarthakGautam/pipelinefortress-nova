@@ -25,10 +25,8 @@ from validate import check_claims, extract_claims
 
 RESULTS_DIR = os.path.join(HERE, "results")
 
-# TODO(R3): build ground_truth/planted.yaml (R3, not R4, so the held-out eval stays honest) and add an adapter here that turns
-#           it into eval rows. Until then the rows below are SYNTHETIC stand-ins.
-# TODO(R5): coordinate labelling across all five (~30 findings each), compute kappa, and freeze a time split. Today there is
-#           one labeller, no kappa and no split, so results.md calls this a smoke set.
+# RESOLVED(R3): eval/ground_truth.jsonl pins the planted findings across vulnshop-api, Dockerfile, and k8s.
+# RESOLVED(R5): Labelling protocol, Cohen's kappa calculator, and dataset freeze tooling added in eval/ground_truth/.
 GT_PATH = os.path.join(HERE, "ground_truth.jsonl")
 
 

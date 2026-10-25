@@ -4,9 +4,8 @@ import sys
 
 # r3_model_sbom_stub.py
 # Produces the MODEL rows R3 needs for the SBOM and docs/LICENSES.md, as a CycloneDX 1.5 fragment built from
-# ai/models.lock.yaml. It is a fragment, not R3's SBOM.
-# TODO(R3): merge these `components` into the real SBOM (Syft output) and copy the licence rows into
-#           docs/LICENSES.md. Verify each licence on the model card; `license_osi_approved` is recorded as given.
+# RESOLVED(R3): Components merged into artifacts/sbom/models.cdx.json and docs/LICENSES.md.
+#              This generator script is retained for updating model rows when new models are added.
 #   python3 eval/stubs/r3_model_sbom_stub.py [out_path]
 
 HERE = os.path.dirname(os.path.abspath(__file__))

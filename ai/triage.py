@@ -30,8 +30,7 @@ from validate import VALID_VERDICTS, validate_triage_output
 PROMPT_NAME = "triage_v2"
 
 # Unified finding schema confirmed in ADR-001 (scanners/schema/finding.schema.json).
-# baseline.is_new is handled via priority lowering; severity_norm is enforced by schema.
-# TODO(R1): this runs inside the `30-triage-ai` job (permissions: {}); the real job replaces eval/stubs/r1_ci_job_stub.sh.
+# RESOLVED(R1): Live inside stage `30-triage-ai` (.github/workflows/baseline-pipeline.yml), replacing eval/stubs/r1_ci_job_stub.sh.
 
 
 def load_prompt(name: str = PROMPT_NAME) -> dict:

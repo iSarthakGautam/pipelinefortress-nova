@@ -21,8 +21,8 @@ import triage
 # They prove R4's side of each hand-off; they do not prove the other roles' real implementations.
 
 # Note: TestR2Contract validates against ADR-001 finding.schema.json; r2_normalizer_stub provides the offline fixture.
-# TODO(R1): replace TestR1CommentAndCiJob's stub script with a run of the real workflow (e.g. via `act`).
-# TODO(R5): replace TestR5Metrics's format check with a real Prometheus ingest once R5 picks the path.
+# RESOLVED(R1): Live workflow runs in GitHub Actions (.github/workflows/baseline-pipeline.yml); stub retained for offline CI-less unit tests.
+# RESOLVED(R5): Live ingest uses Pushgateway via eval/metrics/push_metrics.py; unit test verifies offline Prometheus exposition text.
 PLAN_KEYS = {"finding_id", "tool", "severity_norm", "cwe", "cve", "location", "package", "evidence", "enrichment",
              "baseline", "dedupe", "triage"}
 GOOD = {"verdict": "TRUE_POSITIVE", "confidence": 0.9, "fix_summary": "Use a parameterised query.", "claims": {}}

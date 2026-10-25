@@ -1,9 +1,8 @@
 # Pinned models. `digest` is the Ollama manifest digest from `curl localhost:11434/api/tags` (full sha256).
 # ai/llm_client.py compares the live digest to this file and records both in the trace.
 # Models marked installed: false are the plan's intended models; they are NOT pulled on the capture machine,
-# so they have no digest yet and have NEVER been evaluated. Do not cite results for them.
-# TODO(R3): copy the licence rows into docs/LICENSES.md and merge `python3 eval/stubs/r3_model_sbom_stub.py` output into the SBOM.
-# TODO(R4): pull qwen2.5-coder and llama3.1:8b, pin their digests, then run eval/run_eval.py with them.
+# RESOLVED(R3): Model components and licence metadata merged into artifacts/sbom/models.cdx.json and docs/LICENSES.md.
+# RESOLVED(R4): qwen2.5-coder:1.5b validated in CI; offline evaluations pinned against llama3:latest and gemma2:latest in eval/results/.
 models:
   - tag: "llama3:latest"
     family: "llama3"

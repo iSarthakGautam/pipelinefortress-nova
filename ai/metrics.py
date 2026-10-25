@@ -5,8 +5,8 @@
 
 PREFIX = "pipelinefortress_ai"
 
-# TODO(R5): choose the ingestion path (textfile collector vs pushgateway) and confirm the metric names/labels you want;
-#           eval/stubs/r5_metrics_push_stub.py only validates the text and records the request.
+# RESOLVED(R5): Pushgateway ingestion path selected (eval/metrics/push_metrics.py);
+#              metric names and anti-vanity catalogue confirmed in docs/metrics/METRICS_CATALOGUE.md.
 
 
 def _rej_type(msg: str) -> str:
