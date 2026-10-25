@@ -1,0 +1,78 @@
+# Maps each scanner's native severity to severity_norm (CRITICAL|HIGH|MEDIUM|LOW|INFO).
+# A Trivy HIGH is NOT a Semgrep ERROR: Semgrep has no CRITICAL, so its ERROR is capped at HIGH.
+# Keys are matched case-insensitively. Owner: R2. Changing a mapping changes gate behaviour, so
+# open a PR and note it in the channel.
+_default: MEDIUM        # used (with a stderr warning) when a scanner emits an unmapped value
+
+semgrep:                # JSON severity and SARIF level
+  ERROR: HIGH
+  WARNING: MEDIUM
+  INFO: LOW
+  note: LOW
+  error: HIGH
+  warning: MEDIUM
+  none: INFO
+
+bandit:                 # issue_severity. A LOW-confidence result drops one level (see parse_bandit)
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+
+gosec:
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+
+trivy:
+  CRITICAL: CRITICAL
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+  UNKNOWN: INFO
+
+grype:
+  CRITICAL: CRITICAL
+  HIGH: HIGH
+  MEDIUM: MEDIUM
+  LOW: LOW
+  NEGLIGIBLE: INFO
+  UNKNOWN: INFO
+
+osv:                    # only used when a group has no CVSS score; numeric max_severity is
+  CRITICAL: CRITICAL    # bucketed with CVSS v3 ranges in normalize.cvss_bucket()
+  HIGH: HIGH
+  MODERATE: MEDIUM
+  LOW: LOW
+  UNKNOWN: INFO
+
+gitleaks:               # gitleaks has no severity concept. A committed secret is always HIGH.
+  "*": HIGH
+
+checkov:                # OSS Checkov has no severity: every failed check is SARIF level "error",
+  error: MEDIUM         # so the level says nothing. Failures are MEDIUM unless listed in
+  warning: MEDIUM       # _rule_overrides below.
+  note: LOW
+
+hadolint:
+  error: HIGH
+  warning: MEDIUM
+  info: LOW
+  style: INFO
+
+# Per-rule severities for tools whose own severity is missing or meaningless. Checked before the
+# tool table. Checkov HIGHs: the container-escape / host-access checks, matching Trivy's rating of
+# the equivalent check (e.g. Trivy DS-0002 "image user should not be root" is HIGH), and workflow
+# checks that hand an attacker code execution or the CI token.
+_rule_overrides:
+  checkov:
+    CKV_K8S_16: HIGH    # privileged container
+    CKV_K8S_17: HIGH    # shares host PID namespace
+    CKV_K8S_18: HIGH    # shares host IPC namespace
+    CKV_K8S_19: HIGH    # shares host network namespace
+    CKV_K8S_27: HIGH    # docker daemon socket mounted
+    CKV_K8S_39: HIGH    # CAP_SYS_ADMIN
+    CKV_DOCKER_3: HIGH  # no USER, so the container runs as root (Trivy DS-0002 covers both)
+    CKV_DOCKER_8: HIGH  # last USER is root
+    CKV_GHA_1: HIGH     # ACTIONS_ALLOW_UNSECURE_COMMANDS
+    CKV_GHA_2: HIGH     # shell injection in run:
+    CKV_GHA_3: HIGH     # curl with secrets
