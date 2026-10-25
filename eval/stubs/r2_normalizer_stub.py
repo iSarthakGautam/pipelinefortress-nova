@@ -10,7 +10,8 @@ import sys
 # so the pointer-following path (ai/sarif_ref.py) is exercised. The SARIF content is SYNTHETIC, not scanner output.
 #   python3 eval/stubs/r2_normalizer_stub.py <out_dir>     -> <out_dir>/findings.json + <out_dir>/scanners.sarif
 
-# TODO(R2): delete this stub when the real normalizer ships; keep the field names it emits (they follow PROJECT_PLAN §5).
+# Note: Retained as the deterministic offline fixture generator for tests/test_integration_stubs.py
+# and `make demo` (exercises SARIF pointer hydration, canary secret redaction, and prompt injection).
 HERE = os.path.dirname(os.path.abspath(__file__))
 AWS = "AKIA" + "IOSFODNN7EXAMPLE"  # AWS's published example key id, built from parts
 
@@ -34,7 +35,8 @@ def build(out_dir: str) -> str:
                               "locations": [{"physicalLocation": {"artifactLocation": {"uri": file}, "region": {"startLine": line, "snippet": {"text": snippet}}}}]})
         fid = hashlib.sha256(f"{tool}|{rule}|{file}|{line}".encode()).hexdigest()[:16]
         findings.append({
-            "finding_id": fid, "tool": tool, "severity_norm": sev, "cwe": cwe, "cve": cve,
+            "schema_version": "1.0.0",
+            "finding_id": fid, "tool": tool, "severity_raw": sev, "severity_norm": sev, "cwe": cwe, "cve": cve,
             "location": {"file": file, "line": line},
             "package": pkg or {"name": None, "version": None, "fixed_version": None},
             "evidence": {"snippet_redacted": "<REDACTED:CODE>", "raw_ref": f"scanners.sarif#/runs/0/results/{i}"},

@@ -201,7 +201,7 @@ def apply_l1_structural(raw_finding: dict) -> dict:
         "cve": raw_finding.get("cve", []),
         "file_name": _scrub_untrusted_string(str(loc.get("file", "")).split("/")[-1]),
         "line": loc.get("line", 0),
-        "snippet": (raw_finding.get("evidence") or {}).get("snippet_raw", ""),
+        "snippet": (raw_finding.get("evidence") or {}).get("snippet") or (raw_finding.get("evidence") or {}).get("snippet_raw") or "",
     }
 
 
@@ -233,7 +233,7 @@ def assert_no_leak(raw_finding: dict, outbound_text: str) -> list:
     """Pre-egress gate. Returns what leaked (empty list == safe to send).
     Checks (a) canary values, (b) every secret L2 detects in the RAW snippet must be absent verbatim."""
     leaked = [c for c in CANARY_VALUES if c in outbound_text]
-    raw_snippet = (raw_finding.get("evidence") or {}).get("snippet_raw", "")
+    raw_snippet = (raw_finding.get("evidence") or {}).get("snippet") or (raw_finding.get("evidence") or {}).get("snippet_raw") or ""
     leaked += [s for s in find_secrets(raw_snippet) if s and s in outbound_text]
     return leaked
 

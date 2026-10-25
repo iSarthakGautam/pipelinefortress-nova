@@ -29,10 +29,8 @@ from validate import VALID_VERDICTS, validate_triage_output
 
 PROMPT_NAME = "triage_v2"
 
-# TODO(R2): confirm the final schema file and send me a REAL findings.json (today the input is eval/stubs/r2_normalizer_stub.py).
-# TODO(R2): decide whether baseline.is_new == false findings are skipped (PLAN §5 stage 1: "only new or P2+"). Today they are
-#           still triaged and only get a lower priority. Skipping needs a verdict value R2/R5 accept for "not triaged".
-# TODO(R2): severity_norm must always be present; priority.py treats a missing one as UNKNOWN and gives P2.
+# Unified finding schema confirmed in ADR-001 (scanners/schema/finding.schema.json).
+# baseline.is_new is handled via priority lowering; severity_norm is enforced by schema.
 # TODO(R1): this runs inside the `30-triage-ai` job (permissions: {}); the real job replaces eval/stubs/r1_ci_job_stub.sh.
 
 
@@ -52,10 +50,11 @@ def load_prompt(name: str = PROMPT_NAME) -> dict:
 
 
 def _strip_raw(finding: dict, safe: dict) -> dict:
-    """Deep copy of a scanner record with the raw snippet removed; only the redacted one survives."""
+    """Deep copy of a scanner record with raw snippets removed; only the redacted one survives."""
     out = copy.deepcopy(finding)
     evidence = out.get("evidence") or {}
     evidence.pop("snippet_raw", None)
+    evidence.pop("snippet", None)
     evidence["snippet_redacted"] = safe.get("snippet", "")
     out["evidence"] = evidence
     return out

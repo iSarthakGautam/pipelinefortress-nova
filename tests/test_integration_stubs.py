@@ -20,7 +20,7 @@ import triage
 # Contract tests against STUBS of the other roles' pieces (R2 normalizer output, R1 CI job, R5 metrics, R3 repo tree).
 # They prove R4's side of each hand-off; they do not prove the other roles' real implementations.
 
-# TODO(R2): once the real normalizer exists, run TestR2Contract against its output instead of eval/stubs/r2_normalizer_stub.py.
+# Note: TestR2Contract validates against ADR-001 finding.schema.json; r2_normalizer_stub provides the offline fixture.
 # TODO(R1): replace TestR1CommentAndCiJob's stub script with a run of the real workflow (e.g. via `act`).
 # TODO(R5): replace TestR5Metrics's format check with a real Prometheus ingest once R5 picks the path.
 PLAN_KEYS = {"finding_id", "tool", "severity_norm", "cwe", "cve", "location", "package", "evidence", "enrichment",
@@ -52,7 +52,7 @@ class TestR2Contract(StubCase):
 
     def test_stub_input_has_no_raw_snippet_or_rule_id(self):
         # the worst case R2 could hand us
-        self.assertTrue(all("snippet_raw" not in f["evidence"] and "rule_id" not in f for f in self.findings))
+        self.assertTrue(all("snippet_raw" not in f["evidence"] and "snippet" not in f["evidence"] and "rule_id" not in f for f in self.findings))
 
     def test_snippet_is_recovered_from_sarif_pointer_and_redacted(self):
         _, _, chat = self.run_triage()
@@ -78,8 +78,22 @@ class TestR2Contract(StubCase):
             self.assertIn(r["triage"]["priority"], {"P1", "P2", "P3", "UNASSIGNED"})
             self.assertIsInstance(r["triage"]["confidence"], float)
             self.assertNotIn("snippet_raw", r["evidence"])
+            self.assertNotIn("snippet", r["evidence"])
             self.assertEqual(r["evidence"]["raw_ref"].split("#")[0], "scanners.sarif")  # R2's pointer preserved
         self.assertNotIn("AKIAIOSFODNN7EXAMPLE", json.dumps(res))
+
+    def test_output_validates_against_r2_finding_schema_json(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema not installed in test runner environment")
+        schema_path = os.path.join(ROOT, "scanners", "schema", "finding.schema.json")
+        if not os.path.exists(schema_path):
+            self.skipTest("finding.schema.json not found")
+        schema = json.load(open(schema_path, encoding="utf-8"))
+        res, _, _ = self.run_triage()
+        for r in res:
+            jsonschema.validate(instance=r, schema=schema)
 
     def test_injection_planted_in_sarif_never_reaches_model(self):
         res, tr, chat = self.run_triage()
