@@ -1,0 +1,23 @@
+# Staging Environment Compose Stack (R3 & R1 Deliverable)
+# Runs both target applications for live DevSecOps scanner integration & OWASP ZAP DAST.
+
+services:
+  # 1. Custom VulnShop API (Python / Flask)
+  vulnshop-api:
+    build:
+      context: ../apps/vulnshop-api
+      dockerfile: ../../docker/Dockerfile
+    ports:
+      - "8000:3000"
+    environment:
+      - PORT=3000
+      - DB_PATH=/tmp/vulnshop.db
+    restart: unless-stopped
+
+  # 2. OWASP Juice Shop (Pinned Benchmark Staging Container)
+  juice-shop:
+    image: bkimminich/juice-shop:v16.0.0
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+

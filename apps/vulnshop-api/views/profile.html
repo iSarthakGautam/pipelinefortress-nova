@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile - VulnShop</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        .card { border: 1px solid #ccc; padding: 1.5rem; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>User Profile</h1>
+        <!-- [PLANTED VULN: CWE-79] Cross-Site Scripting via unescaped Jinja safe filter -->
+        <div>Hello {{ username | safe }}</div>
+        <p>Email: {{ email }}</p>
+        <p>Member since: 2026</p>
+    </div>
+</body>
+</html>
+
