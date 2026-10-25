@@ -1,0 +1,25 @@
+{
+  "version": "2.1.0",
+  "runs": [{
+    "tool": {"driver": {"name": "Semgrep OSS", "rules": [
+      {"id": "python.flask.security.sql-injection", "defaultConfiguration": {"level": "error"},
+       "properties": {"tags": ["CWE-89: Improper Neutralization of Special Elements used in an SQL Command", "OWASP-A03:2021"]}},
+      {"id": "python.lang.security.audit.insecure-hash", "defaultConfiguration": {"level": "warning"},
+       "properties": {"tags": ["CWE-327: Use of a Broken or Risky Cryptographic Algorithm"]}}
+    ]}},
+    "results": [
+      {"ruleId": "python.flask.security.sql-injection", "level": "error",
+       "message": {"text": "User input flows into raw SQL"},
+       "locations": [{"physicalLocation": {"artifactLocation": {"uri": "./apps/vulnshop-api/app/routes/search.py"},
+         "region": {"startLine": 42, "snippet": {"text": "db.execute(f\"SELECT * FROM items WHERE name = '{q}'\")"}}}}]},
+      {"ruleId": "python.flask.security.sql-injection", "level": "error",
+       "message": {"text": "User input flows into raw SQL"},
+       "locations": [{"physicalLocation": {"artifactLocation": {"uri": "apps/vulnshop-api/app/routes/search.py"},
+         "region": {"startLine": 42}}}]},
+      {"ruleId": "python.lang.security.audit.insecure-hash", "level": "warning",
+       "message": {"text": "MD5 is weak"},
+       "locations": [{"physicalLocation": {"artifactLocation": {"uri": "apps\\vulnshop-api\\app\\auth.py"},
+         "region": {"startLine": 17}}}]}
+    ]
+  }]
+}

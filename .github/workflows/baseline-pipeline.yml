@@ -1,46 +1,420 @@
-name: PipelineFortress DevSecOps CI
+name: PipelineFortress DevSecOps CI/CD
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
-  pull-requests: read
+
+env:
+  APP_NAME: "vulnshop-api"
+  PYTHON_VERSION: "3.12"
+  SEMGREP_VERSION: "1.179.0"
+  TRIVY_VERSION: "0.75.0"
+  GITLEAKS_VERSION: "8.30.1"
+  GRYPE_VERSION: "0.86.1"
+  OSV_SCANNER_VERSION: "1.9.2"
+  ZAP_VERSION: "2.15.0"
+  LLM_MODEL: "qwen2.5-coder:1.5b"
+  OLLAMA_BASE_URL: "http://127.0.0.1:11434/v1"
 
 jobs:
-  build-and-scan:
+  # =========================================================================
+  # STAGE 0: Build, Environment Verification & Unit Testing
+  # =========================================================================
+  build-and-test:
+    name: 00-build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        # actions/setup-python@v5.3.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Run unit & contract test suite
+        run: |
+          python3 -m unittest discover -s tests -v
+
+  # =========================================================================
+  # STAGE 1: Parallel Security Scanners (SAST, SCA, Secrets, IaC)
+  # =========================================================================
+  security-scanners:
+    name: 10-security-scanners
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        # actions/setup-python@v5.3.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install scanners (pinned versions)
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin" artifacts/scans
+          pip install "semgrep==${SEMGREP_VERSION}" bandit checkov
+
+          # Install pinned Gitleaks
+          f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfLO "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$f"
+          tar -xzf "$f" -C "$RUNNER_TEMP/bin" gitleaks
+
+          # Install pinned Trivy
+          f="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -sSfLO "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/$f"
+          tar -xzf "$f" -C "$RUNNER_TEMP/bin" trivy
+
+          # Install pinned Grype (SCA)
+          f="grype_${GRYPE_VERSION}_linux_amd64.tar.gz"
+          curl -sSfLO "https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}/$f"
+          tar -xzf "$f" -C "$RUNNER_TEMP/bin" grype
+
+          # Install pinned OSV-Scanner
+          curl -sSfL \
+            "https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64" \
+            -o "$RUNNER_TEMP/bin/osv-scanner"
+          chmod +x "$RUNNER_TEMP/bin/osv-scanner"
+
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Scan Secrets (Gitleaks)
+        run: |
+          gitleaks git --redact --no-banner --exit-code 0 \
+            --report-format sarif --report-path artifacts/scans/gitleaks.sarif .
+
+      - name: Scan SAST (Semgrep)
+        run: |
+          semgrep scan --config p/default --metrics off --disable-version-check \
+            --exclude eval --exclude tests --exclude artifacts \
+            --sarif --output artifacts/scans/semgrep.sarif . || true
+
+      - name: Scan Python SAST (Bandit)
+        run: |
+          bandit -r apps/ -f json -o artifacts/scans/bandit.json --exit-zero || true
+
+      - name: Scan SCA & Container Files (Trivy)
+        run: |
+          trivy fs --scanners vuln,misconfig --exit-code 0 --skip-dirs artifacts,eval,tests \
+            --format json --output artifacts/scans/trivy.json .
+
+      - name: Scan SCA (Grype)
+        run: |
+          grype dir:. -o json --file artifacts/scans/grype.json --exclude ./eval --exclude ./tests --exclude ./artifacts --add-cpes-if-none || true
+
+      - name: Scan SCA (OSV-Scanner)
+        run: |
+          osv-scanner scan source -r --skip-git --format json --output artifacts/scans/osv.json . || true
+
+      - name: Scan IaC & K8s Manifests (Checkov)
+        run: |
+          checkov -d infra/ --output sarif --output-file-path artifacts/scans/checkov.sarif --soft-fail || true
+
+      - name: Upload Raw Scanner Artifacts
+        if: always()
+        # actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+        with:
+          name: raw-scans
+          path: artifacts/scans/
+          retention-days: 7
+
+  # =========================================================================
+  # STAGE 2: Normalization & Baseline Diffing (R2 Handshake)
+  # =========================================================================
+  normalize-and-baseline:
+    name: 20-normalize-and-baseline
+    needs: security-scanners
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        # actions/setup-python@v5.3.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install jsonschema pyyaml
+
+      - name: Download Raw Scanner Artifacts
+        # actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: raw-scans
+          path: artifacts/scans/
+
+      - name: Normalize findings into ADR-001 Schema
+        run: |
+          mkdir -p artifacts
+          CMD="python3 scanners/normalize/normalize.py -o artifacts/findings.json"
+          [ -f artifacts/scans/semgrep.sarif ] && CMD="$CMD --semgrep artifacts/scans/semgrep.sarif"
+          [ -f artifacts/scans/gitleaks.sarif ] && CMD="$CMD --gitleaks artifacts/scans/gitleaks.sarif"
+          [ -f artifacts/scans/trivy.json ] && CMD="$CMD --trivy artifacts/scans/trivy.json"
+          [ -f artifacts/scans/bandit.json ] && CMD="$CMD --bandit artifacts/scans/bandit.json"
+          [ -f artifacts/scans/grype.json ] && CMD="$CMD --grype artifacts/scans/grype.json"
+          [ -f artifacts/scans/osv.json ] && CMD="$CMD --osv artifacts/scans/osv.json"
+          [ -f artifacts/scans/checkov.sarif ] && CMD="$CMD --checkov artifacts/scans/checkov.sarif"
+          echo "Executing: $CMD"
+          $CMD
+
+      - name: Baseline security diffing check
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 scanners/baseline/baseline.py check \
+            --findings artifacts/findings.json \
+            --baseline scanners/baseline/security-baseline.json \
+            --repo . --commit "$HEAD_SHA" \
+            -o artifacts/findings.diffed.json --report artifacts/gate-report.json \
+            > artifacts/gate-summary.txt || true
+          cat artifacts/gate-summary.txt
+
+      - name: Upload Normalized Findings Artifacts
+        # actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+        with:
+          name: normalized-findings
+          path: |
+            artifacts/findings.json
+            artifacts/findings.diffed.json
+            artifacts/gate-report.json
+            artifacts/gate-summary.txt
+          retention-days: 7
+
+  # =========================================================================
+  # STAGE 3: Zero-Egress AI Triage Subsystem (R4 Handshake)
+  # =========================================================================
+  triage-ai:
+    name: 30-triage-ai
+    needs: normalize-and-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Scoped read-only access for private repo checkout; credentials stripped immediately after
+    permissions:
+      contents: read
+    continue-on-error: true # Fail-open: pipeline never fails if model is offline
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        # actions/setup-python@v5.3.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install AI triage dependencies
+        run: |
+          pip install requests jsonschema pyyaml
+
+      - name: Setup & Launch Ollama Service
+        run: |
+          echo "Installing Ollama for local CI inference..."
+          curl -fsSL https://ollama.com/install.sh -o /tmp/install-ollama.sh
+          sh /tmp/install-ollama.sh
+          ollama serve > /tmp/ollama.log 2>&1 &
+          echo "Waiting for Ollama loopback daemon..."
+          for i in {1..20}; do
+            if curl --silent --fail http://127.0.0.1:11434/api/tags > /dev/null; then
+              echo "✅ Ollama loopback daemon is active."
+              break
+            fi
+            sleep 1
+          done
+          echo "Pulling model ${{ env.LLM_MODEL }}..."
+          ollama pull "${{ env.LLM_MODEL }}" || true
+
+      - name: Download Normalized Findings
+        # actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: normalized-findings
+          path: artifacts/
+
+      - name: Run Zero-Egress AI Triage
+        env:
+          LLM_MODEL: ${{ env.LLM_MODEL }}
+          OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
+        run: |
+          python3 ai/triage.py \
+            --comment-out artifacts/pr_comment.md \
+            --metrics-out artifacts/metrics.prom \
+            < artifacts/findings.json \
+            > artifacts/findings.triaged.json
+
+      - name: Upload AI Triage Artifacts
+        # actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+        with:
+          name: triage-artifacts
+          path: |
+            artifacts/findings.triaged.json
+            artifacts/pr_comment.md
+            artifacts/metrics.prom
+          retention-days: 7
+
+  # =========================================================================
+  # STAGE 4: Automated PR Markdown Bot Comment (R1 & R4)
+  # =========================================================================
+  pr-comment:
+    name: 40-pr-comment
+    needs: triage-ai
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Download Triage Artifacts
+        # actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: triage-artifacts
+          path: artifacts/
+
+      - name: Post Triage Summary Comment to PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f artifacts/pr_comment.md ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body-file artifacts/pr_comment.md
+          else
+            echo "No pr_comment.md generated."
+          fi
+
+  # =========================================================================
+  # STAGE 5: Security Merge Policy Gate (R1 & R2)
+  # =========================================================================
+  security-gate:
+    name: 50-security-gate
+    needs: [normalize-and-baseline, triage-ai]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Normalized & Triaged Findings
+        # actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: normalized-findings
+          path: artifacts/
+
+      - name: Evaluate Security Merge Gate
+        run: |
+          echo "======================================================="
+          echo "           PipelineFortress Security Gate              "
+          echo "======================================================="
+          if [ -f artifacts/gate-summary.txt ]; then
+            cat artifacts/gate-summary.txt
+          fi
+          # Check for unexcepted P1 critical blockers
+          if grep -q "FAIL" artifacts/gate-summary.txt 2>/dev/null; then
+            echo "❌ Security Gate FAILED: Unexcepted high-severity security findings detected."
+            exit 1
+          fi
+          echo "✅ Security Gate PASSED: All findings grandfathered or accepted."
+          exit 0
+
+  # =========================================================================
+  # STAGE 6: Staging Runtime Deployment, Smoke Verification & DAST
+  # =========================================================================
+  staging-smoke-test:
+    name: 60-staging-smoke-test
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Secrets Scanning (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # continue-on-error: true # Uncomment to prevent build failure during initial baseline
-
-      - name: SAST Scanning (Semgrep)
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: "p/default"
-        # continue-on-error: true
-
-      - name: Build target application
+      - name: Check Staging Manifests
+        id: check_staging
         run: |
-          echo "Building target app..."
-          # cd target-app && npm install && npm run build
-          
-      - name: SCA & Container Scanning (Trivy)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'table'
-        # continue-on-error: true
+          if [ -f docker/docker-compose.staging.yml ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Staging environment found. Proceeding with deployment and DAST."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "docker/docker-compose.staging.yml not present on this branch."
+            echo "Skipping staging containers & DAST (will activate upon merging R3 target-app branch)."
+          fi
 
+      - name: Start Staging Containers
+        if: steps.check_staging.outputs.exists == 'true'
+        run: |
+          docker compose -f docker/docker-compose.staging.yml up -d --build
+
+      - name: Smoke test target API health endpoint
+        if: steps.check_staging.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -e
+          echo "Verifying vulnshop-api staging health endpoint..."
+          for i in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:8000/healthz; then
+              echo
+              echo "✅ vulnshop-api health check passed."
+              break
+            fi
+            sleep 2
+          done
+
+      - name: DAST Scan (OWASP ZAP Baseline)
+        if: steps.check_staging.outputs.exists == 'true'
+        # owasp/zap-baseline-scan@v0.14.0
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: "http://127.0.0.1:8000"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-I"                 # -I = informational (non-blocking) mode
+          artifact_name: "zap-dast-report"
+          fail_action: false                # Fail-open: advisory only
+
+      - name: Teardown Staging Containers
+        if: always() && steps.check_staging.outputs.exists == 'true'
+        run: |
+          docker compose -f docker/docker-compose.staging.yml down

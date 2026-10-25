@@ -1,0 +1,211 @@
+{
+ "SchemaVersion": 2,
+ "Results": [
+  {
+   "Target": "apps/api/requirements.txt",
+   "Class": "lang-pkgs",
+   "Type": "pip",
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2019-10906",
+     "VendorIDs": [
+      "GHSA-462w-v97r-4m45"
+     ],
+     "PkgName": "Jinja2",
+     "InstalledVersion": "2.10",
+     "FixedVersion": "2.10.1",
+     "Fingerprint": "sha256:dad442a37e3d5a4aa7ab220ec53078070236b5231397578a4d08d7481c3a9e38",
+     "Title": "python-jinja2: str.format_map allows sandbox escape",
+     "Severity": "HIGH"
+    },
+    {
+     "VulnerabilityID": "CVE-2020-28493",
+     "VendorIDs": [
+      "GHSA-g3rq-g295-4j3m"
+     ],
+     "PkgName": "Jinja2",
+     "InstalledVersion": "2.10",
+     "FixedVersion": "2.11.3",
+     "Fingerprint": "sha256:1dcfe36771d6994769f4402d3591a0b56e51ae5d191ff85ba0aa49075a574bae",
+     "Title": "python-jinja2: ReDoS vulnerability in the urlize filter",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-400"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2024-22195",
+     "VendorIDs": [
+      "GHSA-h5c8-rqwp-cp95"
+     ],
+     "PkgName": "Jinja2",
+     "InstalledVersion": "2.10",
+     "FixedVersion": "3.1.3",
+     "Fingerprint": "sha256:84ea567da6a4e2734e8cc714c8aa68896b9e21ff2d79c49d6df9e6e9e7b1d5d8",
+     "Title": "jinja2: HTML attribute injection when passing user input as keys to xmlattr filter",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-79"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2024-34064",
+     "VendorIDs": [
+      "GHSA-h75v-3vvj-5mfj"
+     ],
+     "PkgName": "Jinja2",
+     "InstalledVersion": "2.10",
+     "FixedVersion": "3.1.4",
+     "Fingerprint": "sha256:60ff9848fd6f817d4466dfdba32226f363a43ba5d528a9809d6c0f3412312a8d",
+     "Title": "jinja2: accepts keys containing non-attribute characters",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-79"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2024-56326",
+     "VendorIDs": [
+      "GHSA-q2x7-8rv6-6q7h"
+     ],
+     "PkgName": "Jinja2",
+     "InstalledVersion": "2.10",
+     "FixedVersion": "3.1.5",
+     "Fingerprint": "sha256:ba3ccda94430ac1db63faaebf56cb78649652f26757a02a707cf3679156b1b69",
+     "Title": "jinja2: Jinja has a sandbox breakout through indirect reference to format method",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-693",
+      "CWE-1336"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2025-27516",
+     "VendorIDs": [
+      "GHSA-cpwx-vrp4-4pq7"
+     ],
+     "PkgName": "Jinja2",
+     "InstalledVersion": "2.10",
+     "FixedVersion": "3.1.6",
+     "Fingerprint": "sha256:c4d21b8a82636baed19cef272db24477a8bf321fdf4f69e409ae530d285d1bc7",
+     "Title": "jinja2: Jinja sandbox breakout through attr filter selecting format method",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-1336"
+     ]
+    }
+   ]
+  },
+  {
+   "Target": "apps/web/package-lock.json",
+   "Class": "lang-pkgs",
+   "Type": "npm",
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2020-8203",
+     "VendorIDs": [
+      "GHSA-p6mc-m468-83gw"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.17.19",
+     "Fingerprint": "sha256:a0e736697829032bc60e14f6d723ce8658bc5a18f7ad003003ad3d83843f1d28",
+     "Title": "nodejs-lodash: prototype pollution in zipObjectDeep function",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-770",
+      "CWE-1321"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2021-23337",
+     "VendorIDs": [
+      "GHSA-35jh-r3h4-6jhm"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.17.21",
+     "Fingerprint": "sha256:ad3a2e79bff0b01822140c40aa68085295ce56ea5c22ede84ac204a94c5f8112",
+     "Title": "nodejs-lodash: command injection via template",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-94"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2026-4800",
+     "VendorIDs": [
+      "GHSA-r5fr-rjxr-66jc"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.18.0",
+     "Fingerprint": "sha256:987f31fe5119c241a2790303da320ab3d0574a90bdbb4636369aac8b68693ac2",
+     "Title": "lodash: lodash: Arbitrary code execution via untrusted input in template imports",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-94"
+     ]
+    },
+    {
+     "VulnerabilityID": "NSWG-ECO-516",
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": ">=4.17.19",
+     "Fingerprint": "sha256:ed11cb146a68d64e6afe8b956fea9fc5d9119365e491a86f63a9a25696371416",
+     "Title": "Allocation of Resources Without Limits or Throttling",
+     "Severity": "HIGH"
+    },
+    {
+     "VulnerabilityID": "CVE-2020-28500",
+     "VendorIDs": [
+      "GHSA-29mw-wpgm-hmr9"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.17.21",
+     "Fingerprint": "sha256:5e5e5ab612320c7f0c10cd19c1f07f8c70e5867671dba4b21314341124d37e6b",
+     "Title": "nodejs-lodash: ReDoS via the toNumber, trim and trimEnd functions",
+     "Severity": "MEDIUM"
+    },
+    {
+     "VulnerabilityID": "CVE-2025-13465",
+     "VendorIDs": [
+      "GHSA-xxjr-mmjv-4gpg"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.17.23",
+     "Fingerprint": "sha256:cbb0806f1d2ae5ccd25c54f9daedc2b4078aebe8f98b7fbdbb4f212b0fef8e59",
+     "Title": "lodash: prototype pollution in _.unset and _.omit functions",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-1321"
+     ]
+    },
+    {
+     "VulnerabilityID": "CVE-2026-2950",
+     "VendorIDs": [
+      "GHSA-f23m-r3pf-42rh"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.18.0",
+     "Fingerprint": "sha256:0578d29014c511c0e89cc8322eb8e3d9eb1c8e4716c2b1bb2233239b8db1e081",
+     "Title": "lodash: Lodash: Prototype pollution allows deletion of built-in prototype properties via array path bypass",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-1321"
+     ]
+    }
+   ]
+  }
+ ]
+}
