@@ -1,0 +1,84 @@
+
+name: Employee API DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  devsecops:
+    name: Build, Scan, Deploy and Verify
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build and test with Maven
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package
+
+      - name: Scan source code with Semgrep
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/src" \
+            -w /src \
+            semgrep/semgrep:latest \
+            semgrep scan --config auto --error .
+
+      - name: Build Docker image
+        run: |
+          docker build -t employee-api:jenkins .
+
+      - name: Scan Docker image with Trivy
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$HOME/.cache/trivy:/root/.cache/" \
+            aquasec/trivy:latest \
+            image --severity HIGH,CRITICAL employee-api:jenkins
+
+      - name: Deploy using Ansible
+        run: |
+          ansible-playbook -i ansible/inventory.ini ansible/deploy.yml
+
+      - name: Verify Kubernetes deployment
+        run: |
+          kubectl rollout status deployment/employee-api --timeout=180s
+          kubectl get deployment employee-api
+          kubectl get pods -o wide
+          kubectl get service employee-api
+          kubectl get servicemonitor employee-api -n monitoring
+
+      - name: Smoke test API health endpoint
+        shell: bash
+        run: |
+          set -e
+          kubectl port-forward service/employee-api 8081:8080 > /tmp/employee-api-port-forward.log 2>&1 &
+          PF_PID=$!
+          trap 'kill "$PF_PID" 2>/dev/null || true' EXIT
+
+          for i in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:8081/actuator/health; then
+              echo
+              echo "API health check passed."
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "API health check failed."
+          cat /tmp/employee-api-port-forward.log
+          exit 1
