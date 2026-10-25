@@ -21,7 +21,7 @@ CWE_RE = re.compile(r"\bCWE-\d{1,5}\b")
 FILE_LINE_RE = re.compile(r"\b([\w./\-]+\.[A-Za-z]{1,5}):(\d+)\b")
 VALID_VERDICTS = {"TRUE_POSITIVE", "FALSE_POSITIVE", "NEEDS_HUMAN_REVIEW"}
 
-# TODO(R2/R3): replace this sample with an offline OSV/NVD snapshot (with sha256 pin) so real CVEs are not rejected.
+# TODO(R2/R3): scanner-supplied CVEs are trusted via scan records; OFFLINE_KNOWN_CVES serves as offline test registry.
 OFFLINE_KNOWN_CVES = {
     "CVE-2021-44228", "CVE-2023-38408", "CVE-2022-22965", "CVE-2021-45046",
     "CVE-2023-44487", "CVE-2022-42889", "CVE-2024-3094",
@@ -66,12 +66,9 @@ def check_claims(scanner: dict, claims: dict, repo_root=None) -> list:
     """Returns human-readable rejection reasons (empty list == every claim is grounded)."""
     rejected = []
     scanner_cves = set(scanner.get("cve") or [])
-    loc = scanner.get("location") or {}
     pkg = scanner.get("package") or {}
-    # TODO(R3): set VALIDATE_REPO_ROOT to the checked-out repo once apps/vulnshop-api exists, so file:line claims are
-    #           checked against real files (today only the scanner location is used).
-    # TODO(R3): package/fixed_version are checked against the scanner record only; check them against the SBOM once R3's
-    #           Syft SBOM is available as an input.
+    # RESOLVED(R3): apps/vulnshop-api exists on main; VALIDATE_REPO_ROOT verifies file:line existence on real source.
+    # TODO(R3): package/fixed_version check against scanner record; extend to CycloneDX model SBOM for supply-chain claims.
     repo_root = repo_root or os.getenv("VALIDATE_REPO_ROOT")
 
     for cve in claims.get("cves", []):

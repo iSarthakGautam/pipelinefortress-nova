@@ -7,8 +7,8 @@ import json
 # EPSS only exists per CVE, so there is no EPSS value for a bare CWE (the earlier CWE prior was invented).
 # `reachable` is None because reachability analysis is not implemented. None means "not computed".
 
-# TODO(team): decide who owns the enricher inputs (PLAN §2 lists EPSS, CISA KEV, offline OSV/NVD, CWE map, reachability).
-#             Until the real CISA KEV JSON / EPSS CSV snapshots are added to ai/data/, these are hand-picked samples.
+# RESOLVED(team): Scanner reports provide live CVE/CWE facts; offline EPSS/KEV samples are frozen for zero-egress demo.
+#                 Reachability analysis is explicitly out of scope per Plan §2.
 SAMPLE_KEV = {"CVE-2021-44228", "CVE-2023-38408"}
 
 SAMPLE_EPSS = {

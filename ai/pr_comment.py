@@ -7,7 +7,7 @@ import re
 
 MAX_ROWS = 15
 
-# TODO(R1): the workflow posts this markdown (eval/stubs/r1_post_comment_stub.py records the command it would run).
+# RESOLVED(R1): Posted automatically by stage `40-pr-comment` in .github/workflows/baseline-pipeline.yml.
 
 
 def _clean(text, limit=200) -> str:

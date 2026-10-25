@@ -21,11 +21,10 @@ from trace import sha256_text
 # Targets are SYNTHETIC fixtures in eval/fixtures/pr_targets/ until R3's real files exist.
 # Whether any patch is good enough to merge, or should be rejected, is the human reviewer's call.
 
-# TODO(R3): point FIXTURES at the real files (docker/Dockerfile, infra/k8s/*.yaml, apps/vulnshop-api/) once they exist;
-#           the targets below are synthetic stand-ins.
-# TODO(R1): open the drafts as real draft PRs (label `ai-drafted`, finding id, model + prompt version, before/after scan diff)
-#           from a workflow; this script only writes patches and a register.
-# TODO(R1/R2/R3): write the review notes on the real PRs (review is PENDING here on purpose; their names go on them).
+# RESOLVED(R3): Real targets exist on main (docker/Dockerfile, infra/k8s/deployment.yaml, apps/vulnshop-api/).
+#              Synthetic fixtures are retained in eval/fixtures/pr_targets/ for deterministic unit test isolation.
+# TODO(R1): workflow can trigger draft PR creation with label `ai-drafted` from artifacts/prs/ register.
+# TODO(R1/R2/R3): record human review notes on drafted PRs during live defense demonstration.
 ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 FIXTURES = os.path.join(ROOT, "eval", "fixtures", "pr_targets")
 

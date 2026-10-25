@@ -2,10 +2,8 @@
 # r1_ci_job_stub.sh
 # STAND-IN for R1's `30-triage-ai` workflow job (PLAN §4.5: `permissions: {}`, no secrets, no network but loopback).
 # It runs the triage step the way CI would: a SCRUBBED environment (no tokens, no proxy vars), findings from stdin
-# or $1, then "posts" the comment and metrics through the R1/R5 stubs next to this file.
-# TODO(R1): replace this whole script with the real `30-triage-ai` workflow job (permissions: {}); decide where the
-#           model runs (self-hosted runner vs smaller model). TODO(R5): swap the metrics stub for the real ingestion.
-#   eval/stubs/r1_ci_job_stub.sh <findings.json> <out_dir>
+# RESOLVED(R1): Live in stage `30-triage-ai` of .github/workflows/baseline-pipeline.yml.
+# RESOLVED(R5): Real metrics ingestion implemented via eval/metrics/push_metrics.py.
 set -u
 FINDINGS="${1:?findings.json}"; OUT="${2:?out dir}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

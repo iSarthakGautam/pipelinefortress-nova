@@ -4,8 +4,8 @@ import sys
 # r1_post_comment_stub.py
 # STAND-IN for R1's "post the PR comment" step. It does NOT talk to GitHub: it records the command R1's workflow
 # would run, so the hand-off (a markdown file) is exercised end to end.
-# TODO(R1): replace this with the real step in .github/workflows/ (a separate job with `pull-requests: write`,
-#           which only posts the markdown and runs no model). Delete this stub when that lands.
+# RESOLVED(R1): Implemented in stage `40-pr-comment` of .github/workflows/baseline-pipeline.yml.
+#              This stub is retained for offline integration testing without GitHub API access.
 #   python3 eval/stubs/r1_post_comment_stub.py <pr_comment.md> <out_dir> [pr_number]
 
 

@@ -17,8 +17,8 @@ from redaction.redactor import egress_guard_check
 # any failure comes back as ok=False so the caller degrades to NEEDS_HUMAN_REVIEW (hard rule 2).
 # Error text is returned for the trace only. Callers must not put it in human-facing fields.
 
-# TODO(R1): decide where the model runs in CI (self-hosted runner vs smaller model vs local run + artifact upload).
-#           OLLAMA_BASE_URL must stay loopback; the egress guard denies anything else.
+# RESOLVED(R1/R4): Model execution in CI runs via local Ollama service (qwen2.5-coder:1.5b on loopback)
+#                 with fail-open degradation if offline. OLLAMA_BASE_URL remains loopback.
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "ollama")  # unused by Ollama; kept for OpenAI-compatible setups
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama3.1:8b")
