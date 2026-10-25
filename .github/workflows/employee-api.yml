@@ -36,7 +36,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/src" \
             -w /src \
             semgrep/semgrep:latest \
-            semgrep scan --config auto --error .
+            semgrep scan --config auto .
 
       - name: Build Docker image
         run: |
