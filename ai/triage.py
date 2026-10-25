@@ -199,6 +199,10 @@ def main():
     ap.add_argument("--no-validate", action="store_true", help="ablation only")
     ap.add_argument("--no-defence", action="store_true", help="ablation only: disables injection heuristic AND framing")
     ap.add_argument("--trace-dir", default=None)
+    ap.add_argument("--max-findings", type=int, default=int(os.getenv("MAX_FINDINGS", "0")),
+                    help="Maximum number of findings to triage (0 = unlimited)")
+    ap.add_argument("--only-new", action="store_true", default=os.getenv("ONLY_NEW", "").lower() in ("1", "true"),
+                    help="Only triage net-new findings from baseline diff")
     ap.add_argument("--comment-out", default=None, help="write the PR-comment markdown here (for R1's workflow)")
     ap.add_argument("--metrics-out", default=None, help="write Prometheus text metrics here (for R5)")
     args = ap.parse_args()
@@ -217,6 +221,10 @@ def main():
         return 2
     if isinstance(findings, dict):
         findings = [findings]
+    if args.only_new:
+        findings = [f for f in findings if (f.get("baseline") or {}).get("is_new", True)]
+    if args.max_findings > 0:
+        findings = findings[:args.max_findings]
     results, traces = triage_findings(findings, args.model, args.format_mode, not args.no_validate,
                                       not args.no_defence, args.trace_dir)
     if args.comment_out:

@@ -25,6 +25,7 @@ env:
   ZAP_VERSION: "2.15.0"
   LLM_MODEL: "qwen2.5-coder:1.5b"
   OLLAMA_BASE_URL: "http://127.0.0.1:11434/v1"
+  FORMAT_MODE: "json"
 
 jobs:
   # =========================================================================
@@ -277,11 +278,19 @@ jobs:
         env:
           LLM_MODEL: ${{ env.LLM_MODEL }}
           OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
+          FORMAT_MODE: ${{ env.FORMAT_MODE }}
         run: |
+          INPUT_FILE="artifacts/findings.diffed.json"
+          if [ ! -f "$INPUT_FILE" ]; then
+            INPUT_FILE="artifacts/findings.json"
+          fi
           python3 ai/triage.py \
+            --format-mode json \
+            --only-new \
+            --max-findings 5 \
             --comment-out artifacts/pr_comment.md \
             --metrics-out artifacts/metrics.prom \
-            < artifacts/findings.json \
+            < "$INPUT_FILE" \
             > artifacts/findings.triaged.json
 
       - name: Upload AI Triage Artifacts
