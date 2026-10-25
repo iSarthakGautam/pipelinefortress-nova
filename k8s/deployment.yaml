@@ -1,22 +1,23 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: employee-api
+  name: app
   labels:
-    app: employee-api
+    app: app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: employee-api
+      app: app
   template:
     metadata:
       labels:
-        app: employee-api
+        app: app
     spec:
       containers:
-        - name: employee-api
-          image: employee-api:jenkins
+        - name: app
+          image: app:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8080

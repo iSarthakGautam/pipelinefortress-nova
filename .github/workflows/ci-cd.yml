@@ -1,14 +1,20 @@
 
-name: Employee API DevSecOps Pipeline
+name: Reusable DevSecOps Pipeline
 
 on:
   push:
     branches:
       - main
+      - feature/generic-devsecops-pipeline
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  APP_NAME: app
+  APP_NAMESPACE: default
+  IMAGE_TAG: latest
 
 jobs:
   devsecops:
@@ -40,7 +46,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t employee-api:jenkins .
+          docker build -t "${APP_NAME}:${IMAGE_TAG}" .
+
+      - name: Load image into Minikube
+        run: |
+          minikube image load "${APP_NAME}:${IMAGE_TAG}"
 
       - name: Scan Docker image with Trivy
         run: |
@@ -48,37 +58,47 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v "$HOME/.cache/trivy:/root/.cache/" \
             aquasec/trivy:latest \
-            image --severity HIGH,CRITICAL employee-api:jenkins
+            image --severity HIGH,CRITICAL "${APP_NAME}:${IMAGE_TAG}"
 
       - name: Deploy using Ansible
         run: |
-          ansible-playbook -i ansible/inventory.ini ansible/deploy.yml
+          ansible-playbook \
+            -i ansible/inventory.ini \
+            ansible/deploy.yml
 
       - name: Verify Kubernetes deployment
         run: |
-          kubectl rollout status deployment/employee-api --timeout=180s
-          kubectl get deployment employee-api
-          kubectl get pods -o wide
-          kubectl get service employee-api
-          kubectl get servicemonitor employee-api -n monitoring
+          kubectl rollout status "deployment/${APP_NAME}" \
+            -n "${APP_NAMESPACE}" --timeout=180s
 
-      - name: Smoke test API health endpoint
+          kubectl get deployment "${APP_NAME}" -n "${APP_NAMESPACE}"
+          kubectl get pods -n "${APP_NAMESPACE}" -o wide
+          kubectl get service "${APP_NAME}" -n "${APP_NAMESPACE}"
+          kubectl get servicemonitor "${APP_NAME}" -n monitoring
+
+      - name: Smoke test application health endpoint
         shell: bash
         run: |
           set -e
-          kubectl port-forward service/employee-api 8081:8080 > /tmp/employee-api-port-forward.log 2>&1 &
+
+          kubectl port-forward \
+            -n "${APP_NAMESPACE}" \
+            "service/${APP_NAME}" 8081:8080 \
+            > /tmp/app-port-forward.log 2>&1 &
           PF_PID=$!
+
           trap 'kill "$PF_PID" 2>/dev/null || true' EXIT
 
           for i in {1..30}; do
-            if curl --silent --fail http://127.0.0.1:8081/actuator/health; then
+            if curl --silent --fail \
+              http://127.0.0.1:8081/actuator/health; then
               echo
-              echo "API health check passed."
+              echo "Application health check passed."
               exit 0
             fi
             sleep 2
           done
 
-          echo "API health check failed."
-          cat /tmp/employee-api-port-forward.log
+          echo "Application health check failed."
+          cat /tmp/app-port-forward.log
           exit 1

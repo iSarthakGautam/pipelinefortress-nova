@@ -1,10 +1,15 @@
 ---
-- name: Deploy Employee API to Kubernetes
+- name: Deploy Application to Kubernetes
   hosts: local
   gather_facts: false
 
-  tasks:
+  vars:
+    app_name: "{{ lookup('env', 'APP_NAME') | default('app', true) }}"
+    app_namespace: "{{ lookup('env', 'APP_NAMESPACE') | default('default', true) }}"
+    image_tag: "{{ lookup('env', 'IMAGE_TAG') | default('latest', true) }}"
+    rendered_dir: "{{ playbook_dir }}/rendered"
 
+  tasks:
     - name: Check Kubernetes cluster
       command: kubectl get nodes
       register: kubernetes_nodes
@@ -14,32 +19,68 @@
       debug:
         var: kubernetes_nodes.stdout_lines
 
-    - name: Apply Employee API Deployment
-      command: kubectl apply -f "{{ playbook_dir }}/../k8s/deployment.yaml"
+    - name: Create rendered manifests directory
+      file:
+        path: "{{ rendered_dir }}"
+        state: directory
+        mode: "0755"
 
-    - name: Apply Employee API Service
-      command: kubectl apply -f "{{ playbook_dir }}/../k8s/service.yaml"
+    - name: Render Deployment manifest
+      template:
+        src: templates/deployment.yaml.j2
+        dest: "{{ rendered_dir }}/deployment.yaml"
+        mode: "0644"
 
-    - name: Apply Employee API ServiceMonitor
-      command: kubectl apply -f "{{ playbook_dir }}/../k8s/servicemonitor.yaml"
+    - name: Render Service manifest
+      template:
+        src: templates/service.yaml.j2
+        dest: "{{ rendered_dir }}/service.yaml"
+        mode: "0644"
 
-    - name: Wait for Employee API rollout
-      command: kubectl rollout status deployment/employee-api --timeout=120s
+    - name: Render ServiceMonitor manifest
+      template:
+        src: templates/servicemonitor.yaml.j2
+        dest: "{{ rendered_dir }}/servicemonitor.yaml"
+        mode: "0644"
 
-    - name: Show Employee API pods
-      command: kubectl get pods -l app=employee-api
-      register: employee_pods
+    - name: Validate rendered Deployment
+      command: kubectl apply --dry-run=client -f "{{ rendered_dir }}/deployment.yaml"
       changed_when: false
 
-    - name: Display Employee API pods
-      debug:
-        var: employee_pods.stdout_lines
-
-    - name: Show Employee API service
-      command: kubectl get service employee-api
-      register: employee_service
+    - name: Validate rendered Service
+      command: kubectl apply --dry-run=client -f "{{ rendered_dir }}/service.yaml"
       changed_when: false
 
-    - name: Display Employee API service
+    - name: Validate rendered ServiceMonitor
+      command: kubectl apply --dry-run=client -f "{{ rendered_dir }}/servicemonitor.yaml"
+      changed_when: false
+
+    - name: Apply application Deployment
+      command: kubectl apply -f "{{ rendered_dir }}/deployment.yaml"
+
+    - name: Apply application Service
+      command: kubectl apply -f "{{ rendered_dir }}/service.yaml"
+
+    - name: Apply application ServiceMonitor
+      command: kubectl apply -f "{{ rendered_dir }}/servicemonitor.yaml"
+
+    - name: Wait for application rollout
+      command: kubectl rollout status deployment/{{ app_name }} -n {{ app_namespace }} --timeout=120s
+
+    - name: Show application pods
+      command: kubectl get pods -n {{ app_namespace }} -l app={{ app_name }}
+      register: app_pods
+      changed_when: false
+
+    - name: Display application pods
       debug:
-        var: employee_service.stdout_lines
+        var: app_pods.stdout_lines
+
+    - name: Show application Service
+      command: kubectl get service {{ app_name }} -n {{ app_namespace }}
+      register: app_service
+      changed_when: false
+
+    - name: Display application Service
+      debug:
+        var: app_service.stdout_lines
