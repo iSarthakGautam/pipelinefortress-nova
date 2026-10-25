@@ -194,12 +194,41 @@ jobs:
             --baseline scanners/baseline/security-baseline.json \
             --repo . --commit "$HEAD_SHA" \
             -o artifacts/findings.diffed.json --report artifacts/gate-report.json \
+            --triage-out artifacts/triage-input.json \
             > artifacts/gate-summary.txt
           rc=$?
           set -e
           cat artifacts/gate-summary.txt
           { echo '### Security gate'; echo '```'; cat artifacts/gate-summary.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           exit $rc
+
+      # Contract check of the R2 -> R4 hand-off on this PR's real findings. No model runs here
+      # (R1's 30-triage-ai job owns that), so every verdict is NEEDS_HUMAN_REVIEW; what this proves
+      # is that R4's triage accepts our output and that its output is still valid schema with no
+      # raw snippet in it.
+      - name: Triage hand-off check (ai/triage.py, model offline)
+        if: always() && hashFiles('artifacts/triage-input.json') != ''
+        env:
+          ARTIFACTS_BASE: ${{ github.workspace }}
+          OLLAMA_BASE_URL: http://127.0.0.1:9/v1     # nothing listens: the model call fails fast
+        run: |
+          python ai/triage.py --comment-out artifacts/pr_comment.md \
+            --metrics-out artifacts/triage-metrics.prom \
+            < artifacts/triage-input.json > artifacts/findings.triaged.json
+          python - <<'EOF'
+          import json, sys
+          sys.path.insert(0, "scanners/normalize")
+          import normalize
+          handed = json.load(open("artifacts/triage-input.json"))
+          out = json.load(open("artifacts/findings.triaged.json"))
+          assert sorted(f["finding_id"] for f in out) == sorted(f["finding_id"] for f in handed), "findings lost"
+          normalize.validate(out)
+          leaked = [f["finding_id"] for f in out if set(f["evidence"]) - {"raw_ref", "snippet_redacted"}]
+          assert not leaked, f"raw evidence left the triage step: {leaked}"
+          print(f"hand-off ok: {len(handed)} findings in, {len(out)} triaged, schema valid, no raw snippets")
+          EOF
+          { echo '### Triage hand-off (model offline: verdicts are placeholders)'; cat artifacts/pr_comment.md; } \
+            >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload scan evidence
         if: always()
@@ -214,5 +243,9 @@ jobs:
             artifacts/gate-summary.txt
             artifacts/sca-crosscheck.json
             artifacts/sca-crosscheck.md
+            artifacts/triage-input.json
+            artifacts/findings.triaged.json
+            artifacts/pr_comment.md
+            artifacts/triage-metrics.prom
           retention-days: 14
           if-no-files-found: warn

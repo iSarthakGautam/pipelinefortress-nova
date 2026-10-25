@@ -28,7 +28,7 @@ def test_duplicate_results_collapse_to_one_finding():
     sqli = by_rule(n.dedupe_exact(raw), "python.flask.security.sql-injection")
     assert len(sqli) == 1
     # First occurrence wins, so the snippet survives
-    assert "SELECT" in sqli[0]["evidence"]["snippet"]
+    assert "SELECT" in sqli[0]["evidence"]["snippet_raw"]
 
 
 def test_semgrep_cwe_and_severity_mapping():
@@ -60,7 +60,7 @@ def test_trivy_vulns_and_misconfigs():
 def test_gitleaks_is_always_high():
     out = n.parse_sarif(FIX / "gitleaks.sarif", "gitleaks")
     assert out[0]["severity_norm"] == "HIGH"
-    assert "snippet" not in out[0]["evidence"]    # gitleaks runs with --redact
+    assert "snippet_raw" not in out[0]["evidence"]    # gitleaks runs with --redact
 
 
 def test_bandit_json():
@@ -69,7 +69,7 @@ def test_bandit_json():
     urlopen = by_rule(out, "B310")[0]
     assert urlopen["location"] == {"file": "ai/llm_client.py", "line": 53}
     assert urlopen["cwe"] == ["CWE-22"] and urlopen["severity_norm"] == "MEDIUM"
-    assert urlopen["evidence"]["snippet"] == "with urllib.request.urlopen(req, timeout=60) as resp:"
+    assert urlopen["evidence"]["snippet_raw"] == "with urllib.request.urlopen(req, timeout=60) as resp:"
     assert urlopen["evidence"]["raw_ref"] == "artifacts/scans/bandit.json#/results/0"
     assert "(confidence: HIGH)" in urlopen["message"]
     assert by_rule(out, "B105")[0]["severity_norm"] == "LOW"

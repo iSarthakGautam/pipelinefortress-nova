@@ -1,4 +1,4 @@
-# ADR-001: Unified finding schema v1.0.0
+# ADR-001: Unified finding schema v1.0.0 (see ADR-002 for v1.1.0)
 
 **Status:** Proposed (R2) · **Needs sign-off:** R4 (consumer), R1, R5
 **Schema:** `scanners/schema/finding.schema.json`

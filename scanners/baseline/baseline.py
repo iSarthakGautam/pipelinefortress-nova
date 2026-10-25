@@ -12,7 +12,8 @@ not on accepted existing debt (plan §4.2).
   # Mark new vs known, attach exceptions, decide pass/fail
   python scanners/baseline/baseline.py check \
       --findings artifacts/findings.json --baseline scanners/baseline/security-baseline.json \
-      --repo . --commit $SHA -o artifacts/findings.diffed.json --report artifacts/gate-report.json
+      --repo . --commit $SHA -o artifacts/findings.diffed.json --report artifacts/gate-report.json \
+      --triage-out artifacts/triage-input.json
 
 Exit codes for `check`: 0 pass, 1 gate failed, 2 usage/input error.
 
@@ -305,6 +306,13 @@ def cmd_create(args) -> int:
     return 0
 
 
+def select_for_triage(findings: list) -> list:
+    """The hand-off to R4's triage step: new findings, minus those a valid exception already covers.
+    Known findings are accepted debt and excepted ones have a named human owner, so neither needs a
+    model verdict. Call before _exception_status is dropped."""
+    return [f for f in findings if f["baseline"]["is_new"] and f.get("_exception_status") != "valid"]
+
+
 def cmd_check(args) -> int:
     findings = json.loads(args.findings.read_text(encoding="utf-8"))
     baseline = load_baseline(args.baseline)
@@ -314,11 +322,14 @@ def cmd_check(args) -> int:
     annotations = scan_annotations(args.repo, today, args.max_exception_days)
     attach_exceptions(findings, annotations)
     report = evaluate_gate(findings, annotations, args.fail_on, stats)
+    to_triage = select_for_triage(findings)
 
     for f in findings:
         f.pop("_exception_status", None)
     if args.output:
         _write_json(args.output, findings)
+    if args.triage_out:
+        _write_json(args.triage_out, to_triage)
     if args.report:
         _write_json(args.report, report)
     print(format_summary(report))
@@ -344,6 +355,8 @@ def main(argv=None) -> int:
     k.add_argument("--commit", default=None)
     k.add_argument("-o", "--output", type=Path, help="findings with baseline block filled in")
     k.add_argument("--report", type=Path, help="gate report JSON (for metrics)")
+    k.add_argument("--triage-out", type=Path,
+                   help="new, non-excepted findings: the input for ai/triage.py (R4)")
     k.add_argument("--fail-on", default="HIGH", choices=SEVERITY_ORDER)
     k.add_argument("--max-exception-days", type=int, default=90)
     k.add_argument("--today", help="override today's date (YYYY-MM-DD), for tests and replays")

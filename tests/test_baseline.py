@@ -18,7 +18,7 @@ TODAY = dt.date(2026, 10, 22)
 
 def finding(rule="r.sqli", file="app/search.py", line=10, sev="HIGH", tool="semgrep", pkg=None):
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "finding_id": n.make_finding_id(tool, rule, file, line, pkg),
         "tool": tool, "rule_id": rule, "severity_raw": sev, "severity_norm": sev,
         "cwe": [], "cve": [],

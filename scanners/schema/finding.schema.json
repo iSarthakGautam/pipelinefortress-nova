@@ -2,12 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/iSarthakGautam/pipelinefortress-nova/scanners/schema/finding.schema.json",
   "title": "PipelineFortress unified finding",
-  "description": "v1.0.0. Owner: R2. Everything except `triage` is deterministic (normalizer/enricher/baseline). `triage` is the only model-produced block and is optional until the AI stage runs. Breaking changes after week 1 need an ADR + channel heads-up.",
+  "description": "v1.1.0 (see docs/adr/ADR-002). Owner: R2. Everything except `triage` is deterministic (normalizer/enricher/baseline). `triage` is the only model-produced block and is optional until the AI stage runs. Breaking changes after week 1 need an ADR + channel heads-up.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "finding_id", "tool", "rule_id", "severity_raw", "severity_norm", "cwe", "cve", "location", "package", "evidence", "baseline"],
   "properties": {
-    "schema_version": { "const": "1.0.0" },
+    "schema_version": { "const": "1.1.0" },
     "finding_id": {
       "description": "sha256(tool|rule_id|file|line|pkg)[:16], lowercase hex.",
       "type": "string",
@@ -52,19 +52,19 @@
       "additionalProperties": false,
       "required": ["raw_ref"],
       "properties": {
-        "snippet": { "description": "Raw code snippet. Runner-local only; input to R4's redactor. Never published.", "type": "string" },
+        "snippet_raw": { "description": "Raw code snippet. Runner-local only; input to R4's redactor, which strips it from everything it outputs. Never published.", "type": "string" },
         "snippet_redacted": { "description": "Written by the redaction stage (R4), not the normalizer.", "type": "string" },
         "raw_ref": { "description": "Pointer into the raw scanner output, e.g. artifacts/scans/semgrep.sarif#/runs/0/results/17", "type": "string" }
       }
     },
     "enrichment": {
-      "description": "Written by enrich.py (R4).",
+      "description": "Written by enrich.py (R4). null = not known (offline, or no data), never a guess.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "epss": { "type": "number", "minimum": 0, "maximum": 1 },
+        "epss": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
         "kev": { "type": "boolean" },
-        "reachable": { "type": "boolean" }
+        "reachable": { "type": ["boolean", "null"] }
       }
     },
     "baseline": {
