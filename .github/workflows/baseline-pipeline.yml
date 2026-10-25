@@ -412,6 +412,7 @@ jobs:
           rules_file_name: ".zap/rules.tsv"
           cmd_options: "-I"                 # -I = informational (non-blocking) mode
           artifact_name: "zap-dast-report"
+          allow_issue_writing: false        # Do not attempt to create GitHub issues
           fail_action: false                # Fail-open: advisory only
 
       - name: Teardown Staging Containers
