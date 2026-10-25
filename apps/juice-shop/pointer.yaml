@@ -1,0 +1,20 @@
+# OWASP Juice Shop - Fork Pointer & Pinned Spec (R3 Ownership)
+# As defined in PROJECT_PLAN.pdf (§9 Repo Layout): "fork pointer, pinned SHA"
+# Avoids committing a 150MB+ upstream repo while locking deterministic scanner reproducibility.
+
+repository: "https://github.com/juice-shop/juice-shop.git"
+upstream_release: "v16.0.0"
+pinned_commit_sha: "5cb904bc2368c46006f7435f29d46924d5ba89c3"
+license: "MIT"
+
+container:
+  image: "bkimminich/juice-shop:v16.0.0"
+  digest: "sha256:3bbba5fa8d147bbba7e6dbce922dc479b4eeef7e4b52945d81b369cff6705df3"
+  exposed_port: 3000
+  staging_url: "http://localhost:3000"
+
+dast_target:
+  tool: "owasp-zap"
+  scan_type: "baseline"
+  context_file: "apps/juice-shop/zap-context.prop"
+

@@ -1,0 +1,27 @@
+# Hardened Multi-Stage Dockerfile for vulnshop-api (R3 Deliverable)
+# Stage 1: Build & Dependencies
+FROM node:20.11.1-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Stage 2: Hardened Distroless/Minimal Runtime
+FROM node:20.11.1-alpine AS runner
+WORKDIR /app
+
+# Run as non-root user (USER 10001)
+RUN addgroup -g 10001 -S appgroup && \
+    adduser -u 10001 -S appuser -G appgroup
+
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --chown=appuser:appgroup . .
+
+USER 10001
+EXPOSE 3000
+ENV NODE_ENV=production
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/healthz || exit 1
+
+CMD ["node", "server.js"]
+

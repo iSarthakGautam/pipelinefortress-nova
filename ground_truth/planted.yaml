@@ -1,0 +1,146 @@
+# Planted Vulnerabilities Catalog for PipelineFortress (R3 Ownership)
+# Maps test vulnerabilities planted in the target codebase, container, and infrastructure.
+# Used by evaluation harnesses (eval/run_eval.py) and baseline security diffing.
+
+version: "1.0"
+target_service: "apps/vulnshop-api"
+last_updated: "2026-10-25"
+
+planted_vulnerabilities:
+  - id: "PLANT-001"
+    name: "Raw String SQL Injection in Search"
+    tool: "semgrep"
+    rule_id: "sql-injection"
+    cwe:
+      - "CWE-89"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/routes/search.py"
+      line: 42
+    snippet: "q = f\"SELECT * FROM items WHERE name = '{user_input}'\""
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P1"
+    remediation: "Parameterize query using cursor.execute('SELECT ... WHERE name = ?', (user_input,))"
+
+  - id: "PLANT-002"
+    name: "Safe Parameterized User Query (Negative Control)"
+    tool: "semgrep"
+    rule_id: "sqli-parameterized"
+    cwe:
+      - "CWE-89"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/routes/user.py"
+      line: 18
+    snippet: "cursor.execute('SELECT * FROM users WHERE id = %s', (uid,))"
+    ground_truth: "FALSE_POSITIVE"
+    expected_priority: "UNASSIGNED"
+    remediation: "None required (False Positive control)"
+
+  - id: "PLANT-003"
+    name: "Hardcoded AWS Access Key"
+    tool: "gitleaks"
+    rule_id: "aws-access-key"
+    cwe:
+      - "CWE-798"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/config.py"
+      line: 12
+    snippet: "AWS_KEY = 'AKIAIOSFODNN7EXAMPLE'"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P1"
+    remediation: "Inject credentials via environment variables or secret manager (IAM roles)"
+
+  - id: "PLANT-004"
+    name: "Command Injection in Payment Receipt Logger"
+    tool: "bandit"
+    rule_id: "B602_subprocess_popen_with_shell_equals_true"
+    cwe:
+      - "CWE-78"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/routes/pay.py"
+      line: 20
+    snippet: "proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P1"
+    remediation: "Avoid shell=True; use built-in logging module instead of shell commands"
+
+  - id: "PLANT-005"
+    name: "Outdated Dependency with Known Prototype Pollution"
+    tool: "trivy"
+    rule_id: "CVE-2020-8203"
+    cwe:
+      - "CWE-471"
+      - "CWE-1321"
+    cve:
+      - "CVE-2020-8203"
+    location:
+      file: "apps/vulnshop-api/package.json"
+      line: 12
+    snippet: "\"lodash\": \"4.17.15\""
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P2"
+    remediation: "Bump lodash to >= 4.17.21"
+
+  - id: "PLANT-006"
+    name: "Container Base Image Uses Mutable Latest Tag & Runs as Root"
+    tool: "checkov"
+    rule_id: "CKV_DOCKER_3"
+    cwe:
+      - "CWE-250"
+    cve: []
+    location:
+      file: "docker/Dockerfile"
+      line: 1
+    snippet: "FROM node:latest"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P2"
+    remediation: "Pin to specific sha256 or immutable tag (node:20.11.1-alpine) and add USER 10001"
+
+  - id: "PLANT-007"
+    name: "Kubernetes Container Runs as Root (runAsNonRoot: false)"
+    tool: "checkov"
+    rule_id: "CKV_K8S_40"
+    cwe:
+      - "CWE-276"
+    cve: []
+    location:
+      file: "infra/k8s/deployment.yaml"
+      line: 20
+    snippet: "securityContext: runAsNonRoot: false"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P2"
+    remediation: "Set runAsNonRoot: true and runAsUser: 10001 in pod/container securityContext"
+
+  - id: "PLANT-008"
+    name: "Reflected XSS via Unescaped Jinja Safe Filter"
+    tool: "zap"
+    rule_id: "10038-xss"
+    cwe:
+      - "CWE-79"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/views/profile.html"
+      line: 15
+    snippet: "<div>Hello {{ username | safe }}</div>"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P1"
+    remediation: "Remove | safe filter to ensure automatic HTML escaping"
+
+  - id: "PLANT-009"
+    name: "Helmet Frameguard Anti-Clickjacking (Negative Control)"
+    tool: "zap"
+    rule_id: "10020-anti-clickjacking"
+    cwe:
+      - "CWE-1021"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/server.js"
+      line: 5
+    snippet: "app.use(helmet.frameguard({ action: 'deny' }))"
+    ground_truth: "FALSE_POSITIVE"
+    expected_priority: "UNASSIGNED"
+    remediation: "None required (False Positive control)"
+
