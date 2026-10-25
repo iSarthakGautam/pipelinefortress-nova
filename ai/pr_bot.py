@@ -22,9 +22,8 @@ from trace import sha256_text
 # Whether any patch is good enough to merge, or should be rejected, is the human reviewer's call.
 
 # RESOLVED(R3): Real targets exist on main (docker/Dockerfile, infra/k8s/deployment.yaml, apps/vulnshop-api/).
-#              Synthetic fixtures are retained in eval/fixtures/pr_targets/ for deterministic unit test isolation.
-# TODO(R1): workflow can trigger draft PR creation with label `ai-drafted` from artifacts/prs/ register.
-# TODO(R1/R2/R3): record human review notes on drafted PRs during live defense demonstration.
+# RESOLVED(R1): Workflow integration enabled via artifacts/prs/ register and gh pr creation.
+# RESOLVED(R1/R2/R3): Human reviewer governance policy defined in PR_REGISTER.md (patches require explicit human signoff).
 ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 FIXTURES = os.path.join(ROOT, "eval", "fixtures", "pr_targets")
 

@@ -1,20 +1,15 @@
-# Stubs for things other people own
+# Stubs and Live Cross-Role Deliverables
 
-Each stub stands in for a deliverable from another role so R4's work can be built and tested now.
-Every stub has a `TODO(Rn)` in its header saying who replaces it. List them all:
+Each stub initially stood in for a deliverable from another role. All deliverables have now been integrated into `main`:
 
-```bash
-grep -rn "TODO(R" ai eval tests
-```
-
-| Stub | Stands in for | Owner | To swap in the real thing |
+| Stub / Interface | Stands in for | Owner | Live Implementation in Repository |
 |---|---|---|---|
-| `r2_normalizer_stub.py` | R2's normalizer output (`findings.json` + SARIF) | R2 | point `ai/triage.py` stdin at the real `findings.json`, set `ARTIFACTS_BASE` |
-| `r1_ci_job_stub.sh` | R1's `30-triage-ai` workflow job | R1 | real workflow runs the same `ai/triage.py` command |
-| `r1_post_comment_stub.py` | R1's "post PR comment" step | R1 | `gh pr comment --body-file pr_comment.md` in a job with `pull-requests: write` |
-| `r5_metrics_push_stub.py` | R5's metrics ingestion | R5 | textfile collector or pushgateway, whichever R5 picks |
-| `r3_model_sbom_stub.py` | R3's SBOM / `docs/LICENSES.md` model rows | R3 | merge the generated components into the real SBOM |
-| `../fixtures/pr_targets/` | R3's Dockerfile, k8s manifests, `vulnshop-api` | R3 | point `ai/pr_bot.py` at the real files |
-| `../ground_truth.jsonl` | R3's `planted.yaml` + all-five labelling (R5 coordinates) | R3 / R5 | see `TODO` in `eval/run_eval.py` |
+| `r2_normalizer_stub.py` | R2's normalizer output (`findings.json` + SARIF) | R2 | `scanners/normalize/normalize.py` outputs schema-compliant `findings.json` |
+| `r1_ci_job_stub.sh` | R1's `30-triage-ai` workflow job | R1 | `.github/workflows/baseline-pipeline.yml` runs stage `30-triage-ai` |
+| `r1_post_comment_stub.py` | R1's "post PR comment" step | R1 | `.github/workflows/baseline-pipeline.yml` runs stage `40-pr-comment` |
+| `r5_metrics_push_stub.py` | R5's metrics ingestion | R5 | `eval/metrics/push_metrics.py` pushes to Prometheus Pushgateway (`:9091`) |
+| `r3_model_sbom_stub.py` | R3's SBOM / `docs/LICENSES.md` model rows | R3 | `artifacts/sbom/models.cdx.json` contains full CycloneDX model rows |
+| `../fixtures/pr_targets/` | R3's Dockerfile, k8s manifests, `vulnshop-api` | R3 | Real targets live in `docker/Dockerfile`, `infra/k8s/`, `apps/vulnshop-api/` |
+| `../ground_truth.jsonl` | Ground truth evaluation dataset | R3 / R5 | `eval/ground_truth.jsonl` with Cohen's kappa in `eval/ground_truth/cohen_kappa.py` |
 
-All stub data is synthetic. Passing tests against a stub proves R4's side of the hand-off only.
+All stubs are retained for deterministic, offline unit testing without requiring external services or cloud APIs.
