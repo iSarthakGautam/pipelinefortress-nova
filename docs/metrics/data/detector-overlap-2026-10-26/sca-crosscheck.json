@@ -1,0 +1,748 @@
+{
+  "summary": {
+    "fix_availability_disagreements": 0,
+    "found_by_all": 19,
+    "found_by_one": {
+      "grype": 0,
+      "osv": 5,
+      "trivy": 0
+    },
+    "pairwise": {
+      "grype|osv": {
+        "both": 20,
+        "jaccard": 0.69
+      },
+      "trivy|grype": {
+        "both": 19,
+        "jaccard": 0.792
+      },
+      "trivy|osv": {
+        "both": 23,
+        "jaccard": 0.793
+      }
+    },
+    "per_tool": {
+      "grype": 20,
+      "osv": 29,
+      "trivy": 23
+    },
+    "severity_disagreements": 3,
+    "tools": [
+      "trivy",
+      "grype",
+      "osv"
+    ],
+    "unique_vulns": 29
+  },
+  "vulnerabilities": [
+    {
+      "aliases": [
+        "GHSA-6q48-6c7w-9gw2"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "2026.10.19"
+      },
+      "id": "GHSA-6q48-6c7w-9gw2",
+      "max_severity": "CRITICAL",
+      "package": "certifi",
+      "severity": {
+        "osv": "CRITICAL"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv"
+      ],
+      "version": "2026.7.22"
+    },
+    {
+      "aliases": [
+        "CVE-2023-30861"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.2.5",
+        "osv": "70f906c51ce49c485f1d355703e9cc3386b1cc2b, afd63b16170b7c047f5758eb910c416511e9c965, 2.2.5, 2.3.2",
+        "trivy": "2.3.2, 2.2.5"
+      },
+      "id": "CVE-2023-30861",
+      "max_severity": "HIGH",
+      "package": "flask",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "2.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2026-27205"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "3.1.3",
+        "osv": "3.1.3",
+        "trivy": "3.1.3"
+      },
+      "id": "CVE-2026-27205",
+      "max_severity": "MEDIUM",
+      "package": "flask",
+      "severity": {
+        "grype": "LOW",
+        "osv": "MEDIUM",
+        "trivy": "LOW"
+      },
+      "severity_agrees": false,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "2.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2024-3651"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "1d365e17e10d72d0b7876316fc7b9ca0eebdd38d, 3.7"
+      },
+      "id": "CVE-2024-3651",
+      "max_severity": "HIGH",
+      "package": "idna",
+      "severity": {
+        "osv": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv"
+      ],
+      "version": "2.9.0"
+    },
+    {
+      "aliases": [
+        "CVE-2026-45409"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "3.15"
+      },
+      "id": "CVE-2026-45409",
+      "max_severity": "MEDIUM",
+      "package": "idna",
+      "severity": {
+        "osv": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv"
+      ],
+      "version": "2.9.0"
+    },
+    {
+      "aliases": [
+        "CVE-2024-22195"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "3.1.3",
+        "osv": "3.1.3",
+        "trivy": "3.1.3"
+      },
+      "id": "CVE-2024-22195",
+      "max_severity": "MEDIUM",
+      "package": "jinja2",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "3.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2024-34064"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "3.1.4",
+        "osv": "3.1.4",
+        "trivy": "3.1.4"
+      },
+      "id": "CVE-2024-34064",
+      "max_severity": "MEDIUM",
+      "package": "jinja2",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "3.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2024-56201"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "3.1.5",
+        "osv": "3.1.5",
+        "trivy": "3.1.5"
+      },
+      "id": "CVE-2024-56201",
+      "max_severity": "HIGH",
+      "package": "jinja2",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "HIGH",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": false,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "3.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2024-56326"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "3.1.5",
+        "osv": "3.1.5",
+        "trivy": "3.1.5"
+      },
+      "id": "CVE-2024-56326",
+      "max_severity": "HIGH",
+      "package": "jinja2",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "HIGH",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": false,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "3.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2025-27516"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "3.1.6",
+        "osv": "3.1.6",
+        "trivy": "3.1.6"
+      },
+      "id": "CVE-2025-27516",
+      "max_severity": "MEDIUM",
+      "package": "jinja2",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "3.0.1"
+    },
+    {
+      "aliases": [
+        "CVE-2020-14343"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "5.4",
+        "osv": "5.4",
+        "trivy": "5.4"
+      },
+      "id": "CVE-2020-14343",
+      "max_severity": "CRITICAL",
+      "package": "pyyaml",
+      "severity": {
+        "grype": "CRITICAL",
+        "osv": "CRITICAL",
+        "trivy": "CRITICAL"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "5.3.1"
+    },
+    {
+      "aliases": [
+        "CVE-2023-32681"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.31.0",
+        "osv": "74ea7cf7a6a27a4eeb2ae24e162bcc942a6706d5, 2.31.0",
+        "trivy": "2.31.0"
+      },
+      "id": "CVE-2023-32681",
+      "max_severity": "MEDIUM",
+      "package": "requests",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "2.25.1"
+    },
+    {
+      "aliases": [
+        "CVE-2024-35195"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.32.0",
+        "osv": "2.32.0",
+        "trivy": "2.32.0"
+      },
+      "id": "CVE-2024-35195",
+      "max_severity": "MEDIUM",
+      "package": "requests",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "2.25.1"
+    },
+    {
+      "aliases": [
+        "CVE-2024-47081"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.32.4",
+        "osv": "2.32.4",
+        "trivy": "2.32.4"
+      },
+      "id": "CVE-2024-47081",
+      "max_severity": "MEDIUM",
+      "package": "requests",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "2.25.1"
+    },
+    {
+      "aliases": [
+        "CVE-2026-25645"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "2.33.0",
+        "trivy": "2.33.0"
+      },
+      "id": "CVE-2026-25645",
+      "max_severity": "MEDIUM",
+      "package": "requests",
+      "severity": {
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv",
+        "trivy"
+      ],
+      "version": "2.25.1"
+    },
+    {
+      "aliases": [
+        "CVE-2021-33503"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "1.26.5",
+        "osv": "2d4a3fee6de2fa45eb82169361918f759269b4ec, 1.26.5",
+        "trivy": "1.26.5"
+      },
+      "id": "CVE-2021-33503",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2023-43804"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "1.26.17",
+        "osv": "644124ecd0b6e417c527191f866daa05a5a2056d, 01220354d389cd05474713f8c982d05c9b17aafb, 2.0.6, 1.26.17",
+        "trivy": "2.0.6, 1.26.17"
+      },
+      "id": "CVE-2023-43804",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2023-45803"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "1.26.18",
+        "osv": "4e98d57809dacab1cbe625fddeec1a290c478ea9, 2.0.7, 1.26.18",
+        "trivy": "2.0.7, 1.26.18"
+      },
+      "id": "CVE-2023-45803",
+      "max_severity": "MEDIUM",
+      "package": "urllib3",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2024-37891"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "1.26.19",
+        "osv": "1.26.19, 2.2.2",
+        "trivy": "1.26.19, 2.2.2"
+      },
+      "id": "CVE-2024-37891",
+      "max_severity": "MEDIUM",
+      "package": "urllib3",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2025-50181"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.5.0",
+        "osv": "2.5.0",
+        "trivy": "2.5.0"
+      },
+      "id": "CVE-2025-50181",
+      "max_severity": "MEDIUM",
+      "package": "urllib3",
+      "severity": {
+        "grype": "MEDIUM",
+        "osv": "MEDIUM",
+        "trivy": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2025-66418"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.6.0",
+        "osv": "2.6.0",
+        "trivy": "2.6.0"
+      },
+      "id": "CVE-2025-66418",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2025-66471"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.6.0",
+        "osv": "2.6.0",
+        "trivy": "2.6.0"
+      },
+      "id": "CVE-2025-66471",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2026-21441"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "grype": "2.6.3",
+        "osv": "2.6.3",
+        "trivy": "2.6.3"
+      },
+      "id": "CVE-2026-21441",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2026-44431"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "2.7.0",
+        "trivy": "2.7.0"
+      },
+      "id": "CVE-2026-44431",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2026-97687"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "2.8.0",
+        "trivy": "2.8.0"
+      },
+      "id": "CVE-2026-97687",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2026-97689"
+      ],
+      "file": "apps/vulnshop-api/requirements.txt",
+      "fixed_version": {
+        "osv": "2.8.0",
+        "trivy": "2.8.0"
+      },
+      "id": "CVE-2026-97689",
+      "max_severity": "HIGH",
+      "package": "urllib3",
+      "severity": {
+        "osv": "HIGH",
+        "trivy": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv",
+        "trivy"
+      ],
+      "version": "1.26.4"
+    },
+    {
+      "aliases": [
+        "CVE-2026-102734"
+      ],
+      "file": "requirements-scanners.txt",
+      "fixed_version": {
+        "osv": "1.0.9"
+      },
+      "id": "CVE-2026-102734",
+      "max_severity": "MEDIUM",
+      "package": "asteval",
+      "severity": {
+        "osv": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv"
+      ],
+      "version": "1.0.6"
+    },
+    {
+      "aliases": [
+        "CVE-2026-55244"
+      ],
+      "file": "requirements-scanners.txt",
+      "fixed_version": {
+        "osv": "1.0.9"
+      },
+      "id": "CVE-2026-55244",
+      "max_severity": "MEDIUM",
+      "package": "asteval",
+      "severity": {
+        "osv": "MEDIUM"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "osv"
+      ],
+      "version": "1.0.6"
+    },
+    {
+      "aliases": [
+        "CVE-2024-23342"
+      ],
+      "file": "requirements-scanners.txt",
+      "fixed_version": {
+        "grype": null,
+        "osv": null
+      },
+      "id": "CVE-2024-23342",
+      "max_severity": "HIGH",
+      "package": "ecdsa",
+      "severity": {
+        "grype": "HIGH",
+        "osv": "HIGH"
+      },
+      "severity_agrees": true,
+      "tools": [
+        "grype",
+        "osv"
+      ],
+      "version": "0.19.2"
+    }
+  ]
+}
