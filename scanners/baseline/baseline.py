@@ -14,7 +14,8 @@ not on accepted existing debt (plan §4.2).
       --findings artifacts/findings.json --baseline scanners/baseline/security-baseline.json \
       --repo . --commit $SHA -o artifacts/findings.diffed.json --report artifacts/gate-report.json
 
-Exit codes for `check`: 0 pass, 1 gate failed, 2 usage/input error.
+Exit codes for `check`: 0 pass, 1 gate failed, 2 usage/input error or any crash. CI treats
+only 1 as a security verdict, so a bug here must never exit 1.
 
 Matching. finding_id hashes the line number, so matching on it alone would turn every
 finding below an inserted line into a "new" one. Findings are instead grouped by a
@@ -37,6 +38,7 @@ import os
 import re
 import subprocess
 import sys
+import traceback
 from collections import defaultdict
 from pathlib import Path
 
@@ -355,6 +357,10 @@ def main(argv=None) -> int:
         return args.func(args)
     except (OSError, ValueError, KeyError) as e:
         print(f"error: {e}", file=sys.stderr)
+        return 2
+    except Exception:
+        # Uncaught, Python would exit 1, which CI reads as "new findings": report a crash instead
+        traceback.print_exc()
         return 2
 
 

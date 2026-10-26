@@ -1,0 +1,17 @@
+# Python-based scanners for the scan-and-gate CI job. Installed into their own venv so their large
+# dependency trees can't change requirements-dev.txt. Edit THIS file, then regenerate the lock:
+#   uv pip compile requirements-scanners.in --generate-hashes --python-version 3.12 \
+#     --python-platform x86_64-manylinux_2_28 --exclude-newer <today minus 14 days> \
+#     --exclude-newer-package certifi=2026-10-21 --exclude-newer-package gitpython=2026-10-15 \
+#     -o requirements-scanners.txt
+# Then re-add the security-exception line at the end of requirements-scanners.txt (uv drops it;
+# without it the gate blocks on ecdsa again, which is the safe failure).
+# Install with: pip install --require-hashes -r requirements-scanners.txt
+# Semgrep is NOT here: it pins its own dependencies tightly and gets a separate venv.
+#
+# Cooldown exceptions (--exclude-newer-package), each the oldest release that fixes a finding the
+# gate blocked on. Drop them once the cooldown date passes them:
+#   certifi 2026.10.19   GHSA-6q48-6c7w-9gw2 (CRITICAL), released 2026-10-20
+#   gitpython 3.2.1      CVE-2026-114145 (HIGH), released 2026-10-14
+bandit
+checkov
