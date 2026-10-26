@@ -183,10 +183,14 @@ jobs:
         run: |
           # Whole repo, so docker/Dockerfile and .github/workflows are covered, not just infra/.
           # --output-file-path is a DIRECTORY for checkov; the SARIF lands in results_sarif.sarif.
-          # secrets: gitleaks owns them. sca_*: needs a Prisma API key; Trivy/Grype/OSV cover SCA.
+          # Allow-list of the IaC this repo has. Checkov pins asteval==1.0.6 (2 sandbox escapes,
+          # see requirements-scanners.txt); only its terraform/cloudformation variable rendering
+          # evaluates with asteval, so those frameworks must stay off: a PR adding a .tf file would
+          # otherwise get its expressions evaluated in this job. Add a framework here only after
+          # checkov ships a fixed asteval. (secrets: gitleaks owns them; sca_*: Trivy/Grype/OSV.)
           checkov -d . --quiet --compact --soft-fail --skip-download \
             --skip-path eval --skip-path tests --skip-path artifacts \
-            --skip-framework secrets sca_package sca_image \
+            --framework dockerfile kubernetes github_actions \
             -o sarif --output-file-path artifacts/scans/checkov
           mv artifacts/scans/checkov/results_sarif.sarif artifacts/scans/checkov.sarif
 
