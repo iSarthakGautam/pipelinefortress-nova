@@ -154,12 +154,32 @@ extra (same 9–10 s run). Dropping it from IaC would not be worth a second conf
 
 | What | Owner |
 |---|---|
-| Upgrade Grype to a current-DB release and re-run this, or remove it | R2 (pipeline: R1 review) |
+| ~~Upgrade Grype to a current-DB release and re-run this, or remove it~~ Done in #29 (see Update below) | R2 |
 | Add `apps/vulnshop-api/package-lock.json` so PLANT-005 is detectable, or record it as an expected miss | R3 |
 | Make Trivy read `requirements-scanners.txt` / `requirements-dev.txt` (or accept OSV+Grype covering them) | R2 |
-| asteval 1.0.6 → 1.0.9 in `requirements-scanners.txt` (2 MEDIUM, OSV only) | R2 |
+| ~~asteval 1.0.6 → 1.0.9~~ Not possible (checkov pins it); made unreachable in #29 | R2 |
+| Link findings across GHSA/CVE aliases in crosscheck (the schema keeps only CVE ids) | R2 |
 | PLANT-003 is catalogued for gitleaks, which cannot see the example key: retarget to the custom Semgrep rule or plant a non-example key | R3 |
 | Cross-tool control map for the noise-reduction metric | R4 / R5 |
+
+## Update: Grype upgraded (#29)
+
+Grype 0.120.1 (DB schema v6, built 2026-10-25) re-run with the same Trivy/OSV results:
+found by all three **19 → 23**; Grype now matches Trivy on all 23 CVEs in
+`apps/vulnshop-api/requirements.txt`; pairwise Jaccard Trivy+Grype 0.79 → 0.89, Grype+OSV
+0.69 → 0.83. Grype still has **0 unique findings**: its one apparent unique (asteval
+`GHSA-9w56-46f6-3qhx`) is OSV's `CVE-2026-102734`, which crosscheck cannot link because the
+normalized schema keeps only CVE aliases. The remaining disagreements are all about which files a
+tool reads (OSV's transitive resolution; Trivy skipping `requirements-scanners.txt`).
+
+**Cost:** the Grype step went from 26–29 s to ~61 s, because the v6 DB download is larger. Grype is
+now a working second opinion, but on this repo it is still redundant with OSV. Whether to keep it for
+the three-way disagreement metric or drop it to save a minute per run is the team's call.
+
+The upgrade also surfaced two asteval 1.0.6 sandbox escapes in `requirements-scanners.txt`. Checkov
+pins `asteval==1.0.6` in every release through 3.3.30, so #29 makes them unreachable instead:
+Checkov now runs only the `dockerfile kubernetes github_actions` frameworks, and asteval is only
+used by its terraform/cloudformation rendering.
 
 ## Reproduce
 
