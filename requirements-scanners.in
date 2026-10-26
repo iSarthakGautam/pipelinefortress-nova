@@ -4,8 +4,10 @@
 #     --python-platform x86_64-manylinux_2_28 --exclude-newer <today minus 14 days> \
 #     --exclude-newer-package certifi=2026-10-21 --exclude-newer-package gitpython=2026-10-15 \
 #     -o requirements-scanners.txt
-# Then re-add the security-exception line at the end of requirements-scanners.txt (uv drops it;
-# without it the gate blocks on ecdsa again, which is the safe failure).
+# Then re-add the security-exception lines at the end of requirements-scanners.txt (uv drops
+# them; without them the gate blocks on ecdsa again, which is the safe failure): ecdsa, and the
+# asteval ones, which also rely on checkov running with --framework dockerfile kubernetes
+# github_actions (asteval is only reachable through terraform/cloudformation rendering).
 # Install with: pip install --require-hashes -r requirements-scanners.txt
 # Semgrep is NOT here: it pins its own dependencies tightly and gets a separate venv.
 #
