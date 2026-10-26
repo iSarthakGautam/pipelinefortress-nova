@@ -17,13 +17,20 @@ permissions:
 env:
   APP_NAME: "vulnshop-api"
   PYTHON_VERSION: "3.12"
-  SEMGREP_VERSION: "1.179.0"
+  # Semgrep's version (and its dependency tree) is pinned in requirements-semgrep.in/.txt.
+  # Each binary's sha256 is pinned here, next to its version: a bump must update both. Taken from the
+  # release checksums file and cross-checked against GitHub's own asset digest (2026-10-26). Checking
+  # against a checksums file downloaded from the same release would not catch a replaced asset.
   TRIVY_VERSION: "0.75.0"
+  TRIVY_SHA256: "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f"
   GITLEAKS_VERSION: "8.30.1"
+  GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
   # 0.86.1 read DB schema v5, frozen at 2026-03-09 (docs/metrics/DETECTOR_OVERLAP.md).
   # 0.120.1: schema v6, released 2026-10-06 (14-day cooldown; also what the test fixtures use)
   GRYPE_VERSION: "0.120.1"
+  GRYPE_SHA256: "0a9ee97ef5ae2ee953b0a80098105052e846cdbe319a57d808b519c33cd1343d"
   OSV_SCANNER_VERSION: "2.6.0"   # 1.9.2 has no `scan source` subcommand; normalize.py parses v2 JSON
+  OSV_SCANNER_SHA256: "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
   ZAP_VERSION: "2.15.0"
   LLM_MODEL: "qwen2.5-coder:1.5b"
   OLLAMA_BASE_URL: "http://127.0.0.1:11434/v1"
@@ -85,14 +92,14 @@ jobs:
 
       # Scanners report findings with exit code 0; only the gate decides. No `|| true`: a scanner that
       # crashes must fail this job, not silently drop its findings and let the gate pass.
-      - name: Install scanners (pinned versions, checksum-verified)
+      - name: Install scanners (pinned versions and hashes)
         run: |
           bin="$RUNNER_TEMP/bin"; mkdir -p "$bin" artifacts/scans
           ws="$GITHUB_WORKSPACE"; cd "$RUNNER_TEMP"
 
-          # Semgrep pins its own dependencies tightly, so it gets its own venv
+          # Semgrep pins its own dependencies tightly, so it gets its own hash-locked venv
           python -m venv semgrep-venv
-          semgrep-venv/bin/pip install --quiet "semgrep==${SEMGREP_VERSION}"
+          semgrep-venv/bin/pip install --quiet --require-hashes -r "$ws/requirements-semgrep.txt"
           ln -s "$RUNNER_TEMP/semgrep-venv/bin/semgrep" "$bin/semgrep"
           # Bandit + Checkov: hash-locked (requirements-scanners.in documents the cooldown)
           python -m venv scanners-venv
@@ -102,26 +109,26 @@ jobs:
 
           f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
-          curl -sSfLO "$base/$f"; curl -sSfLO "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
-          grep " $f\$" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum -c -
+          curl -sSfLO "$base/$f"
+          echo "${GITLEAKS_SHA256}  $f" | sha256sum -c -
           tar -xzf "$f" -C "$bin" gitleaks
 
           f="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
           base="https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}"
-          curl -sSfLO "$base/$f"; curl -sSfLO "$base/trivy_${TRIVY_VERSION}_checksums.txt"
-          grep " $f\$" "trivy_${TRIVY_VERSION}_checksums.txt" | sha256sum -c -
+          curl -sSfLO "$base/$f"
+          echo "${TRIVY_SHA256}  $f" | sha256sum -c -
           tar -xzf "$f" -C "$bin" trivy
 
           f="grype_${GRYPE_VERSION}_linux_amd64.tar.gz"
           base="https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}"
-          curl -sSfLO "$base/$f"; curl -sSfLO "$base/grype_${GRYPE_VERSION}_checksums.txt"
-          grep " $f\$" "grype_${GRYPE_VERSION}_checksums.txt" | sha256sum -c -
+          curl -sSfLO "$base/$f"
+          echo "${GRYPE_SHA256}  $f" | sha256sum -c -
           tar -xzf "$f" -C "$bin" grype
 
           f="osv-scanner_linux_amd64"
           base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
-          curl -sSfLO "$base/$f"; curl -sSfLO "$base/osv-scanner_SHA256SUMS"
-          grep " $f\$" osv-scanner_SHA256SUMS | sha256sum -c -
+          curl -sSfLO "$base/$f"
+          echo "${OSV_SCANNER_SHA256}  $f" | sha256sum -c -
           install -m 0755 "$f" "$bin/osv-scanner"
 
           echo "$bin" >> "$GITHUB_PATH"
@@ -188,8 +195,10 @@ jobs:
           # evaluates with asteval, so those frameworks must stay off: a PR adding a .tf file would
           # otherwise get its expressions evaluated in this job. Add a framework here only after
           # checkov ships a fixed asteval. (secrets: gitleaks owns them; sca_*: Trivy/Grype/OSV.)
+          # --skip-path is a regex searched anywhere in the path (plus a plain substring check), so a
+          # bare `eval` also skipped e.g. infra/k8s/retrieval-svc.yaml. Anchor to the top-level dirs.
           checkov -d . --quiet --compact --soft-fail --skip-download \
-            --skip-path eval --skip-path tests --skip-path artifacts \
+            --skip-path '^\./eval(/|$)' --skip-path '^\./tests(/|$)' --skip-path '^\./artifacts(/|$)' \
             --framework dockerfile kubernetes github_actions \
             -o sarif --output-file-path artifacts/scans/checkov
           mv artifacts/scans/checkov/results_sarif.sarif artifacts/scans/checkov.sarif
@@ -404,9 +413,19 @@ jobs:
   # =========================================================================
   security-gate:
     name: 50-security-gate
-    needs: [normalize-and-baseline, triage-ai]
+    # Deterministic gate: reads only baseline.py's exit code, so it does not wait on the AI stage.
+    # `!cancelled()`: a job skipped because an upstream job failed shows as skipped, which GitHub
+    # treats as passing for a required check. Run anyway and fail unless the baseline job succeeded.
+    needs: normalize-and-baseline
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Require a completed baseline check
+        if: needs.normalize-and-baseline.result != 'success'
+        run: |
+          echo "❌ Security Gate FAILED: the scan/normalize/baseline stage did not complete (${{ needs.normalize-and-baseline.result }})."
+          exit 1
+
       - name: Download Normalized & Triaged Findings
         # actions/download-artifact@v4.1.8
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
