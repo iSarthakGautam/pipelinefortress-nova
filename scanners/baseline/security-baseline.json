@@ -1,11 +1,11 @@
 {
-  "created_commit": "b86bb89",
+  "created_commit": "53f261b",
   "entries": [
     {
       "file": ".github/workflows/baseline-pipeline.yml",
-      "finding_id": "1bfa9c24ba6ea0e7",
+      "finding_id": "1a410286ff898114",
       "first_seen_commit": "930ab36",
-      "line": 474,
+      "line": 477,
       "match_key": "8aea1e2172949588",
       "package": null,
       "rule_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
@@ -300,6 +300,17 @@
     },
     {
       "file": "apps/vulnshop-api/requirements.txt",
+      "finding_id": "9c6ff6a26228a583",
+      "first_seen_commit": "53f261b",
+      "line": 0,
+      "match_key": "fd4e5cbee22fec1c",
+      "package": "requests",
+      "rule_id": "CVE-2026-25645",
+      "severity_norm": "MEDIUM",
+      "tool": "grype"
+    },
+    {
+      "file": "apps/vulnshop-api/requirements.txt",
       "finding_id": "2a591d5dd757d082",
       "first_seen_commit": "c48f1bc433cb3e7bad745ed1e1cfad009358f5c8",
       "line": 0,
@@ -307,6 +318,39 @@
       "package": "flask",
       "rule_id": "CVE-2026-27205",
       "severity_norm": "LOW",
+      "tool": "grype"
+    },
+    {
+      "file": "apps/vulnshop-api/requirements.txt",
+      "finding_id": "fdc9746b2926b8dd",
+      "first_seen_commit": "53f261b",
+      "line": 0,
+      "match_key": "b92d5697e43b0286",
+      "package": "urllib3",
+      "rule_id": "CVE-2026-44431",
+      "severity_norm": "HIGH",
+      "tool": "grype"
+    },
+    {
+      "file": "apps/vulnshop-api/requirements.txt",
+      "finding_id": "d7c22c3e99143c95",
+      "first_seen_commit": "53f261b",
+      "line": 0,
+      "match_key": "c8ffe9c5e85639f1",
+      "package": "urllib3",
+      "rule_id": "CVE-2026-97687",
+      "severity_norm": "HIGH",
+      "tool": "grype"
+    },
+    {
+      "file": "apps/vulnshop-api/requirements.txt",
+      "finding_id": "25833a2c92a586f0",
+      "first_seen_commit": "53f261b",
+      "line": 0,
+      "match_key": "272de7c26e764b08",
+      "package": "urllib3",
+      "rule_id": "CVE-2026-97689",
+      "severity_norm": "HIGH",
       "tool": "grype"
     },
     {
@@ -1617,28 +1661,6 @@
       "rule_id": "yaml.kubernetes.security.allow-privilege-escalation.allow-privilege-escalation",
       "severity_norm": "MEDIUM",
       "tool": "semgrep"
-    },
-    {
-      "file": "requirements-scanners.txt",
-      "finding_id": "733d94ef239353ce",
-      "first_seen_commit": "cd1b4b8",
-      "line": 0,
-      "match_key": "8c4bbdca041a13e5",
-      "package": "asteval",
-      "rule_id": "CVE-2026-102734",
-      "severity_norm": "MEDIUM",
-      "tool": "osv"
-    },
-    {
-      "file": "requirements-scanners.txt",
-      "finding_id": "7cfb930a3077f874",
-      "first_seen_commit": "cd1b4b8",
-      "line": 0,
-      "match_key": "358d77e2c9138fb8",
-      "package": "asteval",
-      "rule_id": "CVE-2026-55244",
-      "severity_norm": "MEDIUM",
-      "tool": "osv"
     },
     {
       "file": "scripts/install_hooks.py",
