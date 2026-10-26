@@ -1,0 +1,37 @@
+# PipelineFortress custom rule. Owner: R2. Planted class: PLANT-001 (negative control: PLANT-002).
+# Tests: tests/semgrep/python-sqli.py (run: semgrep --test --config scanners/semgrep/rules tests/semgrep)
+rules:
+  - id: pf-python-sqli-formatted-query
+    languages: [python]
+    severity: ERROR
+    message: >-
+      SQL text built with string formatting reaches $CUR.$EXEC(). Any user input in it can rewrite
+      the query (SQL injection). Pass values as parameters: $CUR.$EXEC("... WHERE name = ?", (value,)).
+    metadata:
+      cwe: ["CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"]
+      category: security
+      confidence: MEDIUM
+      planted: [PLANT-001, PLANT-002]
+    patterns:
+      - pattern-either:
+          - pattern: $CUR.$EXEC($FMT, ...)
+          - pattern: |
+              $Q = $FMT
+              ...
+              $CUR.$EXEC($Q, ...)
+      - metavariable-regex:
+          metavariable: $EXEC
+          regex: ^(execute|executemany|executescript)$
+      # Built by formatting: f-string with a placeholder, %, .format() or + concatenation.
+      # A plain literal plus a parameter tuple (the safe form) never matches.
+      - metavariable-pattern:
+          metavariable: $FMT
+          pattern-either:
+            - pattern: f"...{$X}..."
+            - pattern: '"..." % $ARGS'
+            - pattern: '"...".format(...)'
+            - pattern: '"..." + $Y'
+            - pattern: '$Y + "..."'
+      - metavariable-regex:
+          metavariable: $FMT
+          regex: (?is).*\b(select|insert|update|delete|replace|create|drop|alter)\b

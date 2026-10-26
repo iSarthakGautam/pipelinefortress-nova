@@ -58,6 +58,28 @@
     },
     {
       "file": "apps/vulnshop-api/config.py",
+      "finding_id": "e0d3038a59695afc",
+      "first_seen_commit": "b86bb89",
+      "line": 10,
+      "match_key": "1d1b603252b880a3",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-python-hardcoded-credential",
+      "severity_norm": "HIGH",
+      "tool": "semgrep"
+    },
+    {
+      "file": "apps/vulnshop-api/config.py",
+      "finding_id": "f784acaf3ff96df4",
+      "first_seen_commit": "b86bb89",
+      "line": 12,
+      "match_key": "1d1b603252b880a3",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-python-hardcoded-credential",
+      "severity_norm": "HIGH",
+      "tool": "semgrep"
+    },
+    {
+      "file": "apps/vulnshop-api/config.py",
       "finding_id": "5c174cea93210fb3",
       "first_seen_commit": "c48f1bc433cb3e7bad745ed1e1cfad009358f5c8",
       "line": 13,
@@ -66,6 +88,17 @@
       "rule_id": "B105",
       "severity_norm": "LOW",
       "tool": "bandit"
+    },
+    {
+      "file": "apps/vulnshop-api/config.py",
+      "finding_id": "42b2e412c7dcd110",
+      "first_seen_commit": "b86bb89",
+      "line": 13,
+      "match_key": "1d1b603252b880a3",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-python-hardcoded-credential",
+      "severity_norm": "HIGH",
+      "tool": "semgrep"
     },
     {
       "file": "apps/vulnshop-api/requirements.txt",
@@ -915,6 +948,17 @@
       "tool": "semgrep"
     },
     {
+      "file": "apps/vulnshop-api/routes/pay.py",
+      "finding_id": "cbf5f6a447404a92",
+      "first_seen_commit": "b86bb89",
+      "line": 22,
+      "match_key": "bf74f9c8573c778a",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-python-flask-shell-injection",
+      "severity_norm": "HIGH",
+      "tool": "semgrep"
+    },
+    {
       "file": "apps/vulnshop-api/routes/search.py",
       "finding_id": "e0ffdd7fd32e5d31",
       "first_seen_commit": "c48f1bc433cb3e7bad745ed1e1cfad009358f5c8",
@@ -935,6 +979,17 @@
       "rule_id": "B608",
       "severity_norm": "LOW",
       "tool": "bandit"
+    },
+    {
+      "file": "apps/vulnshop-api/routes/search.py",
+      "finding_id": "98291f33567cd132",
+      "first_seen_commit": "b86bb89",
+      "line": 34,
+      "match_key": "1072fd8a4b04c8cc",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-python-sqli-formatted-query",
+      "severity_norm": "HIGH",
+      "tool": "semgrep"
     },
     {
       "file": "apps/vulnshop-api/routes/search.py",
@@ -1004,6 +1059,17 @@
     },
     {
       "file": "apps/vulnshop-api/routes/search.py",
+      "finding_id": "f9807247eee6df36",
+      "first_seen_commit": "b86bb89",
+      "line": 42,
+      "match_key": "1072fd8a4b04c8cc",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-python-sqli-formatted-query",
+      "severity_norm": "HIGH",
+      "tool": "semgrep"
+    },
+    {
+      "file": "apps/vulnshop-api/routes/search.py",
       "finding_id": "8927252fefa1e12f",
       "first_seen_commit": "c48f1bc433cb3e7bad745ed1e1cfad009358f5c8",
       "line": 44,
@@ -1044,6 +1110,17 @@
       "package": null,
       "rule_id": "javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
       "severity_norm": "LOW",
+      "tool": "semgrep"
+    },
+    {
+      "file": "apps/vulnshop-api/views/profile.html",
+      "finding_id": "cffbb5b231d9660c",
+      "first_seen_commit": "b86bb89",
+      "line": 15,
+      "match_key": "6886e359ac456a25",
+      "package": null,
+      "rule_id": "scanners.semgrep.rules.pf-jinja-autoescape-bypass",
+      "severity_norm": "MEDIUM",
       "tool": "semgrep"
     },
     {

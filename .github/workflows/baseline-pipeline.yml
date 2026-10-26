@@ -141,9 +141,17 @@ jobs:
             --config .gitleaks.toml \
             --report-format sarif --report-path artifacts/scans/gitleaks.sarif .
 
+      - name: Test custom Semgrep rules
+        run: |
+          # Each rule in scanners/semgrep/rules/ has annotated targets (ruleid:/ok:) in tests/semgrep/
+          semgrep --test --config scanners/semgrep/rules tests/semgrep --metrics off --disable-version-check
+
       - name: Scan SAST (Semgrep)
         run: |
-          semgrep scan --config p/default --metrics off --disable-version-check \
+          # p/default comes from the registry and changes over time; scanners/semgrep/rules/ is ours,
+          # versioned in the repo, and covers every planted vuln class (PLANT-001/003/004/008)
+          semgrep scan --config p/default --config scanners/semgrep/rules \
+            --metrics off --disable-version-check \
             --exclude eval --exclude tests --exclude artifacts \
             --sarif --output artifacts/scans/semgrep.sarif .
 

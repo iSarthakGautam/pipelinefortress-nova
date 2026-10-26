@@ -1,0 +1,29 @@
+# PipelineFortress custom rule. Owner: R2. Planted class: PLANT-004.
+# Tests: tests/semgrep/python-shell-injection.py
+rules:
+  - id: pf-python-flask-shell-injection
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Data from the Flask request reaches a shell command. A value such as "x; rm -rf /" runs as a
+      second command (command injection). Pass an argument list without shell=True, e.g.
+      subprocess.run(["echo", value]), and validate the value against an allow-list.
+    metadata:
+      cwe: ["CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"]
+      category: security
+      confidence: HIGH
+      planted: [PLANT-004]
+    pattern-sources:
+      - pattern-either:
+          - pattern: flask.request.$ATTR
+          - pattern: flask.request.$METHOD(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: subprocess.$FUNC($CMD, ..., shell=True, ...)
+              - pattern: os.system($CMD)
+              - pattern: os.popen($CMD, ...)
+          - focus-metavariable: $CMD
+    pattern-sanitizers:
+      - pattern: shlex.quote(...)
