@@ -1,0 +1,15 @@
+# Semgrep for the scan-and-gate CI job, in its own venv: it pins its dependencies tightly, so it
+# can't share a resolver with bandit/checkov (requirements-scanners.in). Edit THIS file, then
+# regenerate the lock:
+#   uv pip compile requirements-semgrep.in --generate-hashes --python-version 3.12 \
+#     --python-platform x86_64-manylinux_2_28 --exclude-newer <today minus 14 days> \
+#     --exclude-newer-package certifi=2026-10-21 -o requirements-semgrep.txt
+# Then re-add the security-exception lines at the end of requirements-semgrep.txt (uv drops them;
+# without them the gate reports the two as new again).
+# Install with: pip install --require-hashes -r requirements-semgrep.txt
+#
+# Cooldown exception (--exclude-newer-package), the oldest release that fixes a finding:
+#   certifi 2026.10.19   GHSA-6q48-6c7w-9gw2 (CRITICAL), released 2026-10-20
+# Not upgradable: semgrep 1.179.0 pins mcp==1.29.0 and opentelemetry-api~=1.37.0; see the
+# exception lines in requirements-semgrep.txt.
+semgrep==1.179.0
