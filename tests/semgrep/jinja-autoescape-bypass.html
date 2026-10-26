@@ -1,0 +1,15 @@
+<!-- Test targets for scanners/semgrep/rules/jinja-autoescape-bypass.yaml -->
+<body>
+    <!-- ruleid: pf-jinja-autoescape-bypass -->
+    <div>Hello {{ username | safe }}</div>
+    <!-- ruleid: pf-jinja-autoescape-bypass -->
+    <div>{{ bio|safe }}</div>
+    <!-- ruleid: pf-jinja-autoescape-bypass -->
+    {% autoescape false %}{{ note }}{% endautoescape %}
+    <!-- ok: pf-jinja-autoescape-bypass -->
+    <p>Email: {{ email }}</p>
+    <!-- ok: pf-jinja-autoescape-bypass -->
+    <p>{{ safety_rating }}</p>
+    <!-- ok: pf-jinja-autoescape-bypass -->
+    {% autoescape true %}{{ note }}{% endautoescape %}
+</body>

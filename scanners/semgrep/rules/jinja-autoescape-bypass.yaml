@@ -1,0 +1,20 @@
+# PipelineFortress custom rule. Owner: R2. Planted class: PLANT-008 (catalogued for ZAP; this is
+# the static check for the same template). Tests: tests/semgrep/jinja-autoescape-bypass.html
+rules:
+  - id: pf-jinja-autoescape-bypass
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      This template turns off Jinja's HTML escaping. If the value can come from a user, any <script>
+      in it runs in the page (cross-site scripting). Drop "| safe" / autoescape false, or sanitise the
+      value (e.g. with bleach) before it is marked safe.
+    metadata:
+      cwe: ["CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"]
+      category: security
+      confidence: MEDIUM
+      planted: [PLANT-008]
+    paths:
+      include: ["*.html", "*.htm", "*.j2", "*.jinja", "*.jinja2"]
+    pattern-either:
+      - pattern-regex: \{\{[^}]*\|\s*safe\b[^}]*\}\}
+      - pattern-regex: \{%-?\s*autoescape\s+false\b
