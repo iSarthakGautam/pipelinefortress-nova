@@ -21,7 +21,7 @@ env:
   TRIVY_VERSION: "0.75.0"
   GITLEAKS_VERSION: "8.30.1"
   GRYPE_VERSION: "0.86.1"
-  OSV_SCANNER_VERSION: "1.9.2"
+  OSV_SCANNER_VERSION: "2.6.0"   # 1.9.2 has no `scan source` subcommand; normalize.py parses v2 JSON
   ZAP_VERSION: "2.15.0"
   LLM_MODEL: "qwen2.5-coder:1.5b"
   OLLAMA_BASE_URL: "http://127.0.0.1:11434/v1"
@@ -81,48 +81,66 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install scanners (pinned versions)
+      # Scanners report findings with exit code 0; only the gate decides. No `|| true`: a scanner that
+      # crashes must fail this job, not silently drop its findings and let the gate pass.
+      - name: Install scanners (pinned versions, checksum-verified)
         run: |
-          mkdir -p "$RUNNER_TEMP/bin" artifacts/scans
-          pip install "semgrep==${SEMGREP_VERSION}" bandit checkov
+          bin="$RUNNER_TEMP/bin"; mkdir -p "$bin" artifacts/scans
+          ws="$GITHUB_WORKSPACE"; cd "$RUNNER_TEMP"
 
-          # Install pinned Gitleaks
+          # Semgrep pins its own dependencies tightly, so it gets its own venv
+          python -m venv semgrep-venv
+          semgrep-venv/bin/pip install --quiet "semgrep==${SEMGREP_VERSION}"
+          ln -s "$RUNNER_TEMP/semgrep-venv/bin/semgrep" "$bin/semgrep"
+          # Bandit + Checkov: hash-locked (requirements-scanners.in documents the cooldown)
+          python -m venv scanners-venv
+          scanners-venv/bin/pip install --quiet --require-hashes -r "$ws/requirements-scanners.txt"
+          ln -s "$RUNNER_TEMP/scanners-venv/bin/bandit" "$bin/bandit"
+          ln -s "$RUNNER_TEMP/scanners-venv/bin/checkov" "$bin/checkov"
+
           f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl -sSfLO "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$f"
-          tar -xzf "$f" -C "$RUNNER_TEMP/bin" gitleaks
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -sSfLO "$base/$f"; curl -sSfLO "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " $f\$" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "$f" -C "$bin" gitleaks
 
-          # Install pinned Trivy
           f="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-          curl -sSfLO "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/$f"
-          tar -xzf "$f" -C "$RUNNER_TEMP/bin" trivy
+          base="https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}"
+          curl -sSfLO "$base/$f"; curl -sSfLO "$base/trivy_${TRIVY_VERSION}_checksums.txt"
+          grep " $f\$" "trivy_${TRIVY_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "$f" -C "$bin" trivy
 
-          # Install pinned Grype (SCA)
           f="grype_${GRYPE_VERSION}_linux_amd64.tar.gz"
-          curl -sSfLO "https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}/$f"
-          tar -xzf "$f" -C "$RUNNER_TEMP/bin" grype
+          base="https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}"
+          curl -sSfLO "$base/$f"; curl -sSfLO "$base/grype_${GRYPE_VERSION}_checksums.txt"
+          grep " $f\$" "grype_${GRYPE_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "$f" -C "$bin" grype
 
-          # Install pinned OSV-Scanner
-          curl -sSfL \
-            "https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64" \
-            -o "$RUNNER_TEMP/bin/osv-scanner"
-          chmod +x "$RUNNER_TEMP/bin/osv-scanner"
+          f="osv-scanner_linux_amd64"
+          base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
+          curl -sSfLO "$base/$f"; curl -sSfLO "$base/osv-scanner_SHA256SUMS"
+          grep " $f\$" osv-scanner_SHA256SUMS | sha256sum -c -
+          install -m 0755 "$f" "$bin/osv-scanner"
 
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          echo "$bin" >> "$GITHUB_PATH"
 
       - name: Scan Secrets (Gitleaks)
         run: |
-          gitleaks git --redact --no-banner --exit-code 0 \
+          # --ignore-gitleaks-allow: an inline comment must not silence a finding; suppressions are
+          # exact values in .gitleaks.toml, reviewed in a PR
+          gitleaks git --redact --no-banner --exit-code 0 --ignore-gitleaks-allow \
+            --config .gitleaks.toml \
             --report-format sarif --report-path artifacts/scans/gitleaks.sarif .
 
       - name: Scan SAST (Semgrep)
         run: |
           semgrep scan --config p/default --metrics off --disable-version-check \
             --exclude eval --exclude tests --exclude artifacts \
-            --sarif --output artifacts/scans/semgrep.sarif . || true
+            --sarif --output artifacts/scans/semgrep.sarif .
 
       - name: Scan Python SAST (Bandit)
         run: |
-          bandit -r apps/ -f json -o artifacts/scans/bandit.json --exit-zero || true
+          bandit -r apps/ -f json -o artifacts/scans/bandit.json --exit-zero
 
       - name: Scan SCA & Container Files (Trivy)
         run: |
@@ -131,15 +149,32 @@ jobs:
 
       - name: Scan SCA (Grype)
         run: |
-          grype dir:. -o json --file artifacts/scans/grype.json --exclude ./eval --exclude ./tests --exclude ./artifacts --add-cpes-if-none || true
+          grype dir:. -o json --file artifacts/scans/grype.json --exclude ./eval --exclude ./tests --exclude ./artifacts --add-cpes-if-none
 
       - name: Scan SCA (OSV-Scanner)
         run: |
-          osv-scanner scan source -r --skip-git --format json --output artifacts/scans/osv.json . || true
+          set +e
+          osv-scanner scan source -r --experimental-exclude "g:eval/**" --experimental-exclude "g:tests/**" \
+            --experimental-exclude "g:artifacts/**" --format json --output-file artifacts/scans/osv.json .
+          rc=$?
+          set -e
+          # 0 = clean, 1 = vulnerabilities found, 128 = no packages found; anything else is an error
+          case "$rc" in
+            0|1) ;;
+            128) echo "osv-scanner: no packages found"; echo '{"results": []}' > artifacts/scans/osv.json ;;
+            *) echo "osv-scanner failed with exit code $rc"; exit "$rc" ;;
+          esac
 
-      - name: Scan IaC & K8s Manifests (Checkov)
+      - name: Scan IaC (Checkov)
         run: |
-          checkov -d infra/ --output sarif --output-file-path artifacts/scans/checkov.sarif --soft-fail || true
+          # Whole repo, so docker/Dockerfile and .github/workflows are covered, not just infra/.
+          # --output-file-path is a DIRECTORY for checkov; the SARIF lands in results_sarif.sarif.
+          # secrets: gitleaks owns them. sca_*: needs a Prisma API key; Trivy/Grype/OSV cover SCA.
+          checkov -d . --quiet --compact --soft-fail --skip-download \
+            --skip-path eval --skip-path tests --skip-path artifacts \
+            --skip-framework secrets sca_package sca_image \
+            -o sarif --output-file-path artifacts/scans/checkov
+          mv artifacts/scans/checkov/results_sarif.sarif artifacts/scans/checkov.sarif
 
       - name: Upload Raw Scanner Artifacts
         if: always()
@@ -185,29 +220,37 @@ jobs:
 
       - name: Normalize findings into ADR-001 Schema
         run: |
-          mkdir -p artifacts
-          CMD="python3 scanners/normalize/normalize.py -o artifacts/findings.json"
-          [ -f artifacts/scans/semgrep.sarif ] && CMD="$CMD --semgrep artifacts/scans/semgrep.sarif"
-          [ -f artifacts/scans/gitleaks.sarif ] && CMD="$CMD --gitleaks artifacts/scans/gitleaks.sarif"
-          [ -f artifacts/scans/trivy.json ] && CMD="$CMD --trivy artifacts/scans/trivy.json"
-          [ -f artifacts/scans/bandit.json ] && CMD="$CMD --bandit artifacts/scans/bandit.json"
-          [ -f artifacts/scans/grype.json ] && CMD="$CMD --grype artifacts/scans/grype.json"
-          [ -f artifacts/scans/osv.json ] && CMD="$CMD --osv artifacts/scans/osv.json"
-          [ -f artifacts/scans/checkov.sarif ] && CMD="$CMD --checkov artifacts/scans/checkov.sarif"
-          echo "Executing: $CMD"
-          $CMD
+          # Every scanner output is required: a missing file means a scanner did not run, and
+          # skipping it would make the gate pass on fewer findings (fail-open).
+          python3 scanners/normalize/normalize.py \
+            --semgrep artifacts/scans/semgrep.sarif \
+            --gitleaks artifacts/scans/gitleaks.sarif \
+            --trivy artifacts/scans/trivy.json \
+            --bandit artifacts/scans/bandit.json \
+            --grype artifacts/scans/grype.json \
+            --osv artifacts/scans/osv.json \
+            --checkov artifacts/scans/checkov.sarif \
+            --root "$GITHUB_WORKSPACE" \
+            -o artifacts/findings.json
 
       - name: Baseline security diffing check
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
+          # Exit 1 (gate failed) must not stop this job, so triage still runs on a failing PR; the
+          # gate job reads the code from gate-rc.txt. Exit 2 (bad input / crash) fails here.
+          set +e
           python3 scanners/baseline/baseline.py check \
             --findings artifacts/findings.json \
             --baseline scanners/baseline/security-baseline.json \
             --repo . --commit "$HEAD_SHA" \
             -o artifacts/findings.diffed.json --report artifacts/gate-report.json \
-            > artifacts/gate-summary.txt || true
+            > artifacts/gate-summary.txt
+          rc=$?
+          set -e
+          echo "$rc" > artifacts/gate-rc.txt
           cat artifacts/gate-summary.txt
+          if [ "$rc" -gt 1 ]; then echo "baseline check errored (exit $rc)"; exit "$rc"; fi
 
       - name: Upload Normalized Findings Artifacts
         # actions/upload-artifact@v4.4.3
@@ -219,6 +262,7 @@ jobs:
             artifacts/findings.diffed.json
             artifacts/gate-report.json
             artifacts/gate-summary.txt
+            artifacts/gate-rc.txt
           retention-days: 7
 
   # =========================================================================
@@ -360,9 +404,10 @@ jobs:
           if [ -f artifacts/gate-summary.txt ]; then
             cat artifacts/gate-summary.txt
           fi
-          # Check for unexcepted P1 critical blockers
-          if grep -q "FAIL" artifacts/gate-summary.txt 2>/dev/null; then
-            echo "❌ Security Gate FAILED: Unexcepted high-severity security findings detected."
+          # Fail closed: anything but an explicit 0 from baseline.py (including a missing file) fails.
+          rc="$(cat artifacts/gate-rc.txt 2>/dev/null || echo missing)"
+          if [ "$rc" != "0" ]; then
+            echo "❌ Security Gate FAILED (baseline.py exit: $rc): new high-severity findings or bad exceptions."
             exit 1
           fi
           echo "✅ Security Gate PASSED: All findings grandfathered or accepted."
