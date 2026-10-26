@@ -20,7 +20,9 @@ env:
   SEMGREP_VERSION: "1.179.0"
   TRIVY_VERSION: "0.75.0"
   GITLEAKS_VERSION: "8.30.1"
-  GRYPE_VERSION: "0.86.1"
+  # 0.86.1 read DB schema v5, frozen at 2026-03-09 (docs/metrics/DETECTOR_OVERLAP.md).
+  # 0.120.1: schema v6, released 2026-10-06 (14-day cooldown; also what the test fixtures use)
+  GRYPE_VERSION: "0.120.1"
   OSV_SCANNER_VERSION: "2.6.0"   # 1.9.2 has no `scan source` subcommand; normalize.py parses v2 JSON
   ZAP_VERSION: "2.15.0"
   LLM_MODEL: "qwen2.5-coder:1.5b"
@@ -151,8 +153,17 @@ jobs:
             --format json --output artifacts/scans/trivy.json .
 
       - name: Scan SCA (Grype)
+        env:
+          GRYPE_CHECK_FOR_APP_UPDATE: "false"
+          # A stale DB must fail the scan, not silently miss every newer CVE: refuse a DB built more
+          # than 5 days ago, and fail if the update check itself cannot run
+          GRYPE_DB_VALIDATE_AGE: "true"
+          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: "120h"
+          GRYPE_DB_REQUIRE_UPDATE_CHECK: "true"
         run: |
-          grype dir:. -o json --file artifacts/scans/grype.json --exclude ./eval --exclude ./tests --exclude ./artifacts --add-cpes-if-none
+          grype dir:. -o json --file artifacts/scans/grype.json --exclude ./.git --exclude ./eval \
+            --exclude ./tests --exclude ./artifacts --add-cpes-if-none
+          python3 -c "import json; d=json.load(open('artifacts/scans/grype.json'))['descriptor']['db']['status']; print('grype DB', d['schemaVersion'], 'built', d['built'])"
 
       - name: Scan SCA (OSV-Scanner)
         run: |
