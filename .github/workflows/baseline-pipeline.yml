@@ -144,7 +144,9 @@ jobs:
 
       - name: Scan SCA & Container Files (Trivy)
         run: |
+          # Two DB registries, tried in order: mirror.gcr.io has served 404s for DB layers
           trivy fs --scanners vuln,misconfig --exit-code 0 --skip-dirs artifacts,eval,tests \
+            --db-repository mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2 \
             --format json --output artifacts/scans/trivy.json .
 
       - name: Scan SCA (Grype)
