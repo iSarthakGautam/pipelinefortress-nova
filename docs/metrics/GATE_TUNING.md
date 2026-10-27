@@ -42,17 +42,28 @@ went green when it should have blocked.
    - a scanner outage.
 
    Section 4 has the mitigations. This PR adds a warning before exceptions expire.
+5. **Could the gate be bypassed? It could, in three ways, now closed.** A code review of the gate
+   found these:
+   - fixing one known finding freed a baseline slot that hid a new finding of the same rule
+     anywhere in the same file;
+   - a known finding never blocked again, even if re-rated from LOW to CRITICAL;
+   - a vulnerability with no score yet was rated INFO, so it could never block.
+
+   See "Changes in this PR".
 
 ## 1. What the gate decides
 
-`baseline.py check` fails when either of these holds:
+`baseline.py check` fails when any of these holds:
 
 - a finding is **new** (not in `security-baseline.json`), rated **HIGH or above**, and has no
   valid exception;
+- a **known** finding is now rated HIGH or above, but was accepted below HIGH, and has no
+  valid exception (added in this PR);
 - any exception is expired, malformed, or set to expire more than 90 days out.
 
 Matching ignores line numbers (`tool|rule|file|package`), so moving code does not make its
-findings new. The gate job fails closed: it fails unless `baseline.py` exited 0, and since #24 it
+findings new. Since this PR, a moved finding stays known only if its flagged line still has the
+same text (`line_sha`, whitespace ignored). The gate job fails closed: it fails unless `baseline.py` exited 0, and since #24 it
 also fails if the scan stage did not finish.
 
 ## 2. Run history
@@ -115,13 +126,17 @@ Negative controls are PLANT-002 (parameterised query) and PLANT-009 (helmet fram
 
 | Change | Why | Effect on main |
 |---|---|---|
-| `pf-jinja-autoescape-bypass`: WARNING → **ERROR** (HIGH) | The planted P1 XSS rated MEDIUM, so a new `\| safe` on user input passed. In this repo the rule has exactly one hit, the planted one | none: already in the baseline |
-| `CKV_K8S_23` (Checkov) and `KSV-0012` (Trivy) → **HIGH** | A root container rated HIGH in a Dockerfile (`DS-0002`, `CKV_DOCKER_3`) but MEDIUM in a pod spec. Same risk, same rating. Neither fires on the hardened manifest | none: already in the baseline |
+| `pf-jinja-autoescape-bypass`: WARNING → **ERROR** (HIGH) | The planted P1 XSS rated MEDIUM, so a new `\| safe` on user input passed. In this repo the rule has exactly one hit, the planted one | re-accepted at HIGH in the baseline (see the re-rating row) |
+| `CKV_K8S_23` (Checkov) and `KSV-0012` (Trivy) → **HIGH** | A root container rated HIGH in a Dockerfile (`DS-0002`, `CKV_DOCKER_3`) but MEDIUM in a pod spec. Same risk, same rating. Neither fires on the hardened manifest | re-accepted at HIGH in the baseline |
 | `--warn-expiring-days` (default 14) | All 6 current exceptions expire on 2027-01-15. On that day every open PR fails at once, whatever it changes. Each one is now reported as a warning (`warning: exception … expires … (in N days)`) for 14 days beforehand, and counted as `exceptions_expiring` in `gate-report.json`. It does not fail the gate | none today |
+| **Moved findings match on code, not just on group** | When a known finding moved, any leftover baseline slot in the same tool, rule and file absorbed it. So fixing the SQL injection on line 10 and adding a new one on line 300 left the new one "known", and the gate passed. A slot now absorbs a moved finding only if the flagged line has the same text (`line_sha` in the baseline, whitespace ignored) | baseline gains `line_sha` on its 78 entries that point at a source line; one moved finding (a workflow action tag, line 477 → 508) kept its history |
+| **A re-rated known finding blocks again** | Known findings were skipped whatever their current rating. A CVE accepted at LOW and re-scored CRITICAL by the vendor, or by a `severity_map.yaml` change, stayed accepted. It now blocks if it crosses `--fail-on` from below (`BLOCK … (known, but accepted at LOW)`, `raised` in `gate-report.json`). One already accepted at HIGH does not block again as CRITICAL | the 3 findings re-rated above now block, and this PR re-accepts them at HIGH: the re-rating is a visible decision in the baseline diff |
+| **Unscored vulnerabilities → HIGH** (Trivy, Grype, OSV `UNKNOWN`) | They were rated INFO and could never block. A CVE published days ago often has no score yet | none: main has no `UNKNOWN` findings |
 
-Replaying the gate on main's findings with these changes still gives PASS: 162 findings, 152
-known, 10 new, all covered by exceptions, 0 blocking. The ratings only matter for findings that
-are new.
+Replaying the gate on this PR's CI findings (run 40508911302) against main's baseline, the re-rating rule blocks
+exactly the 3 re-rated findings (`known, but accepted at MEDIUM`). With this PR's baseline, which
+holds the same 152 entries with those 3 at HIGH plus `line_sha`, the result is PASS: 162 findings,
+152 known, 10 new (all covered by exceptions), 0 blocking.
 
 ## 4. False-fail risks that remain
 
@@ -130,7 +145,9 @@ are new.
 | **Vulnerability database drift**: a new advisory against an unchanged dependency | Not yet: main (2026-10-26 16:22) and #26 (13 h later) had the same 162 findings | Every PR fails the same day for something none of them changed | Fix or except it in one small PR. **Suggestion for R1:** a nightly scheduled run on main, so drift turns main red, not a contributor's PR |
 | **Scanner change without a rebaseline** | 3 times (#24, #27, #29), each handled correctly | The scanner PR goes red on old debt | Rule: a PR that adds, upgrades or reconfigures a scanner or rule includes `baseline.py create` and explains the diff in its description |
 | **All exceptions expiring on the same day** | All 6 expire on 2027-01-15 | All PRs fail on 2027-01-16 | This PR's 14-day warning. Spread out expiry dates when renewing |
-| **File renames** | No | `match_key` includes the path, so a moved file's findings count as new | Rebaseline in the rename PR. Accepted: matching across renames would need a content hash |
+| **File renames** | No | `match_key` includes the path, so a moved file's findings count as new | Rebaseline in the rename PR. `line_sha` could match across renames later |
+| **Re-scored known CVE** | Not yet | A vendor re-scores an accepted dependency CVE from MEDIUM to HIGH. Every PR blocks until someone decides, like database drift | Fix or except it in one small PR. The gate output names the finding and the severity it was accepted at |
+| **A known finding moved and edited in one change** | Not yet | Its line text changed, so it no longer matches its slot and counts as new | Rebaseline in that PR. Accepted: the alternative is the bypass this PR closes |
 | **Scanner outage** | 2 (Trivy DB) | Fail-closed, so the run goes red with no verdict | Re-run. Trivy tries ghcr.io first; Grype refuses a database more than 5 days old instead of silently missing CVEs |
 
 ## 5. Not fixed here

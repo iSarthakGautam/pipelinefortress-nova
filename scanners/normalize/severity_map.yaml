@@ -23,12 +23,14 @@ gosec:
   MEDIUM: MEDIUM
   LOW: LOW
 
+# UNKNOWN is a vulnerability nobody has scored yet, often because it was published days ago. Rating it
+# INFO meant it could never block, so it is HIGH: a new one needs a fix or a dated exception.
 trivy:
   CRITICAL: CRITICAL
   HIGH: HIGH
   MEDIUM: MEDIUM
   LOW: LOW
-  UNKNOWN: INFO
+  UNKNOWN: HIGH
 
 grype:
   CRITICAL: CRITICAL
@@ -36,14 +38,14 @@ grype:
   MEDIUM: MEDIUM
   LOW: LOW
   NEGLIGIBLE: INFO
-  UNKNOWN: INFO
+  UNKNOWN: HIGH         # unscored, see trivy above
 
 osv:                    # only used when a group has no CVSS score; numeric max_severity is
   CRITICAL: CRITICAL    # bucketed with CVSS v3 ranges in normalize.cvss_bucket()
   HIGH: HIGH
   MODERATE: MEDIUM
   LOW: LOW
-  UNKNOWN: INFO
+  UNKNOWN: HIGH         # no CVSS score and no GHSA label: unscored, see trivy above
 
 gitleaks:               # gitleaks has no severity concept. A committed secret is always HIGH.
   "*": HIGH
