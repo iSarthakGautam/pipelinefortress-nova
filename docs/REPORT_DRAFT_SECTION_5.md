@@ -65,6 +65,8 @@ reported.
   container running as root: HIGH, matching Trivy's rating of the same check).
 - OSV-Scanner severity comes from the CVSS score, bucketed with CVSS v3 ranges.
 - A gitleaks hit is always HIGH; a low-confidence Bandit result drops one level.
+- A vulnerability with no score yet (`UNKNOWN`, often a CVE published days ago) is HIGH, so it
+  needs a decision. It used to be INFO, which meant it could never block (#30).
 
 ### 5.3 Why baseline diffing
 Main carries **162 findings, 56 of them HIGH or CRITICAL**: the planted vulnerabilities in
@@ -74,9 +76,15 @@ risk ("noise drowns the gate") and gave R2 the counter: the gate fails only on w
 
 - **The baseline** (`security-baseline.json`, 152 entries) is accepted existing debt. It is
   created by a command and changed only in a reviewed PR, like code.
-- **Matching ignores line numbers.** Findings are grouped by `tool|rule|file|package`. Otherwise
-  inserting one line above a known finding would make it, and everything below it, "new".
-- **The verdict:** fail if a new finding is HIGH or above and has no valid exception.
+- **Matching ignores line numbers, but not code.** Findings are grouped by
+  `tool|rule|file|package`, so inserting a line above a known finding does not make it "new". A
+  moved finding keeps its baseline slot only if its line still has the same text. The baseline
+  stores a hash of it (`line_sha`), ignoring whitespace. Without that, fixing one known SQL
+  injection and adding another elsewhere in the file let the new one take the old one's slot.
+  A code review found this hole, and #30 closed it.
+- **The verdict:** fail if a new finding is HIGH or above and has no valid exception. A known
+  finding also blocks if it was accepted below HIGH and has since been re-rated to HIGH or above:
+  the debt accepted was not that severe.
 - **Exceptions** are comments next to the finding:
   `security-exception: <rule or id> expires:<date> owner:<name>`. They need an owner and an expiry
   at most 90 days out. An expired or malformed exception fails the gate, so accepted risk cannot
@@ -141,9 +149,9 @@ the Jinja XSS. Each rule has a `semgrep --test` fixture that runs in CI.
   all three SCA scanners read lockfiles, and the app has none.
 - **We knew what we planted.** The custom rules were written for the planted classes. 6/7 is a bound
   on this app, not a detection rate.
-- **Line-independent matching has blind spots.** If a PR fixes one known finding and adds another
-  with the same tool, rule and file, the new one takes the freed baseline slot and is not reported
-  as new. A renamed file makes all its findings new.
+- **Matching by line text has edge cases.** A known finding that is moved *and* edited in the same
+  change counts as new, which is a false fail. A new finding whose line is an exact copy of a fixed
+  one takes the fixed one's slot. A renamed file makes all its findings new.
 - **Database drift.** A new advisory against an unchanged dependency fails the next PR, whatever it
   changes. We have not seen it happen yet. A nightly scan of main would surface it first.
 - **Duplicates.** One vulnerable line can produce up to 5 findings from different tools. The verdict
@@ -163,6 +171,7 @@ into the overall table.
 | Stale detector | an old vulnerability database misses new CVEs | Grype refuses a database older than 5 days | #29; `DETECTOR_OVERLAP.md` §1 | Trivy and OSV have no equivalent age check |
 | Risk accepted forever | an exception with no owner or end date | exceptions need an owner and an expiry at most 90 days out; expired or malformed fails the gate; 14-day warning (#30) | `baseline.py`; `tests/test_gate_tuning.py` | all 6 current exceptions expire on one day |
 | Debt laundered into the baseline | a PR rebaselines to hide a new finding | baseline changes only in a reviewed PR; its diff shows every accepted finding | `security-baseline.json` history | relies on the reviewer reading the diff |
+| New finding hidden as old | fix one known finding and add another of the same rule in the same file; or a known CVE re-rated from LOW to CRITICAL | a moved finding must keep its line text (`line_sha`); a known finding re-rated across the threshold blocks again; an unscored CVE is HIGH | #30; `tests/test_gate_tuning.py` | an exact copy of a fixed line still inherits its slot |
 | Secret committed | a developer commits a key | gitleaks pre-commit hook (staged changes) and gitleaks in CI | `scripts/install_hooks.py`, `.gitleaks.toml` | the hook is opt-in per clone; the custom Semgrep rule is the only detector for the planted AWS key |
 | Scanner input evaluates code | a PR adds a Terraform file that Checkov evaluates with `asteval` | Checkov limited to Dockerfile, Kubernetes and GitHub Actions | workflow comment; exception rationale in `requirements-scanners.txt` | re-enable other frameworks only after an `asteval` fix |
 | Model alters the verdict | prompt injection makes the model clear a finding | the gate reads only `baseline.py`'s exit code; the model writes only `triage` | ADR-001; gate job `needs` | none known for the gate; see §7 for the comment |
