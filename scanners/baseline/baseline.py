@@ -28,7 +28,9 @@ Exception annotation: a comment on the finding's line or the line above it, of t
 behind a comment leader (#, //, --, ;, /*, <!--) that starts the line or follows whitespace,
 so the syntax quoted in strings or docs is not mistaken for an annotation.
 For line-0 findings (dependency manifests) the annotation may sit anywhere in that file.
-Expired, malformed, or over-long exceptions fail the gate.
+Expired, malformed, or over-long exceptions fail the gate. One that expires within
+--warn-expiring-days is reported as a warning first, so its expiry does not surprise every
+open PR on the same day.
 """
 import argparse
 import datetime as dt
@@ -199,6 +201,7 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
                 ann.update(status="malformed", problem=f"invalid date {m['expires']!r}")
                 found.append(ann)
                 continue
+            ann["days_left"] = (expires - today).days
             if expires < today:
                 ann["status"] = "expired"
             elif (expires - today).days > max_days:
@@ -229,7 +232,8 @@ def attach_exceptions(findings: list, annotations: list) -> None:
 
 # --------------------------------------------------------------------------- gate
 
-def evaluate_gate(findings: list, annotations: list, fail_on: str, stats: dict) -> dict:
+def evaluate_gate(findings: list, annotations: list, fail_on: str, stats: dict,
+                  warn_days: int = 14) -> dict:
     threshold = SEVERITY_ORDER.index(fail_on)
     blocking, excepted = [], []
     for f in findings:
@@ -244,6 +248,7 @@ def evaluate_gate(findings: list, annotations: list, fail_on: str, stats: dict) 
 
     bad_annotations = [a for a in annotations if a["status"] in ("expired", "malformed", "too_long")]
     stale = [a for a in annotations if a["status"] == "valid" and not a.get("applies_to")]
+    expiring = [a for a in annotations if a["status"] == "valid" and a["days_left"] <= warn_days]
 
     report = {
         "result": "fail" if (blocking or bad_annotations) else "pass",
@@ -259,6 +264,7 @@ def evaluate_gate(findings: list, annotations: list, fail_on: str, stats: dict) 
             "exceptions_expired": sum(a["status"] == "expired" for a in annotations),
             "exceptions_invalid": sum(a["status"] in ("malformed", "too_long") for a in annotations),
             "exceptions_stale": len(stale),
+            "exceptions_expiring": len(expiring),
         },
         "blocking": [{
             "finding_id": f["finding_id"], "tool": f["tool"], "rule_id": f["rule_id"],
@@ -268,6 +274,7 @@ def evaluate_gate(findings: list, annotations: list, fail_on: str, stats: dict) 
         } for f in blocking],
         "bad_exceptions": bad_annotations,
         "stale_exceptions": stale,
+        "expiring_exceptions": expiring,
     }
     return report
 
@@ -288,6 +295,9 @@ def format_summary(report: dict) -> str:
         lines.append(f"  EXCEPTION {a['status'].upper()} {a['file']}:{a['line']} {a.get('problem', '')}".rstrip())
     for a in report["stale_exceptions"]:
         lines.append(f"  warning: exception {a['id']} at {a['file']}:{a['line']} matches no finding")
+    for a in report.get("expiring_exceptions", []):
+        lines.append(f"  warning: exception {a['id']} at {a['file']}:{a['line']} expires {a['expires']} "
+                     f"(in {a['days_left']} days): fix the finding or renew it in a reviewed PR")
     return "\n".join(lines)
 
 
@@ -315,7 +325,7 @@ def cmd_check(args) -> int:
     stats = apply_baseline(findings, baseline, args.commit)
     annotations = scan_annotations(args.repo, today, args.max_exception_days)
     attach_exceptions(findings, annotations)
-    report = evaluate_gate(findings, annotations, args.fail_on, stats)
+    report = evaluate_gate(findings, annotations, args.fail_on, stats, args.warn_expiring_days)
 
     for f in findings:
         f.pop("_exception_status", None)
@@ -348,6 +358,8 @@ def main(argv=None) -> int:
     k.add_argument("--report", type=Path, help="gate report JSON (for metrics)")
     k.add_argument("--fail-on", default="HIGH", choices=SEVERITY_ORDER)
     k.add_argument("--max-exception-days", type=int, default=90)
+    k.add_argument("--warn-expiring-days", type=int, default=14,
+                   help="warn (without failing) about exceptions that expire within this many days")
     k.add_argument("--today", help="override today's date (YYYY-MM-DD), for tests and replays")
     k.add_argument("--warn-only", action="store_true", help="report but always exit 0 (rollout mode)")
     k.set_defaults(func=cmd_check)

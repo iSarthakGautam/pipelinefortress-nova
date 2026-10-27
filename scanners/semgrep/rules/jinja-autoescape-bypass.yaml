@@ -1,9 +1,11 @@
 # PipelineFortress custom rule. Owner: R2. Planted class: PLANT-008 (catalogued for ZAP; this is
 # the static check for the same template). Tests: tests/semgrep/jinja-autoescape-bypass.html
+# ERROR (-> HIGH), so the gate blocks a new one: at WARNING the planted P1 XSS was only MEDIUM and
+# a new copy of it would have passed (docs/metrics/GATE_TUNING.md).
 rules:
   - id: pf-jinja-autoescape-bypass
     languages: [generic]
-    severity: WARNING
+    severity: ERROR
     message: >-
       This template turns off Jinja's HTML escaping. If the value can come from a user, any <script>
       in it runs in the page (cross-site scripting). Drop "| safe" / autoescape false, or sanitise the
