@@ -57,7 +57,7 @@ class TestNormalize(unittest.TestCase):
         ghsa = by_rule(out, "GHSA-xxxx-yyyy-zzzz")[0]
         assert ghsa["cve"] == []                      # GHSA is not a CVE; never invent one
         assert ghsa["package"]["fixed_version"] is None
-        assert ghsa["severity_norm"] == "INFO"
+        assert ghsa["severity_norm"] == n.normalize_severity("trivy", "UNKNOWN")   # unscored: per the map
 
         ksv = by_rule(out, "KSV017")[0]
         assert ksv["location"] == {"file": "infra/k8s/deployment.yaml", "line": 21}
