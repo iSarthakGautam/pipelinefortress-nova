@@ -47,16 +47,13 @@ We are a team of 5 working full-time. We build for async by default:
 ## Local Branch Protection (Mandatory)
 Because we are using a private repository on a free GitHub account, server-side branch protection rules are disabled. To fulfill the rubric requirement of "no direct pushes to main", **every team member must run this command immediately after cloning the repo**. 
 
-This installs a local git hook that physically prevents you from pushing directly to the `main` branch:
+This installs local git hooks: a pre-push hook that refuses any push to `main`, and a gitleaks pre-commit hook that blocks staged secrets. It works on Windows (Git Bash), macOS and Linux:
 
 ```bash
-echo '#!/bin/bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [ "$branch" = "main" ]; then
-  echo "❌ STOP: Direct pushes to main are forbidden by team contract. Please create a branch and open a PR."
-  exit 1
-fi' > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+python scripts/install_hooks.py
 ```
+
+If you installed the older copy-paste hook from this README, run the command anyway: it replaces it. That hook checked the checked-out branch, so `git push origin feature:main` from a feature branch got through.
 
 ---
 

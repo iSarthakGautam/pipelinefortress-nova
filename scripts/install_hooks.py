@@ -77,11 +77,16 @@ fi
 PRE_PUSH = f"""#!/bin/sh
 {MARKER} (R2). Re-run the script to update; don't edit by hand.
 # Team contract: no direct pushes to main (no server-side branch protection on this plan).
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [ "$branch" = "main" ]; then
-  echo "STOP: Direct pushes to main are forbidden by team contract. Please create a branch and open a PR." >&2
-  exit 1
-fi
+# Git passes one "<local ref> <local sha> <remote ref> <remote sha>" line per ref being pushed.
+# Check where each one lands, not the checked-out branch: `git push origin feature:main` from a
+# feature branch must be refused, and pushing a feature branch while on main must not be.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "STOP: Direct pushes to main are forbidden by team contract. Please create a branch and open a PR." >&2
+    exit 1
+  fi
+done
+exit 0
 """
 
 HOOKS = {"pre-commit": PRE_COMMIT, "pre-push": PRE_PUSH}
