@@ -6,7 +6,7 @@
 | Drafted by | `llama3:latest@sha256:365c0bd3c000`, prompt `patch_draft_v1` (`b397fa91cdf1`) |
 | Target | `eval/fixtures/pr_targets/search.py` (synthetic) |
 | Ask | "Rewrite it as a parameterised query using db.execute(sql, (q,)) with a ? placeholder." |
-| Reviewer | R2 (AmirdeshSU), 2026-10-27. Analysis drafted with Claude Code (see `docs/AI_DISCLOSURE.md`) |
+| Reviewer | R2 (AmirdeshSU). Analysis drafted with Claude Code (see `docs/AI_DISCLOSURE.md`); read and confirmed by R2 on 2026-10-27 |
 | **Verdict** | **REJECT.** The patch does not apply, and its diff hides half of the fix in a context line |
 
 ## 1. It does not apply

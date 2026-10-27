@@ -6,7 +6,7 @@
 | Drafted by | `llama3:latest@sha256:365c0bd3c000`, prompt `patch_draft_v1` (`b397fa91cdf1`) |
 | Target | `eval/fixtures/pr_targets/package.json` (synthetic) |
 | Ask | "Bump the dependency 'lodash' from 4.17.15 to 4.17.21. Change nothing else." |
-| Reviewer | R2 (AmirdeshSU), 2026-10-27. Analysis drafted with Claude Code (see `docs/AI_DISCLOSURE.md`) |
+| Reviewer | R2 (AmirdeshSU). Analysis drafted with Claude Code (see `docs/AI_DISCLOSURE.md`); read and confirmed by R2 on 2026-10-27 |
 | **Verdict** | **REJECT.** The patch does not apply, and the version it was asked for is no longer safe |
 
 ## 1. It does not apply
