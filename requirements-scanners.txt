@@ -2340,3 +2340,6 @@ zipp==4.1.1 \
     # via importlib-metadata
 
 # security-exception: CVE-2024-23342 expires:2027-01-15 owner:AmirdeshSU ecdsa (via checkov) Minerva timing side channel. No upstream fix (won't-fix). The attack recovers a private key from the timing of many signatures made with it; this CI job holds no ECDSA keys.
+# security-exception: CVE-2026-55244 expires:2027-01-15 owner:AmirdeshSU asteval 1.0.6 (via checkov, which pins asteval==1.0.6 up to 3.3.30) sandbox escape. Not reachable: only checkov's terraform/cloudformation variable rendering evaluates with asteval, and the CI step runs --framework dockerfile kubernetes github_actions.
+# security-exception: CVE-2026-102734 expires:2027-01-15 owner:AmirdeshSU same asteval sandbox escape as GHSA-9w56-46f6-3qhx (OSV reports the CVE alias). Not reachable, as above.
+# security-exception: GHSA-9w56-46f6-3qhx expires:2027-01-15 owner:AmirdeshSU asteval sandbox escape via numpy (Grype reports the GHSA id). Not reachable, as above.
