@@ -493,14 +493,22 @@ jobs:
         run: |
           set -e
           echo "Verifying vulnshop-api staging health endpoint..."
+          healthy=false
           for i in {1..30}; do
             if curl --silent --fail http://127.0.0.1:8000/healthz; then
               echo
               echo "✅ vulnshop-api health check passed."
+              healthy=true
               break
             fi
+            echo "Attempt $i/30 failed; retrying..."
             sleep 2
           done
+          if [ "$healthy" != "true" ]; then
+            echo "ERROR: Staging API failed its health check."
+            docker compose -f docker/docker-compose.staging.yml logs
+            exit 1
+          fi          
 
       - name: DAST Scan (OWASP ZAP Baseline)
         if: steps.check_staging.outputs.exists == 'true'
