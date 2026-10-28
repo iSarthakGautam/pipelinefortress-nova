@@ -192,7 +192,8 @@ def _scrub_untrusted_string(value: str, limit: int = 120) -> str:
 def apply_l1_structural(raw_finding: dict) -> dict:
     """L1: allowlist. Anything not listed here (runner ids, emails, commit info, full paths) is dropped."""
     loc = raw_finding.get("location") or {}
-    return {
+    pkg = raw_finding.get("package") or {}
+    record = {
         "finding_id": raw_finding.get("finding_id", "UNKNOWN"),
         "tool": raw_finding.get("tool", "UNKNOWN"),
         "severity": raw_finding.get("severity_norm", "UNKNOWN"),
@@ -203,6 +204,11 @@ def apply_l1_structural(raw_finding: dict) -> dict:
         "line": loc.get("line", 0),
         "snippet": (raw_finding.get("evidence") or {}).get("snippet") or (raw_finding.get("evidence") or {}).get("snippet_raw") or "",
     }
+    if pkg.get("name"):
+        record["package_name"] = _scrub_untrusted_string(pkg["name"])
+    if pkg.get("fixed_version"):
+        record["fixed_version"] = _scrub_untrusted_string(pkg["fixed_version"])
+    return record
 
 
 def redact_finding(raw_finding: dict) -> dict:
