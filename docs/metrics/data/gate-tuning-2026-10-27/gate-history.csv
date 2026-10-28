@@ -1,0 +1,72 @@
+run_id,created,workflow,event,branch,conclusion,gate_job,findings,known,new,blocking,outcome,cause,note
+37908148433,2026-10-09T08:57,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+37908343069,2026-10-09T08:59,pipeline,push,main,success,success,,,,,pass,,
+37910679816,2026-10-09T09:20,pipeline,push,main,success,success,,,,,pass,,
+37910681388,2026-10-09T09:20,pipeline,push,main,success,success,,,,,pass,,
+38073662861,2026-10-10T17:54,pipeline,pull_request,r4/week1-ai-deliverables,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+38073740550,2026-10-10T17:56,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+38146062268,2026-10-11T14:09,pipeline,pull_request,r4/week2-ai-deliverables,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+38153530193,2026-10-11T15:58,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+39401596117,2026-10-20T09:33,pipeline,pull_request,r4/week3-ai-deliverables,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+39401620844,2026-10-20T09:34,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+39773592297,2026-10-22T11:50,pipeline,pull_request,r2/finding-schema,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+39804651189,2026-10-22T15:25,legacy-gate,pull_request,r2/ci-security-gate,failure,failure,4,0,4,2,false-fail,fixture,"gitleaks flagged R4's canary token and a test JWT; 8 exception examples in docs/tests parsed as real (malformed) exceptions. Fixed: .gitleaks.toml exact-value allowlist, comment-leader rule for annotations"
+39805192577,2026-10-22T15:28,legacy-gate,pull_request,r2/ci-security-gate,success,success,2,2,0,0,pass,,
+39805492350,2026-10-22T15:30,legacy-gate,pull_request,r2/ci-security-gate,success,success,2,2,0,0,pass,,
+39808107292,2026-10-22T15:47,legacy-gate,pull_request,r2/sca-crosscheck,success,success,4,2,2,0,pass,,
+39809440665,2026-10-22T15:55,legacy-gate,pull_request,r2/pin-dev-deps,success,success,2,2,0,0,pass,,
+39815804660,2026-10-22T16:39,legacy-gate,pull_request,r2/precommit-gitleaks,success,success,3,2,1,0,pass,,
+39817555182,2026-10-22T16:51,legacy-gate,pull_request,r2/precommit-gitleaks,success,success,3,3,0,0,pass,,
+39822987804,2026-10-22T17:28,pipeline,pull_request,r4/week3-hardening-and-audit,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+39823046557,2026-10-22T17:28,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+40090513422,2026-10-24T11:35,pipeline,pull_request,r4/fix-ollama-schema-fallback,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+40090525645,2026-10-24T11:35,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+40106620076,2026-10-24T15:21,legacy-gate,pull_request,r2/checkov-bandit,failure,failure,,,,,error,pipeline-setup,requirements-scanners.txt missing from the PR (pip install failed)
+40106718277,2026-10-24T15:23,legacy-gate,pull_request,r2/checkov-bandit,failure,failure,24,3,21,7,correct-block,real-new,"6 HIGH/CRITICAL CVEs in the new scanner lockfile (ecdsa, ...): real, risk-accepted with dated exceptions. Plus 1 test-JWT false positive (allowlisted)"
+40107164766,2026-10-24T15:28,legacy-gate,pull_request,r2/checkov-bandit,success,success,19,3,16,0,pass,,
+40107492060,2026-10-24T15:33,legacy-gate,pull_request,r2/checkov-bandit,success,success,19,17,2,0,pass,,
+40110940425,2026-10-24T16:18,pipeline,push,main,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks diffed a commit range missing from the shallow clone (fixed by fix/ci-gitleaks-fetch-depth)
+40113173950,2026-10-24T16:47,pipeline,pull_request,fix/ci-gitleaks-fetch-depth,failure,failure,,,,,error,scanner-infra,legacy pipeline: gitleaks-action lacked PR permissions
+40113693564,2026-10-24T16:54,pipeline,pull_request,fix/ci-gitleaks-fetch-depth,success,success,,,,,pass,,
+40113778497,2026-10-24T16:55,pipeline,push,main,success,success,,,,,pass,,
+40116112957,2026-10-24T17:26,pipeline,pull_request,r4/align-schema-r2-integration,success,success,,,,,pass,,
+40177465318,2026-10-25T08:39,pipeline,push,main,success,success,,,,,pass,,
+40187582516,2026-10-25T11:07,pipeline,pull_request,r1/pipelinefortress-ci,failure,skipped,,,,,error,pipeline-setup,download-artifact pinned to a SHA that does not exist
+40188135406,2026-10-25T11:15,pipeline,pull_request,r1/pipelinefortress-ci,failure,failure,27,2,25,6,correct-block,real-new,"curl|sh in the new workflow (real; later fixed by hash-pinning in #24). Plus 5 findings in eval/fixtures (deliberately vulnerable eval inputs: false positive, excluded)"
+40188711030,2026-10-25T11:24,pipeline,pull_request,r1/pipelinefortress-ci,success,success,3,2,1,0,pass,,
+40189284589,2026-10-25T11:32,pipeline,push,main,success,success,3,2,1,0,pass,,
+40190953247,2026-10-25T11:56,pipeline,pull_request,r3/target-app-and-supply-chain,failure,skipped,89,2,87,29,false-pass,gate-skipped,"baseline said FAIL (29 blocking: the planted app), but 50-security-gate was SKIPPED because triage was cancelled; skipped counts as passing. PR #17 merged and main went red. Fixed in #24 (!cancelled() + needs only the baseline job)"
+40192314887,2026-10-25T12:15,pipeline,pull_request,r1/pipelinefortress-ci,success,success,3,2,1,0,pass,,
+40192326191,2026-10-25T12:15,pipeline,push,main,success,success,3,2,1,0,pass,,
+40192913246,2026-10-25T12:23,pipeline,pull_request,r4/fast-ci-triage,success,success,3,2,1,0,pass,,
+40193294035,2026-10-25T12:28,pipeline,push,main,success,success,3,2,1,0,pass,,
+40195002463,2026-10-25T12:51,pipeline,push,main,failure,failure,89,2,87,29,correct-block,unbaselined-debt,"main after #17: the 29 planted findings, never accepted into the baseline"
+40212028873,2026-10-25T16:30,pipeline,pull_request,r5/final-metrics-evaluation,failure,failure,89,2,87,29,false-fail,inherited,PR inherited main's unbaselined debt (29 planted findings)
+40212045922,2026-10-25T16:30,pipeline,push,main,failure,failure,89,2,87,29,correct-block,unbaselined-debt,main still carrying #17's 29 unbaselined planted findings
+40212444752,2026-10-25T16:35,pipeline,pull_request,chore/todo-review-and-updates,failure,skipped,,,,,error,tests,unit tests failed; gate never ran (old pipeline skipped it)
+40212475513,2026-10-25T16:36,pipeline,push,main,failure,skipped,,,,,error,tests,unit tests failed; gate never ran (old pipeline skipped it)
+40213431636,2026-10-25T16:48,pipeline,pull_request,r4/complete-all-todos,failure,failure,89,2,87,29,false-fail,inherited,PR inherited main's unbaselined debt (29 planted findings)
+40213445050,2026-10-25T16:48,pipeline,push,main,failure,failure,89,2,87,29,correct-block,unbaselined-debt,main still carrying #17's 29 unbaselined planted findings
+40217266350,2026-10-25T17:36,legacy-gate,pull_request,r2/triage-handoff,success,success,29,14,15,0,pass,,
+40272943895,2026-10-26T05:12,pipeline,pull_request,r2/pipeline-failclosed,failure,skipped,,,,,error,scanner-infra,Trivy DB download failed (mirror.gcr.io); fail-closed. Fixed in #24: ghcr.io first
+40273491710,2026-10-26T05:18,pipeline,pull_request,r2/pipeline-failclosed,failure,skipped,,,,,error,scanner-infra,same Trivy DB download failure
+40273953439,2026-10-26T05:23,pipeline,pull_request,r2/pipeline-failclosed,failure,failure,145,4,141,44,expected-block,detector-change,#24 un-silenced Checkov and OSV: 141 'new' are old debt; rebaselined in the same PR
+40274765896,2026-10-26T05:32,pipeline,pull_request,r2/pipeline-failclosed,success,success,145,143,2,0,pass,,
+40275698848,2026-10-26T05:42,pipeline,pull_request,r2/handoff-contract-tests,failure,failure,95,2,93,35,false-fail,inherited,PR inherited main's unbaselined debt (29 planted findings) + 6 gitleaks hits on baseline match_key hashes (allowlisted in #24)
+40277419936,2026-10-26T06:01,pipeline,pull_request,r2/port-unit-tests,failure,failure,95,2,93,35,false-fail,inherited,PR inherited main's unbaselined debt (29 planted findings) + 6 gitleaks hits on baseline match_key hashes (allowlisted in #24)
+40279343627,2026-10-26T06:21,pipeline,pull_request,r2/semgrep-custom-rules,failure,failure,152,143,9,6,expected-block,detector-change,#27 custom Semgrep rules found 6 existing planted vulns; rebaselined in the same PR
+40279942757,2026-10-26T06:27,pipeline,pull_request,r2/semgrep-custom-rules,success,success,152,150,2,0,pass,,
+40281284189,2026-10-26T06:41,pipeline,pull_request,r2/detector-overlap,failure,failure,95,2,93,35,false-fail,inherited,PR inherited main's unbaselined debt (29 planted findings) + 6 gitleaks hits on baseline match_key hashes (allowlisted in #24)
+40282334546,2026-10-26T06:52,pipeline,pull_request,r2/grype-upgrade,failure,failure,151,143,8,3,expected-block,detector-change,#29 Grype upgrade found 3 CVEs Trivy/OSV already reported; rebaselined in the same PR
+40283269311,2026-10-26T07:01,pipeline,pull_request,r2/grype-upgrade,success,success,151,145,6,0,pass,,
+40283953045,2026-10-26T07:08,pipeline,pull_request,r2/detector-overlap,failure,failure,95,2,93,35,false-fail,inherited,PR inherited main's unbaselined debt (29 planted findings) + 6 gitleaks hits on baseline match_key hashes (allowlisted in #24)
+40285263584,2026-10-26T07:21,pipeline,pull_request,r2/semgrep-custom-rules,success,success,158,152,6,0,pass,,
+40339974512,2026-10-26T14:29,pipeline,pull_request,r2/pipeline-failclosed,success,success,147,143,4,0,pass,,
+40341274919,2026-10-26T14:37,pipeline,pull_request,r2/grype-upgrade,success,success,155,145,10,0,pass,,
+40341314393,2026-10-26T14:37,pipeline,pull_request,r2/semgrep-custom-rules,success,success,162,152,10,0,pass,,
+40358391980,2026-10-26T16:21,pipeline,push,main,cancelled,cancelled,,,,,cancelled,superseded,superseded by the next merge to main
+40358453898,2026-10-26T16:22,pipeline,push,main,cancelled,,,,,,cancelled,superseded,superseded by the next merge to main
+40358495428,2026-10-26T16:22,pipeline,push,main,success,success,162,152,10,0,pass,,
+40453738343,2026-10-27T05:09,pipeline,pull_request,r2/handoff-contract-tests,success,success,162,152,10,0,pass,,
+40453744170,2026-10-27T05:09,pipeline,pull_request,r2/port-unit-tests,success,success,162,152,10,0,pass,,
+40453752745,2026-10-27T05:10,pipeline,pull_request,r2/detector-overlap,success,success,162,152,10,0,pass,,

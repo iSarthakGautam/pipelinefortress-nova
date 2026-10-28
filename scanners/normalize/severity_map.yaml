@@ -23,12 +23,14 @@ gosec:
   MEDIUM: MEDIUM
   LOW: LOW
 
+# UNKNOWN is a vulnerability nobody has scored yet, often because it was published days ago. Rating it
+# INFO meant it could never block, so it is HIGH: a new one needs a fix or a dated exception.
 trivy:
   CRITICAL: CRITICAL
   HIGH: HIGH
   MEDIUM: MEDIUM
   LOW: LOW
-  UNKNOWN: INFO
+  UNKNOWN: HIGH
 
 grype:
   CRITICAL: CRITICAL
@@ -36,14 +38,14 @@ grype:
   MEDIUM: MEDIUM
   LOW: LOW
   NEGLIGIBLE: INFO
-  UNKNOWN: INFO
+  UNKNOWN: HIGH         # unscored, see trivy above
 
 osv:                    # only used when a group has no CVSS score; numeric max_severity is
   CRITICAL: CRITICAL    # bucketed with CVSS v3 ranges in normalize.cvss_bucket()
   HIGH: HIGH
   MODERATE: MEDIUM
   LOW: LOW
-  UNKNOWN: INFO
+  UNKNOWN: HIGH         # no CVSS score and no GHSA label: unscored, see trivy above
 
 gitleaks:               # gitleaks has no severity concept. A committed secret is always HIGH.
   "*": HIGH
@@ -73,6 +75,11 @@ _rule_overrides:
     CKV_K8S_39: HIGH    # CAP_SYS_ADMIN
     CKV_DOCKER_3: HIGH  # no USER, so the container runs as root (Trivy DS-0002 covers both)
     CKV_DOCKER_8: HIGH  # last USER is root
+    CKV_K8S_23: HIGH    # pod may run as root: same rating as the Dockerfile root checks above
     CKV_GHA_1: HIGH     # ACTIONS_ALLOW_UNSECURE_COMMANDS
     CKV_GHA_2: HIGH     # shell injection in run:
     CKV_GHA_3: HIGH     # curl with secrets
+  # Trivy rates a root container HIGH in a Dockerfile (DS-0002) but MEDIUM in a k8s manifest, so a
+  # root pod (PLANT-007) did not block on its own. One rating for one risk (docs/metrics/GATE_TUNING.md).
+  trivy:
+    KSV-0012: HIGH      # runs as root user
