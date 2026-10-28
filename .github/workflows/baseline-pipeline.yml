@@ -373,6 +373,7 @@ jobs:
             > artifacts/findings.triaged.json
 
       - name: Upload AI Triage Artifacts
+        if: always()
         # actions/upload-artifact@v4.4.3
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
         with:
@@ -381,6 +382,7 @@ jobs:
             artifacts/findings.triaged.json
             artifacts/pr_comment.md
             artifacts/metrics.prom
+          if-no-files-found: warn
           retention-days: 7
 
   # =========================================================================
@@ -389,7 +391,7 @@ jobs:
   pr-comment:
     name: 40-pr-comment
     needs: triage-ai
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && needs.triage-ai.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
