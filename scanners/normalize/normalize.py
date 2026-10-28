@@ -374,18 +374,26 @@ def main(argv=None) -> int:
     ap.add_argument("-o", "--output", type=Path, required=True)
     args = ap.parse_args(argv)
 
+    def ref(p: Path) -> str:
+        # raw_ref is relative to the repo root: ai/sarif_ref.py (R4) resolves it against ARTIFACTS_BASE,
+        # which defaults to the repo root, and refuses anything outside it
+        try:
+            return p.resolve().relative_to(Path(args.root).resolve()).as_posix()
+        except ValueError:
+            return p.as_posix()
+
     findings = []
     for t in SARIF_TOOLS:
         for p in getattr(args, t):
-            findings += parse_sarif(p, t)
+            findings += parse_sarif(p, t, ref=ref(p))
     for p in args.bandit:
-        findings += parse_bandit(p)
+        findings += parse_bandit(p, ref=ref(p))
     for p in args.trivy:
-        findings += parse_trivy(p)
+        findings += parse_trivy(p, ref=ref(p))
     for p in args.grype:
-        findings += parse_grype(p, root=args.root)
+        findings += parse_grype(p, ref=ref(p), root=args.root)
     for p in args.osv:
-        findings += parse_osv(p, root=args.root)
+        findings += parse_osv(p, ref=ref(p), root=args.root)
 
     findings = dedupe_exact(findings)
     validate(findings)
