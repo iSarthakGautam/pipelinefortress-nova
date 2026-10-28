@@ -125,9 +125,14 @@ HIGH blocked only 4/7 at first. The planted Jinja XSS was rated MEDIUM, and a ro
 in Kubernetes while a root Dockerfile was HIGH. Raising those two ratings (#30) fixed both, with no
 change to main's verdict. MEDIUM adds 82 findings and no extra planted vulnerability.
 
+Since R3's #42 committed the app's `package-lock.json`, PLANT-005 (lodash CVE-2020-8203, HIGH in
+all three SCA tools) is detected as well, so **HIGH now blocks 7/7**. #42 also repeated #17's
+mistake. It surfaced 112 new dependency findings, 32 of them blocking, and merged with the gate
+red, so main stayed red until #30 accepted them as target-app debt.
+
 ### 5.5 Detector overlap
 On the SCA side, three tools found 29 distinct vulnerabilities, and 19 of those were found by all three
-(`DETECTOR_OVERLAP.md`). Every disagreement had a mechanical cause, not a data-quality one:
+(`DETECTOR_OVERLAP.md`, measured 2026-10-26, before the app had a lockfile). Every disagreement had a mechanical cause, not a data-quality one:
 
 - OSV-Scanner resolves transitive dependencies; the other two do not.
 - Trivy only parses files named `requirements.txt`, so it never scanned our scanner lockfiles.
@@ -140,20 +145,23 @@ silent false pass**.
 
 On static coverage, our four custom Semgrep rules raised detection of the planted vulnerabilities
 from 4/7 to 6/7. They are the only detector for the hard-coded AWS key (gitleaks missed it) and
-the Jinja XSS. Each rule has a `semgrep --test` fixture that runs in CI.
+the Jinja XSS. The seventh, PLANT-005, needed a lockfile rather than a rule: once #42 committed
+one, all three SCA tools found it, so static detection is 7/7. Each rule has a `semgrep --test` fixture that runs in CI.
 
 ### 5.6 Limitations
-- **No branch protection.** A red gate does not stop a merge; reviewers do. That needs a public
-  repository or a paid plan.
-- **One planted vulnerability is invisible.** The lodash dependency (PLANT-005) is found by no tool:
-  all three SCA scanners read lockfiles, and the app has none.
-- **We knew what we planted.** The custom rules were written for the planted classes. 6/7 is a bound
-  on this app, not a detection rate.
+- **No branch protection.** A red gate does not stop a merge; reviewers do. It happened twice:
+  #17 merged through a skipped gate, and #42 merged with the gate red. Both left main red for
+  every PR that followed. Protection needs a public repository or a paid plan.
+- **We knew what we planted.** The custom rules were written for the planted classes. 7/7 is a bound
+  on this app, not a detection rate. Static detection is also not runtime detection: the DAST
+  stage has not yet caught a planted vulnerability (see §6).
 - **Matching by line text has edge cases.** A known finding that is moved *and* edited in the same
   change counts as new, which is a false fail. A new finding whose line is an exact copy of a fixed
   one takes the fixed one's slot. A renamed file makes all its findings new.
 - **Database drift.** A new advisory against an unchanged dependency fails the next PR, whatever it
-  changes. We have not seen it happen yet. A nightly scan of main would surface it first.
+  changes. We first saw it on 2026-10-29: 6 newly published CVEs against Semgrep's own
+  dependencies. They did not block only because they are MEDIUM. A nightly scan of main would
+  surface drift before a contributor's PR does.
 - **Duplicates.** One vulnerable line can produce up to 5 findings from different tools. The verdict
   is unaffected, but the PR comment is noisier than it needs to be.
 
