@@ -138,6 +138,32 @@ exactly the 3 re-rated findings (`known, but accepted at MEDIUM`). With this PR'
 holds the same 152 entries with those 3 at HIGH plus `line_sha`, the result is PASS: 162 findings,
 152 known, 10 new (all covered by exceptions), 0 blocking.
 
+### Update 2026-10-29: rebaseline after #42
+
+R3's #42 committed `apps/vulnshop-api/package-lock.json` and pinned `werkzeug==2.0.3`. The SCA
+tools then saw the target app's npm tree and the Werkzeug CVEs: 112 new findings, 32 of them
+blocking. Nothing rebaselined, and #42 merged with the gate red, so main has been red since
+2026-10-28 17:56 (the same pattern as #17 in section 2). On this branch, `UNKNOWN` → HIGH (above)
+made it 33: one Werkzeug CVE had no score yet.
+
+This PR accepts the **94 vulnshop-api dependency findings** (`package-lock.json` 63,
+`requirements.txt` 31) as known debt of the deliberately vulnerable target. That is what #24 did for
+the rest of the planted app. Fixing them would delete ground truth: among them is lodash
+CVE-2020-8203, **PLANT-005, which is now detected by all three SCA tools**. The tables in section 3
+were measured before this, at `1bb3381`, when PLANT-005 was undetected.
+
+18 findings stay new on purpose:
+
+- 10 scanner-dependency CVEs, covered by the dated exceptions;
+- 6 MEDIUM CVEs newly published against Semgrep's own dependencies (`requirements-semgrep.txt`).
+  This is the first observed vulnerability-database drift (section 4). They don't block; R2 to
+  triage after the freeze;
+- 2 MEDIUM Semgrep findings in R3's new `server.js` proxy code. They don't block.
+
+Five known findings moved in #42's edits (in `app.py`, `server.js`, `docker/Dockerfile` and the
+workflow). Each kept its baseline slot and its first-seen commit through the `line_sha` match.
+Replay on CI run 40754386823: PASS, 264 findings, 246 known, 18 new, 0 blocking.
+
 ## 4. False-fail risks that remain
 
 | Risk | Seen? | What happens | Mitigation |
