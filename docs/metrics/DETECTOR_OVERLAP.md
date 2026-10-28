@@ -29,6 +29,9 @@ about the tools. ZAP (DAST, staging job) is not included.
    package, they agreed on every vulnerability.
 3. **No SCA tool detected the planted npm vulnerability (PLANT-005, lodash 4.17.15).** All three
    resolve npm dependencies from a lockfile, and `apps/vulnshop-api/` has `package.json` only.
+   *Update 2026-10-29:* R3 committed `package-lock.json` in #42. Trivy, Grype and OSV now all
+   report lodash CVE-2020-8203 (HIGH), so static detection is 7/7. The rest of this document is
+   the 2026-10-26 snapshot.
 4. **Static detection of the 7 planted true positives: 6/7 with our custom Semgrep rules, 4/7
    without them.** The custom rules are the only detector for PLANT-003 (hard-coded AWS key; gitleaks
    misses it) and PLANT-008 (Jinja `| safe` XSS). Neither negative control (PLANT-002, PLANT-009)
