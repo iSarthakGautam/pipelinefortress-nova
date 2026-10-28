@@ -3,7 +3,7 @@
 FROM node:20.11.1-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Stage 2: Hardened Distroless/Minimal Runtime
 FROM node:20.11.1-alpine AS runner
@@ -12,6 +12,10 @@ WORKDIR /app
 # Run as non-root user (USER 10001)
 RUN addgroup -g 10001 -S appgroup && \
     adduser -u 10001 -S appuser -G appgroup
+
+COPY requirements.txt ./
+RUN apk add --no-cache python3 py3-pip sqlite && \
+    python3 -m pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
 COPY --chown=appuser:appgroup . .

@@ -15,8 +15,26 @@ def get_db():
 @user_bp.route("/<uid>", methods=["GET"])
 def get_user(uid):
     cursor = get_db().cursor()
-    cursor.execute('SELECT * FROM users WHERE id = %s', (uid,))
+    cursor.execute('SELECT * FROM users WHERE id = ?', (uid,))
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "User not found"}), 404
     return jsonify(dict(row))
+
+
+def init_users_table():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            email TEXT NOT NULL
+        )
+    """)
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("INSERT INTO users (id, username, email) VALUES (?, ?, ?)",
+                       (1, "admin", "admin@vulnshop.local"))
+    conn.commit()
+    conn.close()

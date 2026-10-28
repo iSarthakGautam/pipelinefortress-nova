@@ -39,7 +39,7 @@ def load_cwe_catalogue() -> set:
 
 
 def _norm_path(p: str) -> str:
-    return os.path.normpath(str(p).replace("\\", "/")).lstrip("./") if p else ""
+    return os.path.normpath(str(p).replace("\\", "/")).removeprefix("./") if p else ""
 
 
 def extract_claims(triage: dict) -> dict:

@@ -38,7 +38,7 @@ def search_items(db, q):
 @search_bp.route("/", methods=["GET"])
 def search():
     user_input = request.args.get("q", "")
-    cursor = get_db().cursor()
+    conn = get_db(); cursor = conn.cursor()
     q = f"SELECT * FROM items WHERE name = '{user_input}'"
     try:
         cursor.execute(q)

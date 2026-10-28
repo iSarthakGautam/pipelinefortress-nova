@@ -138,6 +138,11 @@ def triage_cluster(cluster_id, members, prompt, model, format_mode="schema", val
     # snapshot the model's own claims and text BEFORE the validator mutates/strips them (hallucination accounting)
     trace["fix_summary_model"] = triage.get("fix_summary", "")
     trace["claims"] = copy.deepcopy(triage.get("claims", {}))
+    # Bug 6 fix: capture model's raw verdict+confidence NOW, before validate_triage_output mutates the
+    # shared triage dict in place. Without this, verdict_model == verdict_final in every eval row,
+    # making the "no validator (counterfactual)" row meaningless.
+    verdict_model = triage.get("verdict")
+    confidence_model = triage.get("confidence")
     digest = (llm or {}).get("digest") or "unknown"
     base = _strip_raw(rep, safe if "safe" in locals() else {})
     base["enrichment"] = enriched if "enriched" in locals() else {"epss": None, "kev": False, "reachable": None}
@@ -147,7 +152,7 @@ def triage_cluster(cluster_id, members, prompt, model, format_mode="schema", val
     else:
         trace["claims_unvalidated"] = base["triage"].pop("claims", {})
         base["triage"]["grounding"] = {"validated": False, "rejected_claims": ["validator disabled (ablation)"]}
-    trace["verdict_model"] = triage["verdict"]
+    trace["verdict_model"] = verdict_model  # the model's raw pre-validator verdict (not the post-validator value)
     trace["grounding"] = base["triage"]["grounding"]
 
     t = base["triage"]
@@ -157,7 +162,13 @@ def triage_cluster(cluster_id, members, prompt, model, format_mode="schema", val
         base["enrichment"]["reachable"], baseline.get("is_new", True))
     t["model"] = _model_id(model, digest)
     t["prompt_version"] = f"{prompt['name']}/{prompt['version']}"
-    t["confidence"] = triage["confidence"] if t["verdict"] == triage["verdict"] else 0.0
+    # Bug 7 fix: when the validator downgrades the verdict (e.g. to NEEDS_HUMAN_REVIEW), the model's
+    # original confidence (e.g. 0.95) is misleading — it was for a verdict the validator rejected.
+    # Set confidence to None (indeterminate) whenever the validator changed the verdict.
+    if t["verdict"] == verdict_model:
+        t["confidence"] = confidence_model
+    else:
+        t["confidence"] = None  # validator changed verdict; model confidence no longer applies
 
     trace["verdict_final"] = t["verdict"]
     write_trace(trace, trace_dir)
@@ -222,8 +233,26 @@ def main():
         findings = [findings]
     if args.only_new:
         findings = [f for f in findings if (f.get("baseline") or {}).get("is_new", True)]
+        
+    # Sort by severity before applying the maximum findings limit.
+    severity_rank = {
+        "CRITICAL": 5,
+        "HIGH": 4,
+        "MEDIUM": 3,
+        "LOW": 2,
+        "INFO": 1,
+        "INFORMATIONAL": 1,
+        "UNKNOWN": 0,
+    }
+    
+    def severity_key(finding):
+        severity = str(finding.get("severity_norm") or "UNKNOWN").upper()
+        return severity_rank.get(severity, 0)
+
+    findings.sort(key=severity_key, reverse=True)        
     if args.max_findings > 0:
         findings = findings[:args.max_findings]
+        
     results, traces = triage_findings(findings, args.model, args.format_mode, not args.no_validate,
                                       not args.no_defence, args.trace_dir)
     if args.comment_out:

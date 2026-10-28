@@ -9,39 +9,37 @@ Ground truth: `eval/ground_truth.jsonl` (sha256 `7d552c524db6…`). Raw per-find
 | Configuration | Precision | Recall | F1 | Abstain | Confidently wrong | Unusable output | p50 latency (s) | Ungrounded claims produced → reaching a human |
 |---|---|---|---|---|---|---|---|---|
 | Heuristic keyword baseline (no LLM) | 0.75 | 0.5 | 0.6 | 0.0 | 4 | 0 | n/a | n/a |
-| llama3:latest, full pipeline (schema decoding + validator) | 0.714 | 0.833 | 0.769 | 0.2 | 2 | 0 | 2.51 | 2 → 0 |
-| llama3:latest, **no validator** (counterfactual, same run) | 0.714 | 0.833 | 0.769 | 0.2 | 2 | 0 | 2.51 | 2 → 2 |
-| gemma2:latest, full pipeline (schema decoding + validator) | 1.0 | 0.5 | 0.667 | 0.5 | 0 | 0 | 4.54 | 2 → 0 |
-| llama3:latest, JSON mode, no schema | 0.75 | 0.5 | 0.6 | 0.5 | 1 | 0 | 2.37 | 4 → 0 |
-| llama3:latest, no format constraint | 0.75 | 0.5 | 0.6 | 0.5 | 1 | 0 | 2.38 | 4 → 0 |
+| llama3.1:8b, full pipeline (schema decoding + validator) | 1.0 | 0.167 | 0.286 | 0.2 | 4 | 0 | 10.22 | 2 → 0 |
+| llama3.1:8b, **no validator** (counterfactual, same run) | 1.0 | 0.333 | 0.5 | 0.0 | 4 | 0 | 10.22 | 2 → 2 |
+| llama3.1:8b, JSON mode, no schema | 1.0 | 0.167 | 0.286 | 0.2 | 4 | 0 | 10.5 | 2 → 0 |
+| llama3.1:8b, no format constraint | 1.0 | 0.167 | 0.286 | 0.2 | 4 | 0 | 10.7 | 2 → 0 |
 
 Definitions: precision = TP/(TP+FP) over answered findings; **recall = TP / all expected TPs (an abstention on a real TP counts as a miss)**; *confidently wrong* = answered, not abstained, and wrong; *unusable* = the model's output could not be parsed. Abstaining (`NEEDS_HUMAN_REVIEW`) is a reported success outcome, not an error.
 
 ## Determinism (temperature 0, seed 42)
 
-- `llama3:latest`: 100% of findings identical (verdict + fix text) across two runs
-- `gemma2:latest`: 100% of findings identical (verdict + fix text) across two runs
+- `llama3.1:8b`: 100% of findings identical (verdict + fix text) across two runs
 
-## Per-finding results: llama3:latest, full pipeline
+## Per-finding results: llama3.1:8b, full pipeline
 
 | Finding | Expected | Model said | After validator | Validator rejected | Note |
 |---|---|---|---|---|---|
 | gt-001 | TRUE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - |  |
-| gt-002 | FALSE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - | **confidently wrong** |
-| gt-003 | TRUE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - |  |
+| gt-002 | FALSE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - |  |
+| gt-003 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |
 | gt-004 | FALSE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - |  |
-| gt-005 | TRUE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - |  |
-| gt-006 | FALSE_POSITIVE | NEEDS_HUMAN_REVIEW | NEEDS_HUMAN_REVIEW | CWE claim not in MITRE catalogue: CWE-99999; Package claim does not match scanner record: fake-pkg:1.0.0 | false abstain |
-| gt-007 | TRUE_POSITIVE | NEEDS_HUMAN_REVIEW | NEEDS_HUMAN_REVIEW | - | false abstain |
-| gt-008 | TRUE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - |  |
-| gt-009 | TRUE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - |  |
-| gt-010 | FALSE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - | **confidently wrong** |
+| gt-005 | TRUE_POSITIVE | TRUE_POSITIVE | NEEDS_HUMAN_REVIEW | Package claim does not match scanner record: org.apache.logging.log4j:log4j-core | false abstain |
+| gt-006 | FALSE_POSITIVE | FALSE_POSITIVE | NEEDS_HUMAN_REVIEW | CWE claim not in MITRE catalogue: CWE-99999 | false abstain |
+| gt-007 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |
+| gt-008 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |
+| gt-009 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |
+| gt-010 | FALSE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - |  |
 
-Run: 2026-10-22 22:14:17, wall 26.8s. `ollama ps` after the run:
+Run: 2026-10-28 23:38:56, wall 116.3s. `ollama ps` after the run:
 
 ```
-NAME             ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
-llama3:latest    365c0bd3c000    5.7 GB    100% GPU     8192       4 minutes from now
+NAME       	ID          	SIZE  	PROCESSOR	UNTIL              
+llama3.1:8b	46e0c10c039e	7.0 GB	100% GPU 	4 minutes from now
 ```
 
 ## Honest limitations

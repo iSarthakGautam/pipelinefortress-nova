@@ -1,5 +1,6 @@
 # Vulnerable dependencies intentionally planted for SCA scanners (Trivy, Grype, OSV)
 flask==2.0.1
+werkzeug==2.0.3
 requests==2.25.1
 urllib3==1.26.4
 pyyaml==5.3.1

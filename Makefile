@@ -13,7 +13,7 @@ help:
 	@echo "PipelineFortress Developer & CI Commands:"
 	@echo "  make bootstrap    - Install dependencies and git pre-commit hooks"
 	@echo "  make test         - Run full Python test suite"
-	@echo "  make scan         - Run local security scanners (Gitleaks, Semgrep, Trivy, Bandit)"
+	@echo "  make scan         - Run local security scanners (Gitleaks, Semgrep, Trivy, Bandit, Grype, Osv, checkov)"
 	@echo "  make normalize    - Normalize scanner outputs to ADR-001 unified schema"
 	@echo "  make gate         - Check findings against security baseline"
 	@echo "  make triage       - Run AI triage on findings (requires Ollama)"
@@ -37,13 +37,37 @@ bootstrap:
 scan:
 	@mkdir -p artifacts/scans
 	@echo "--> Scanning secrets with Gitleaks..."
-	gitleaks git --redact --no-banner --exit-code 0 --report-format sarif --report-path artifacts/scans/gitleaks.sarif . || true
+	gitleaks git --config .gitleaks.toml --ignore-gitleaks-allow --redact --no-banner --exit-code 0 --report-format sarif --report-path artifacts/scans/gitleaks.sarif .
+
 	@echo "--> Scanning SAST with Semgrep..."
-	semgrep scan --config p/default --metrics off --sarif --output artifacts/scans/semgrep.sarif . || true
+	semgrep scan --config p/default --config scanners/semgrep/rules --metrics off --disable-version-check --exclude eval --exclude tests --exclude artifacts --sarif --output artifacts/scans/semgrep.sarif .
+
 	@echo "--> Scanning Python code with Bandit..."
-	bandit -r apps/ -f json -o artifacts/scans/bandit.json --exit-zero || true
+	bandit -r apps/ -f json -o artifacts/scans/bandit.json --exit-zero
+
 	@echo "--> Scanning SCA with Trivy..."
-	trivy fs --scanners vuln,misconfig --exit-code 0 --format json --output artifacts/scans/trivy.json . || true
+	trivy fs --scanners vuln,misconfig --exit-code 0 --skip-dirs artifacts,eval,tests --db-repository ghcr.io/aquasecurity/trivy-db:2,mirror.gcr.io/aquasec/trivy-db:2 --format json --output artifacts/scans/trivy.json .
+
+	@echo "--> Scanning vulnerabilities with Grype..."
+	GRYPE_CHECK_FOR_APP_UPDATE=false GRYPE_DB_VALIDATE_AGE=true GRYPE_DB_MAX_ALLOWED_BUILT_AGE=120h GRYPE_DB_REQUIRE_UPDATE_CHECK=true grype dir:. -o json --file artifacts/scans/grype.json --exclude ./.git --exclude ./eval --exclude ./tests --exclude ./artifacts --add-cpes-if-none
+
+	@echo "--> Scanning dependencies with OSV-Scanner..."
+	@set +e; \
+	osv-scanner scan source -r --experimental-exclude "g:eval/**" --experimental-exclude "g:tests/**" --experimental-exclude "g:artifacts/**" --format json --output-file artifacts/scans/osv.json .; \
+	rc=$$?; \
+	if [ "$$rc" -eq 0 ] || [ "$$rc" -eq 1 ]; then \
+		exit 0; \
+	elif [ "$$rc" -eq 128 ]; then \
+		echo '{"results": []}' > artifacts/scans/osv.json; \
+	else \
+		echo "OSV-Scanner failed with exit code $$rc."; \
+		exit "$$rc"; \
+	fi
+
+	@echo "--> Scanning configuration with Checkov..."
+	checkov -d . --quiet --compact --soft-fail --skip-download --skip-path '^\./eval(/|$$)' --skip-path '^\./tests(/|$$)' --skip-path '^\./artifacts(/|$$)' --framework dockerfile kubernetes github_actions -o sarif --output-file-path artifacts/scans/checkov
+	@mv artifacts/scans/checkov/results_sarif.sarif artifacts/scans/checkov.sarif
+
 	@echo "✅ Local scan completed. Reports in artifacts/scans/"
 
 normalize:
@@ -53,6 +77,9 @@ normalize:
 		--gitleaks artifacts/scans/gitleaks.sarif \
 		--trivy artifacts/scans/trivy.json \
 		--bandit artifacts/scans/bandit.json \
+		--grype artifacts/scans/grype.json \
+		--osv artifacts/scans/osv.json \
+		--checkov artifacts/scans/checkov.sarif \
 		-o artifacts/findings.json
 	@echo "✅ Findings normalized to artifacts/findings.json"
 
@@ -81,7 +108,7 @@ test test-ai:
 	$(PY) -m unittest discover -s tests -v
 
 triage:
-	LLM_TRACE_DIR=$(TRACE_DIR) EGRESS_LOG=$(EGRESS_LOG) $(PY) ai/triage.py < $(FINDINGS)
+	LLM_TRACE_DIR=$(TRACE_DIR) EGRESS_LOG=$(EGRESS_LOG) ARTIFACTS_BASE=$(dir $(FINDINGS)) $(PY) ai/triage.py < $(FINDINGS)
 
 eval:
 	LLM_TRACE_DIR=$(TRACE_DIR) EGRESS_LOG=$(EGRESS_LOG) $(PY) eval/run_eval.py

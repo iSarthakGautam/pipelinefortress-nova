@@ -21,7 +21,7 @@ from redaction.redactor import egress_guard_check
 #                 with fail-open degradation if offline. OLLAMA_BASE_URL remains loopback.
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "ollama")  # unused by Ollama; kept for OpenAI-compatible setups
-DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama3.1:8b")
+DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama3:latest")  # llama3:latest is installed+is_default in models.lock.yaml; llama3.1:8b is not installed
 TIMEOUT_S = float(os.getenv("LLM_TIMEOUT", "180"))
 
 AI_DIR = os.path.dirname(os.path.abspath(__file__))

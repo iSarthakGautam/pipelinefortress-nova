@@ -373,6 +373,7 @@ jobs:
             > artifacts/findings.triaged.json
 
       - name: Upload AI Triage Artifacts
+        if: always()
         # actions/upload-artifact@v4.4.3
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
         with:
@@ -381,6 +382,7 @@ jobs:
             artifacts/findings.triaged.json
             artifacts/pr_comment.md
             artifacts/metrics.prom
+          if-no-files-found: warn
           retention-days: 7
 
   # =========================================================================
@@ -389,7 +391,7 @@ jobs:
   pr-comment:
     name: 40-pr-comment
     needs: triage-ai
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && needs.triage-ai.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -493,14 +495,22 @@ jobs:
         run: |
           set -e
           echo "Verifying vulnshop-api staging health endpoint..."
+          healthy=false
           for i in {1..30}; do
             if curl --silent --fail http://127.0.0.1:8000/healthz; then
               echo
               echo "✅ vulnshop-api health check passed."
+              healthy=true
               break
             fi
+            echo "Attempt $i/30 failed; retrying..."
             sleep 2
           done
+          if [ "$healthy" != "true" ]; then
+            echo "ERROR: Staging API failed its health check."
+            docker compose -f docker/docker-compose.staging.yml logs
+            exit 1
+          fi          
 
       - name: DAST Scan (OWASP ZAP Baseline)
         if: steps.check_staging.outputs.exists == 'true'
