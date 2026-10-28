@@ -233,8 +233,26 @@ def main():
         findings = [findings]
     if args.only_new:
         findings = [f for f in findings if (f.get("baseline") or {}).get("is_new", True)]
+        
+    # Sort by severity before applying the maximum findings limit.
+    severity_rank = {
+        "CRITICAL": 5,
+        "HIGH": 4,
+        "MEDIUM": 3,
+        "LOW": 2,
+        "INFO": 1,
+        "INFORMATIONAL": 1,
+        "UNKNOWN": 0,
+    }
+    
+    def severity_key(finding):
+        severity = str(finding.get("severity_norm") or "UNKNOWN").upper()
+        return severity_rank.get(severity, 0)
+
+    findings.sort(key=severity_key, reverse=True)        
     if args.max_findings > 0:
         findings = findings[:args.max_findings]
+        
     results, traces = triage_findings(findings, args.model, args.format_mode, not args.no_validate,
                                       not args.no_defence, args.trace_dir)
     if args.comment_out:
