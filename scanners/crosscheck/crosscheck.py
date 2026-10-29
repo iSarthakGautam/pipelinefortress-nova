@@ -8,7 +8,8 @@ Metrics only. This never gates the build.
       --tools trivy,grype,osv -o artifacts/sca-crosscheck.json --markdown artifacts/sca-crosscheck.md
 
 Linking: two findings are the same vulnerability when they are in the same manifest, for the
-same package (PEP 503-style name normalization), and share any ID (rule_id or a CVE alias).
+same package (PEP 503-style name normalization), and share any ID (rule_id, a CVE, or a non-CVE
+alias such as a GHSA, ADR-002).
 Linking is transitive, so tool A's GHSA, tool B's CVE and tool C's CVE+GHSA end up in one group.
 """
 import argparse
@@ -49,7 +50,7 @@ def group_findings(findings: list, tools=SCA_TOOLS) -> list:
     first_seen = {}
     for i, f in enumerate(sca):
         scope = (f["location"]["file"], norm_pkg(f["package"]["name"]))
-        for vid in {f["rule_id"], *f.get("cve", [])}:
+        for vid in {f["rule_id"], *f.get("cve", []), *f.get("aliases", [])}:
             key = (scope, vid)
             if key in first_seen:
                 uf.union(first_seen[key], i)
@@ -65,7 +66,8 @@ def group_findings(findings: list, tools=SCA_TOOLS) -> list:
         by_tool = {}
         for f in sorted(fs, key=lambda x: (x["tool"], x["finding_id"])):
             by_tool.setdefault(f["tool"], f)          # one entry per tool is enough for metrics
-        ids = sorted({f["rule_id"] for f in fs} | {c for f in fs for c in f.get("cve", [])})
+        ids = sorted({f["rule_id"] for f in fs} | {c for f in fs for c in f.get("cve", [])}
+                     | {a for f in fs for a in f.get("aliases", [])})
         sev = {t: f["severity_norm"] for t, f in by_tool.items()}
         groups.append({
             "id": min((i for i in ids if i.startswith("CVE-")), default=ids[0]),

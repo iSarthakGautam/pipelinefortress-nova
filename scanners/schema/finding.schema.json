@@ -28,6 +28,12 @@
       "items": { "type": "string", "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$" },
       "uniqueItems": true
     },
+    "aliases": {
+      "description": "Optional (ADR-002). Every non-CVE vulnerability ID the SCANNER reported for this finding (GHSA, PYSEC, NSWG, ...), so tools that name the same flaw differently can be linked. Never used for identity: finding_id and baseline matching ignore it.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
     "location": {
       "type": "object",
       "additionalProperties": false,

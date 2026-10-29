@@ -125,8 +125,14 @@ def extract_cves(values) -> list:
     return sorted({v for v in values or [] if _CVE_RE.match(str(v))})
 
 
+def extract_aliases(values) -> list:
+    """Non-CVE vulnerability IDs (GHSA, PYSEC, ...): ADR-002. Grype may report only the GHSA
+    of a flaw that OSV reports as GHSA + CVE; without these the two can't be linked."""
+    return sorted({str(v) for v in values or [] if v and not _CVE_RE.match(str(v))})
+
+
 def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line, package, snippet, raw_ref,
-                  severity_norm=None):
+                  severity_norm=None, aliases=None):
     pkg = package or {"name": None, "version": None, "fixed_version": None}
     evidence = {"raw_ref": raw_ref}
     if snippet:
@@ -147,6 +153,8 @@ def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line,
     }
     if message:
         finding["message"] = message
+    if aliases:
+        finding["aliases"] = aliases
     return finding
 
 
@@ -235,6 +243,7 @@ def parse_trivy(path: Path, ref: str = None) -> list:
                 severity_raw=v.get("Severity", "UNKNOWN"),
                 cwe=extract_cwes(v.get("CweIDs")),
                 cve=extract_cves(ids),
+                aliases=extract_aliases(ids),
                 file=target,
                 line=0,
                 package={"name": v.get("PkgName"), "version": v.get("InstalledVersion"),
@@ -275,6 +284,7 @@ def parse_grype(path: Path, ref: str = None, root: str = None) -> list:
             severity_raw=v.get("severity", "Unknown"),
             cwe=extract_cwes(c.get("cwe") for c in v.get("cwes") or []),
             cve=extract_cves(ids),
+            aliases=extract_aliases(ids),
             file=norm_path(locs[0].get("path", ""), root),
             line=0,
             package={"name": art.get("name"), "version": art.get("version"), "fixed_version": fixed or None},
@@ -326,6 +336,7 @@ def parse_osv(path: Path, ref: str = None, root: str = None) -> list:
                     severity_norm=bucket,
                     cwe=extract_cwes(cwes),
                     cve=extract_cves(ids),
+                    aliases=extract_aliases(ids),
                     file=file,
                     line=0,
                     package={"name": meta.get("name"), "version": meta.get("version"),

@@ -122,6 +122,16 @@ class TestParsers(unittest.TestCase):
         p.write_text(json.dumps(doc))
         f = n.parse_trivy(p)[0]
         assert f["rule_id"] == "CVE-2020-1234" and f["cve"] == ["CVE-2020-1234"]
+        assert f["aliases"] == ["GHSA-zzzz"]                  # ADR-002: the GHSA is kept too
+        n.validate([f])
+
+    def test_findings_without_non_cve_ids_have_no_aliases(self):
+        fs = load_sca_findings()
+        assert any("aliases" in f for f in fs)
+        assert all(not a.startswith("CVE-") for f in fs for a in f.get("aliases", []))
+        n.validate(fs)
+        semgrep = n.parse_sarif(ROOT / "tests" / "fixtures" / "semgrep.sarif", "semgrep")
+        assert semgrep and all("aliases" not in g for g in semgrep)
 
     def test_empty_scanner_outputs(self):
         (self.tmp / "g.json").write_text('{"matches": []}')
@@ -161,6 +171,17 @@ class TestCrosscheck(unittest.TestCase):
         fs[1]["rule_id"] = "GHSA-x"                                     # osv carries both ids
         groups = cc.group_findings(fs)
         assert len(groups) == 1 and groups[0]["tools"] == ["grype", "osv", "trivy"]
+
+    def test_ghsa_alias_links_a_ghsa_only_finding(self):
+        """Real case (asteval): Grype reports only GHSA-9w56-46f6-3qhx; OSV reports the same group
+        as GHSA + CVE-2026-102734, so normalize names it by the CVE. ADR-002's aliases link them."""
+        grype = sca("grype", "GHSA-9w56", pkg="asteval")
+        osv = sca("osv", "CVE-2026-102734", cve=["CVE-2026-102734"], pkg="asteval")
+        assert len(cc.group_findings([grype, osv])) == 2              # without aliases: unlinked
+        osv["aliases"] = ["GHSA-9w56"]
+        groups = cc.group_findings([grype, osv])
+        assert len(groups) == 1 and groups[0]["tools"] == ["grype", "osv"]
+        assert groups[0]["id"] == "CVE-2026-102734" and "GHSA-9w56" in groups[0]["aliases"]
 
     def test_same_vuln_in_two_manifests_counts_twice(self):
         groups = cc.group_findings([sca("trivy", "CVE-1", file="a/req.txt"),

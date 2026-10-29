@@ -161,7 +161,7 @@ extra (same 9–10 s run). Dropping it from IaC would not be worth a second conf
 | Add `apps/vulnshop-api/package-lock.json` so PLANT-005 is detectable, or record it as an expected miss | R3 |
 | Make Trivy read `requirements-scanners.txt` / `requirements-dev.txt` (or accept OSV+Grype covering them) | R2 |
 | ~~asteval 1.0.6 → 1.0.9~~ Not possible (checkov pins it); made unreachable in #29 | R2 |
-| Link findings across GHSA/CVE aliases in crosscheck (the schema keeps only CVE ids) | R2 |
+| ~~Link findings across GHSA/CVE aliases in crosscheck (the schema keeps only CVE ids)~~ Done: ADR-002 adds `aliases` | R2 |
 | PLANT-003 is catalogued for gitleaks, which cannot see the example key: retarget to the custom Semgrep rule or plant a non-example key | R3 |
 | Cross-tool control map for the noise-reduction metric | R4 / R5 |
 
@@ -183,6 +183,24 @@ The upgrade also surfaced two asteval 1.0.6 sandbox escapes in `requirements-sca
 pins `asteval==1.0.6` in every release through 3.3.30, so #29 makes them unreachable instead:
 Checkov now runs only the `dockerfile kubernetes github_actions` frameworks, and asteval is only
 used by its terraform/cloudformation rendering.
+
+## Update: GHSA aliases linked (ADR-002), 2026-10-29
+
+The normalizer now keeps every non-CVE ID a scanner reports, in an optional `aliases` field
+(ADR-002). Crosscheck links on it, so Grype's GHSA-only asteval finding (`GHSA-9w56-46f6-3qhx`)
+joins OSV's `CVE-2026-102734`. On main's scans after #42 (CI run 40762500169, which includes the
+vulnshop-api lockfile and is why the totals are larger than above):
+
+| | Before | After |
+|---|---|---|
+| Distinct vulnerabilities | 67 | 66 |
+| Found by all three | 53 | 53 |
+| Only Grype | 1 | **0** |
+| Only OSV | 5 | 4 |
+| Only Trivy | 1 | 1 (`NSWG-ECO-516`, lodash: no other tool reports it under any ID) |
+
+Grype's "0 unique" is now measured rather than footnoted. The findings, their IDs and the gate
+result are unchanged.
 
 ## Reproduce
 
