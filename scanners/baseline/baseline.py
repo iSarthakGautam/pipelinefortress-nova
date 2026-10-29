@@ -80,7 +80,7 @@ def line_sha(repo: Path, file: str, line: int, cache: dict):
 
 
 def _source_lines(repo: Path, file: str, cache: dict) -> list:
-    """Lines of a repo file as scanners number them; [] if it can't be read."""
+    """Lines of a repo file, split on \\n as line_sha numbers them; [] if it can't be read."""
     if file not in cache:
         try:
             cache[file] = (Path(repo) / file).read_text(encoding="utf-8", errors="replace").split("\n")
@@ -101,9 +101,16 @@ def missing_lines(repo: Path, entries: list) -> list:
     run outside the repo root or at another commit than the one scanned, and those findings get
     no line_sha (they turn new the first time their line moves). It can also be legitimate:
     gitleaks scans history, so a deleted secret's file is gone at HEAD."""
-    cache = {}
-    return [f"{e['file']}:{e['line']}" for e in entries
-            if e["line"] > 0 and e["line"] > len(_source_lines(repo, e["file"], cache))]
+    cache, missing = {}, []
+    for e in entries:
+        if e["line"] < 1:
+            continue
+        lines = _source_lines(repo, e["file"], cache)
+        count = len(lines) - (1 if lines and lines[-1] == "" else 0)   # a final \n ends a line
+        loc = f"{e['file']}:{e['line']}"
+        if e["line"] > count and loc not in missing:
+            missing.append(loc)
+    return missing
 
 
 def load_baseline(path: Path) -> dict:

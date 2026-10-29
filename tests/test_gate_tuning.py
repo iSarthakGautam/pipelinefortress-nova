@@ -127,6 +127,12 @@ class TestMovedFindings(unittest.TestCase):
         assert rc == 0 and "s.py:40" in err
         assert (self.repo / "base.json").exists()
 
+    def test_warning_counts_distinct_lines_including_one_past_the_end(self):
+        self.write("x = 1", "db.execute(q)")                              # ends with \n: 2 lines
+        rc, err = self.create([finding("s.py", 3), finding("s.py", 3, rule="r.other")], self.repo)
+        assert rc == 0 and "WARNING 1 flagged line(s)" in err and "s.py:3" in err
+        assert err.count("s.py:3") == 1
+
     def test_create_is_quiet_for_line_zero_and_blank_lines(self):
         self.write("x = 1", "", "db.execute(q)")
         rc, err = self.create([finding("s.py", 0), finding("s.py", 2), finding("s.py", 3)], self.repo)
