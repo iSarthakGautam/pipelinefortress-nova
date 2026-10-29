@@ -1,0 +1,10 @@
+# AI-drafted PR register
+
+Drafted by `ai/pr_bot.py` with model `llama3:latest` (prompt `patch_draft_v2`). Targets are SYNTHETIC fixtures (`eval/fixtures/pr_targets/`), not repo files. **No PR has been opened and no human has reviewed any of these.** `applies_cleanly` is the result of `git apply --check`, nothing more: it does not mean the patch is correct. Review notes are written by R1/R2/R3 on the real PR, not here.
+
+| PR | Target | Finding | Model | applies cleanly | lines changed | Review | Reviewer |
+|---|---|---|---|---|---|---|---|
+| PR-001 | `Dockerfile` | CKV_DOCKER_3 / CKV_DOCKER_2 | `llama3:latest@sha256:365c0bd3c000` | yes | 3 | **PENDING** | None |
+| PR-002 | `deployment.yaml` | CKV_K8S_40 | `llama3:latest@sha256:365c0bd3c000` | yes | 3 | **PENDING** | None |
+| PR-003 | `package.json` | SCA outdated dependency (fixture) | `llama3:latest@sha256:365c0bd3c000` | yes | 2 | **PENDING** | None |
+| PR-004 | `search.py` | CWE-89 SQL injection (fixture) | `llama3:latest@sha256:365c0bd3c000` | yes | 4 | **PENDING** | None |

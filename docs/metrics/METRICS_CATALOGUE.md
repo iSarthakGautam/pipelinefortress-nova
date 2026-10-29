@@ -12,6 +12,18 @@ Source: `ai/metrics.py` in the supplied repository. Metric type is a snapshot `g
 | `pipelinefortress_ai_llm_calls_total` | Calls with latency recorded | How many calls had latency values? | It counts `len(lat)`, not necessarily every attempted call. |
 | `pipelinefortress_ai_llm_latency_seconds_sum` | Sum of recorded model-call latency seconds | What was the aggregate latency in this run? | No histogram/buckets; cannot calculate p95. |
 
+## Planted-vulnerability metrics (`eval/metrics/catch_rate.py`)
+These answer the plan's headline question ("are we hitting the CISO's 80% pre-merge catch target?"). They are computed from the CI `findings.json` against `ground_truth/planted.yaml`, written by the `20-normalize-and-baseline` job (`catch-rate.md` in the step summary, `catch-rate.prom` as an artifact).
+
+| Metric | Meaning | Caveat |
+|---|---|---|
+| `pipelinefortress_planted_caught_total` | Planted true positives with a matching finding | Match quality (exact / package / file-level) is in `catch-rate.md`; IaC and DAST findings match at file level |
+| `pipelinefortress_planted_planted_total` | Planted true positives in the catalogue | 12 catalogue rows (10 TP, 2 controls): report as "k of 10", not as a percentage of a large set |
+| `pipelinefortress_planted_blocking_total` | Caught and rated HIGH or CRITICAL (the merge gate would stop it) | Depends on `severity_map.yaml` tuning (R2, `GATE_TUNING.md`) |
+| `pipelinefortress_planted_false_alarms_total` | Negative controls flagged on their own line | Two controls only |
+
+The authors planted these vulnerabilities and tuned rules against them, so this is a **recall on known plants, not a general false-negative rate**. Say so wherever the number appears.
+
 ## Dashboard panels
 1. Findings and clusters in current snapshot.
 2. Verdict distribution including `NEEDS_HUMAN_REVIEW`.

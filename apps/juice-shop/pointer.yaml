@@ -4,17 +4,18 @@
 
 repository: "https://github.com/juice-shop/juice-shop.git"
 upstream_release: "v16.0.0"
-pinned_commit_sha: "5cb904bc2368c46006f7435f29d46924d5ba89c3"
+# Commit the v16.0.0 tag points at (git ls-remote ... refs/tags/v16.0.0^{}); digest = manifest list on Docker Hub, 2026-10-29.
+pinned_commit_sha: "a9b1dffd0e0bc1c046d0c68c66a6dac42341f290"
 license: "MIT"
 
 container:
   image: "bkimminich/juice-shop:v16.0.0"
-  digest: "sha256:3bbba5fa8d147bbba7e6dbce922dc479b4eeef7e4b52945d81b369cff6705df3"
+  digest: "sha256:5aef8464395d101d984d255166b079a52a573fba900450612f8cf3da2ad3a2dd"
   exposed_port: 3000
   staging_url: "http://localhost:3000"
 
 dast_target:
   tool: "owasp-zap"
   scan_type: "baseline"
-  context_file: "apps/juice-shop/zap-context.prop"
+  # No ZAP context file yet: the baseline scan runs against vulnshop-api only (see the workflow, stage 60).
 

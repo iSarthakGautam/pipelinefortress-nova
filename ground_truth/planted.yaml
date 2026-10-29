@@ -4,7 +4,7 @@
 
 version: "1.0"
 target_service: "apps/vulnshop-api"
-last_updated: "2026-10-25"
+last_updated: "2026-10-29"
 
 planted_vulnerabilities:
   - id: "PLANT-001"
@@ -61,7 +61,7 @@ planted_vulnerabilities:
     cve: []
     location:
       file: "apps/vulnshop-api/routes/pay.py"
-      line: 20
+      line: 22
     snippet: "proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
     ground_truth: "TRUE_POSITIVE"
     expected_priority: "P1"
@@ -78,7 +78,7 @@ planted_vulnerabilities:
       - "CVE-2020-8203"
     location:
       file: "apps/vulnshop-api/package.json"
-      line: 12
+      line: 13
     snippet: "\"lodash\": \"4.17.15\""
     ground_truth: "TRUE_POSITIVE"
     expected_priority: "P2"
@@ -144,3 +144,50 @@ planted_vulnerabilities:
     expected_priority: "UNASSIGNED"
     remediation: "None required (False Positive control)"
 
+
+  # Added 2026-10-29. These three were in the code from the start but not catalogued; cataloguing them after the
+  # scanners were tuned means detecting them is NOT a blind result. Rule ids are the ones a scanner is expected to use.
+  - id: "PLANT-010"
+    name: "Second Raw-String SQL Injection (helper in search.py)"
+    tool: "semgrep"
+    rule_id: "sql-injection"
+    cwe:
+      - "CWE-89"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/routes/search.py"
+      line: 34
+    snippet: "query = f\"SELECT * FROM items WHERE name = '{q}'\""
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P1"
+    remediation: "Parameterize the query: db.execute('SELECT ... WHERE name = ?', (q,))"
+
+  - id: "PLANT-011"
+    name: "Hardcoded AWS Secret Access Key"
+    tool: "semgrep"
+    rule_id: "pf-python-hardcoded-credential"
+    cwe:
+      - "CWE-798"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/config.py"
+      line: 13
+    snippet: "AWS_SECRET = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P1"
+    remediation: "Inject credentials via environment variables or a secret manager"
+
+  - id: "PLANT-012"
+    name: "Flask Debug Mode Enabled (Werkzeug debugger)"
+    tool: "bandit"
+    rule_id: "B201"
+    cwe:
+      - "CWE-489"
+    cve: []
+    location:
+      file: "apps/vulnshop-api/app.py"
+      line: 65
+    snippet: "app.run(host=\"0.0.0.0\", port=APP_PORT, debug=DEBUG)"
+    ground_truth: "TRUE_POSITIVE"
+    expected_priority: "P2"
+    remediation: "Never run the debugger on a reachable interface; DEBUG is off in the hardened image"

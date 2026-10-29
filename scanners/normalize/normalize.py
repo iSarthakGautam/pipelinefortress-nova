@@ -165,21 +165,21 @@ def parse_sarif(path: Path, tool: str, ref: str = None, root: str = None) -> lis
     doc = json.loads(path.read_text(encoding="utf-8"))
     ref = ref or path.as_posix()
     findings = []
-    for ri, run in enumerate(doc.get("runs", [])):
-        rules = {r.get("id"): r for r in run.get("tool", {}).get("driver", {}).get("rules", [])}
+    for ri, run in enumerate(doc.get("runs") or []):
+        rules = {r.get("id"): r for r in ((run.get("tool") or {}).get("driver") or {}).get("rules") or []}
         # Results the tool marks as suppressed (SARIF `suppressions`, e.g. an inline nosemgrep or
         # checkov:skip) are kept on purpose: only a dated security-exception may waive a finding,
         # the same rule CI applies to gitleaks with --ignore-gitleaks-allow.
-        for i, res in enumerate(run.get("results", [])):
+        for i, res in enumerate(run.get("results") or []):
             rule_id = res.get("ruleId") or "unknown"
-            rule = rules.get(rule_id, {})
+            rule = rules.get(rule_id) or {}
             locs = res.get("locations") or [{}]
-            phys = locs[0].get("physicalLocation", {})
-            region = phys.get("region", {})
+            phys = (locs[0] or {}).get("physicalLocation") or {}
+            region = phys.get("region") or {}
             snippet = (region.get("snippet") or {}).get("text") or (
-                phys.get("contextRegion", {}).get("snippet", {}).get("text"))
-            level = res.get("level") or rule.get("defaultConfiguration", {}).get("level") or "warning"
-            tags = rule.get("properties", {}).get("tags", [])
+                ((phys.get("contextRegion") or {}).get("snippet") or {}).get("text"))
+            level = res.get("level") or (rule.get("defaultConfiguration") or {}).get("level") or "warning"
+            tags = (rule.get("properties") or {}).get("tags") or []
             findings.append(build_finding(
                 tool=tool,
                 rule_id=rule_id,
@@ -189,8 +189,8 @@ def parse_sarif(path: Path, tool: str, ref: str = None, root: str = None) -> lis
                 cve=[],
                 # Not percent-decoded: these tools write raw paths, so a file literally named
                 # apps%2Fx.py must not turn into apps/x.py and collide with a real finding
-                file=norm_path(phys.get("artifactLocation", {}).get("uri", ""), root),
-                line=int(region.get("startLine", 0)),
+                file=norm_path((phys.get("artifactLocation") or {}).get("uri") or "", root),
+                line=int(region.get("startLine") or 0),
                 package=None,
                 snippet=snippet,
                 raw_ref=f"{ref}#/runs/{ri}/results/{i}",
@@ -207,7 +207,7 @@ def parse_bandit(path: Path, ref: str = None) -> list:
     doc = json.loads(path.read_text(encoding="utf-8"))
     ref = ref or path.as_posix()
     findings = []
-    for i, r in enumerate(doc.get("results", [])):
+    for i, r in enumerate(doc.get("results") or []):
         sev = normalize_severity("bandit", r.get("issue_severity"))
         if str(r.get("issue_confidence")).upper() == "LOW" and sev in _SEVERITY_ORDER[1:]:
             sev = _SEVERITY_ORDER[_SEVERITY_ORDER.index(sev) - 1]
@@ -238,7 +238,7 @@ def parse_trivy(path: Path, ref: str = None) -> list:
     doc = json.loads(path.read_text(encoding="utf-8"))
     ref = ref or path.as_posix()
     findings = []
-    for ri, result in enumerate(doc.get("Results", [])):
+    for ri, result in enumerate(doc.get("Results") or []):
         target = norm_path(result.get("Target", ""))
         for i, v in enumerate(result.get("Vulnerabilities") or []):
             vid = v.get("VulnerabilityID", "unknown")
@@ -301,11 +301,16 @@ def parse_grype(path: Path, ref: str = None, root: str = None) -> list:
     return findings
 
 
+def _pep503(name) -> str:
+    """PEP 503 package-name normalisation: zope.interface, zope_interface and Zope-Interface are one package."""
+    return re.sub(r"[-_.]+", "-", str(name or "")).lower()
+
+
 def _osv_fixed_versions(vulns: list, pkg_name: str) -> list:
     fixed = []
     for v in vulns:
         for aff in v.get("affected") or []:
-            if (aff.get("package") or {}).get("name", "").lower() != pkg_name.lower():
+            if _pep503((aff.get("package") or {}).get("name")) != _pep503(pkg_name):
                 continue
             for rng in aff.get("ranges") or []:
                 for ev in rng.get("events") or []:
@@ -330,6 +335,8 @@ def parse_osv(path: Path, ref: str = None, root: str = None) -> list:
                 members = [vulns[i] for i in group.get("ids") or [] if i in vulns]
                 score = group.get("max_severity") or ""
                 bucket = cvss_bucket(score)
+                if bucket == "INFO":   # osv-scanner can emit "0" for an advisory with no CVSS: not a real INFO rating
+                    bucket = None
                 if bucket is None:   # no CVSS score: fall back to GHSA's qualitative label
                     labels = [(v.get("database_specific") or {}).get("severity") for v in members]
                     score = next((label for label in labels if label), "UNKNOWN")

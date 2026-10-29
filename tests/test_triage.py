@@ -36,6 +36,22 @@ def run(findings, response, **kw):
 
 class TestTriage(unittest.TestCase):
 
+    def test_suggested_fix_is_capped_at_five_lines(self):
+        long = {**GOOD, "fix_summary": "\n".join(f"step {i}" for i in range(9))}
+        res, _, _ = run([finding()], llm(long))
+        self.assertEqual(len(res[0]["triage"]["fix_summary"].splitlines()), 5)
+
+    def test_wrong_typed_scanner_fields_degrade_instead_of_crashing(self):
+        # regression: location/package/evidence as a string raised AttributeError and killed the run,
+        # contradicting the "never crashes the run" contract in the module header
+        for bad in ({"location": "apps/api/db.py"}, {"package": "lodash"}, {"evidence": "oops"},
+                    {"dedupe": "C1"}, {"baseline": "new"}, {"cve": "CVE-2021-44228"}, {"cwe": None}):
+            with self.subTest(bad=bad):
+                f = {**finding(), **bad}
+                res, _, _ = run([f], llm(GOOD))
+                self.assertEqual(len(res), 1)
+                self.assertIn(res[0]["triage"]["verdict"], triage.VALID_VERDICTS)
+
     def test_raw_secret_never_reaches_output(self):
         # regression (audit §4.5 #1): snippet_raw (with the AWS key) was copied into the output
         res, _, _ = run([finding(snippet=f"AWS_KEY = '{SECRET}'")], llm(GOOD))

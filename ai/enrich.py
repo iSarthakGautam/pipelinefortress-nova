@@ -1,9 +1,11 @@
 import json
+import os
 
 # enrich.py
 # Offline enrichment. Attaches EPSS and CISA KEV facts per CVE. Never fetched at inference time.
-# The tables below are a HAND-PICKED SAMPLE, not the full KEV/EPSS feeds. Until ai/data/ gets the real
-# CISA KEV JSON and EPSS CSV (with sha256 pins), CVEs not listed here get epss=None (unknown), not 0.
+# Data: ai/data/kev_ids.txt (the full CISA KEV catalogue) and ai/data/epss_subset.json (EPSS for the CVEs this repo can meet),
+# both written by scripts/fetch_enrichment_data.py with the source, date and sha256 of the raw download in the file.
+# A CVE with no EPSS score gets epss=None (unknown), not 0. If the data files are missing, the two-entry sample below is used.
 # EPSS only exists per CVE, so there is no EPSS value for a bare CWE (the earlier CWE prior was invented).
 # `reachable` is None because reachability analysis is not implemented. None means "not computed".
 
@@ -17,13 +19,31 @@ SAMPLE_EPSS = {
 }
 
 
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+
+
+def _load():
+    kev, epss = set(SAMPLE_KEV), dict(SAMPLE_EPSS)
+    try:
+        with open(os.path.join(DATA_DIR, "kev_ids.txt"), encoding="utf-8") as f:
+            kev = {ln.strip() for ln in f if ln.strip() and not ln.startswith("#")}
+        with open(os.path.join(DATA_DIR, "epss_subset.json"), encoding="utf-8") as f:
+            epss = {k: float(v) for k, v in json.load(f).get("scores", {}).items()}
+    except (OSError, ValueError):
+        pass   # fall back to the sample: enrichment must never stop a run
+    return kev, epss
+
+
+KEV_IDS, EPSS_SCORES = _load()
+
+
 def enrich_finding(finding: dict) -> dict:
     """Adds an `enrichment` block to the finding (mutates and returns it)."""
     cves = finding.get("cve", []) or []
-    known = [SAMPLE_EPSS[c] for c in cves if c in SAMPLE_EPSS]
+    known = [EPSS_SCORES[c] for c in cves if c in EPSS_SCORES]
     finding["enrichment"] = {
         "epss": max(known) if known else None,
-        "kev": any(c in SAMPLE_KEV for c in cves),
+        "kev": any(c in KEV_IDS for c in cves),
         "reachable": None,
     }
     return finding

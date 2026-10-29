@@ -33,10 +33,14 @@ The unit is one normalized security finding presented to the triage system. Pres
 
 ## 6. Freeze and versioning
 After two labels, adjudication and split decisions are complete:
-1. Save the final dataset as a versioned immutable file (e.g. `r5/evaluation/data/ground_truth_v1.jsonl`).
+1. Save the final dataset as a versioned immutable file (e.g. `r5/evaluation/data/ground_truth/data/ground_truth_v1_v1.jsonl`).
 2. Run `split_and_freeze.py` to produce split files and SHA-256 manifest.
 3. Commit dataset, manifest, protocol version and reviewer instructions together. If any row changes, create a new version and hash; never silently update the frozen file.
 4. Record who approved the freeze and when in `freeze_approval.md`.
 
 ## Current status for this repository
-The supplied 10-row dataset is synthetic and single-labelled. `ground_truth/planted.yaml` is empty in the supplied ZIP. Therefore two-labeller agreement, adjudication, a real time-based split, and a final held-out set remain pending until real evidence/labels are provided.
+Updated 2026-10-29.
+- `eval/ground_truth.jsonl` is still the **10-row synthetic, single-labelled smoke set**. It has no timestamp field, so it cannot support a time split. It is not the ground truth the report may call "held-out".
+- `ground_truth/planted.yaml` now has 9 entries (7 true positives, 2 negative controls) from R3. The plan asked for 12-18.
+- R2 froze a candidate population of 264 real findings (`docs/metrics/data/candidate-population-2026-10-29/`, 98 duplicate groups, `first_seen` per row). It has **no labels**. Sampling from it, two-reviewer labelling, adjudication and the freeze are still pending (R5 coordinates; see `docs/R5_NEXT_STEPS.md`).
+- `eval/ground_truth/cohen_kappa.py` and `split_and_freeze.py` are untested against real labels. Run them on a dry-run CSV first.

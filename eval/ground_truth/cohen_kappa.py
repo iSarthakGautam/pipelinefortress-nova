@@ -2,8 +2,8 @@
 """Compute Cohen's kappa from two independent categorical label columns in CSV.
 
 Example:
- python3 r5/evaluation/cohen_kappa.py r5/evaluation/labels_template.csv \
-   --a reviewer_a_label --b reviewer_b_label --out r5/evaluation/kappa_report.json
+ python3 eval/ground_truth/cohen_kappa.py eval/ground_truth/labels_template.csv \
+   --a reviewer_a_label --b reviewer_b_label --out eval/ground_truth/kappa_report.json
 Blank labels are excluded and counted. Labels must be independent pre-adjudication labels.
 """
 import argparse, csv, json, math

@@ -6,7 +6,7 @@ import posixpath
 # Key: tool :: rule_id :: normalised full path. The full path (not the basename) keeps
 # apps/a/index.js and apps/b/index.js apart.
 # Honours an incoming dedupe.cluster_id from R2's normalizer; otherwise computes its own key.
-# Rule-based only. Embedding clustering (mxbai-embed-large) is NOT implemented; see docs/R4_AUDIT_2026-10-21.md.
+# Rule-based on purpose: no embedding calls, one cheap deterministic key.
 
 
 def normalise_path(path: str) -> str:

@@ -1,0 +1,378 @@
+# PipelineFortress test results
+date:    2026-10-29T17:36:21Z
+commit:  0573fa5 (+ uncommitted changes)
+python:  Python 3.13.3
+command: /tmp/pfenv/bin/python -m unittest discover -s tests -v
+-----------------------------------------------------------------------
+test_annotation_syntax_in_strings_and_docs_is_ignored (test_baseline.TestAnnotationParsing.test_annotation_syntax_in_strings_and_docs_is_ignored) ... ok
+test_annotation_text_inside_a_string_with_a_space_is_ignored (test_baseline.TestAnnotationParsing.test_annotation_text_inside_a_string_with_a_space_is_ignored) ... ok
+test_common_comment_leaders (test_baseline.TestAnnotationParsing.test_common_comment_leaders) ... ok
+test_trailing_comment_on_finding_line_applies (test_baseline.TestAnnotationParsing.test_trailing_comment_on_finding_line_applies) ... ok
+test_baselined_finding_does_not_block (test_baseline.TestBaselineMatching.test_baselined_finding_does_not_block) ... ok
+test_dependency_version_bump_keeps_match (test_baseline.TestBaselineMatching.test_dependency_version_bump_keeps_match) ... ok
+test_everything_new_without_baseline (test_baseline.TestBaselineMatching.test_everything_new_without_baseline) ... ok
+test_extra_occurrence_of_known_rule_is_new (test_baseline.TestBaselineMatching.test_extra_occurrence_of_known_rule_is_new) ... ok
+test_fixed_findings_are_counted (test_baseline.TestBaselineMatching.test_fixed_findings_are_counted) ... ok
+test_line_shift_is_not_new (test_baseline.TestBaselineMatching.test_line_shift_is_not_new)
+Inserting lines above a known finding changes finding_id but must not make it new. ... ok
+test_rebaseline_keeps_first_seen_when_lines_move (test_baseline.TestBaselineMatching.test_rebaseline_keeps_first_seen_when_lines_move) ... ok
+test_rebaseline_preserves_first_seen (test_baseline.TestBaselineMatching.test_rebaseline_preserves_first_seen) ... ok
+test_rewriting_a_baselined_line_in_place_is_new (test_baseline.TestBaselineMatching.test_rewriting_a_baselined_line_in_place_is_new) ... ok
+test_same_rule_other_file_is_new (test_baseline.TestBaselineMatching.test_same_rule_other_file_is_new) ... ok
+test_severity_threshold (test_baseline.TestBaselineMatching.test_severity_threshold) ... ok
+test_cli_bad_input_exits_2 (test_baseline.TestCli.test_cli_bad_input_exits_2) ... ok
+test_cli_create_then_check (test_baseline.TestCli.test_cli_create_then_check) ... ok
+test_cli_rejects_a_compact_today (test_baseline.TestCli.test_cli_rejects_a_compact_today) ... ok
+test_cli_writes_lf_line_endings (test_baseline.TestCli.test_cli_writes_lf_line_endings) ... ok
+test_crlf_files_still_parse (test_baseline.TestExceptions.test_crlf_files_still_parse) ... ok
+test_exception_far_from_finding_does_not_apply (test_baseline.TestExceptions.test_exception_far_from_finding_does_not_apply) ... ok
+test_expired_exception_fails_even_on_known_finding (test_baseline.TestExceptions.test_expired_exception_fails_even_on_known_finding) ... ok
+test_malformed_and_too_long_exceptions_fail (test_baseline.TestExceptions.test_malformed_and_too_long_exceptions_fail) ... ok
+test_manifest_exception_applies_anywhere_in_file (test_baseline.TestExceptions.test_manifest_exception_applies_anywhere_in_file) ... ok
+test_only_yyyy_mm_dd_dates_are_valid (test_baseline.TestExceptions.test_only_yyyy_mm_dd_dates_are_valid) ... ok
+test_trailing_comment_does_not_waive_the_next_line (test_baseline.TestExceptions.test_trailing_comment_does_not_waive_the_next_line) ... ok
+test_valid_exception_on_line_above_unblocks (test_baseline.TestExceptions.test_valid_exception_on_line_above_unblocks) ... ok
+test_dependency_matches_by_package_and_low_severity_does_not_block (test_catch_rate.TestCatchRate.test_dependency_matches_by_package_and_low_severity_does_not_block) ... ok
+test_exact_hit_blocking_and_miss (test_catch_rate.TestCatchRate.test_exact_hit_blocking_and_miss) ... ok
+test_negative_control_flagged_only_on_its_own_line (test_catch_rate.TestCatchRate.test_negative_control_flagged_only_on_its_own_line) ... ok
+test_planted_yaml_lines_point_at_the_planted_code (test_catch_rate.TestCatchRate.test_planted_yaml_lines_point_at_the_planted_code) ... ok
+test_real_snapshot_and_prometheus_output (test_catch_rate.TestCatchRate.test_real_snapshot_and_prometheus_output) ... ok
+test_same_basename_in_different_dirs_do_not_collide (test_cluster_priority_trace.TestCluster.test_same_basename_in_different_dirs_do_not_collide) ... ok
+test_incoming_r2_cluster_id_is_honoured (test_cluster_priority_trace.TestClusterRobustness.test_incoming_r2_cluster_id_is_honoured) ... ok
+test_malformed_findings_do_not_crash_clustering (test_cluster_priority_trace.TestClusterRobustness.test_malformed_findings_do_not_crash_clustering) ... ok
+test_unknown_values_are_none_not_invented (test_cluster_priority_trace.TestEnrich.test_unknown_values_are_none_not_invented) ... ok
+test_kev_is_always_p1 (test_cluster_priority_trace.TestPriority.test_kev_is_always_p1) ... ok
+test_only_true_positives_get_a_priority (test_cluster_priority_trace.TestPriority.test_only_true_positives_get_a_priority) ... ok
+test_unknown_reachability_does_not_downgrade (test_cluster_priority_trace.TestPriority.test_unknown_reachability_does_not_downgrade) ... ok
+test_disabled_without_directory (test_cluster_priority_trace.TestTrace.test_disabled_without_directory) ... ok
+test_hash_chain_detects_tampering (test_cluster_priority_trace.TestTrace.test_hash_chain_detects_tampering) ... /Users/sgautam/Downloads/capstone/tests/test_cluster_priority_trace.py:58: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp6xnzpjo5/trace.jsonl' mode='r' encoding='UTF-8'>
+  lines = open(p).read().splitlines()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_cluster_priority_trace.py:59: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp6xnzpjo5/trace.jsonl' mode='w' encoding='UTF-8'>
+  open(p, "w").write("\n".join([lines[0].replace('"n": 0', '"n": 9')] + lines[1:]) + "\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_every_autorun_attack_has_a_matching_step (test_demo_site.TestDemoDeck.test_every_autorun_attack_has_a_matching_step) ... ok
+test_main_path_is_about_nine_minutes (test_demo_site.TestDemoDeck.test_main_path_is_about_nine_minutes) ... ok
+test_no_external_resources (test_demo_site.TestDemoDeck.test_no_external_resources) ... ok
+test_pdf_and_fullscreen_buttons_and_print_stylesheet_exist (test_demo_site.TestDemoDeck.test_pdf_and_fullscreen_buttons_and_print_stylesheet_exist) ... ok
+test_removed_text_stays_removed (test_demo_site.TestDemoDeck.test_removed_text_stays_removed) ... ok
+test_script_mentions_every_slide_title_keyword (test_demo_site.TestDemoDeck.test_script_mentions_every_slide_title_keyword) ... ok
+test_team_slide_has_five_empty_name_fields_and_nova_is_on_the_cover (test_demo_site.TestDemoDeck.test_team_slide_has_five_empty_name_fields_and_nova_is_on_the_cover) ... ok
+test_twenty_slides_each_with_title_time_and_notes (test_demo_site.TestDemoDeck.test_twenty_slides_each_with_title_time_and_notes) ... ok
+test_results_page_builds_from_repo_data (test_demo_site.TestResultsPage.test_results_page_builds_from_repo_data) ... ok
+test_full_kev_catalogue_is_loaded_and_pinned (test_enrich_data.TestEnrichmentData.test_full_kev_catalogue_is_loaded_and_pinned) ... ok
+test_kev_and_epss_drive_enrichment (test_enrich_data.TestEnrichmentData.test_kev_and_epss_drive_enrichment) ... ok
+test_unknown_cve_is_none_not_zero (test_enrich_data.TestEnrichmentData.test_unknown_cve_is_none_not_zero) ... ok
+test_validator_registry_includes_kev_but_not_invented_ids (test_enrich_data.TestEnrichmentData.test_validator_registry_includes_kev_but_not_invented_ids) ... ok
+test_cli_flag (test_gate_tuning.TestExpiringExceptions.test_cli_flag) ... ok
+test_expires_today_warns_and_tomorrow_fails (test_gate_tuning.TestExpiringExceptions.test_expires_today_warns_and_tomorrow_fails) ... ok
+test_expiring_soon_warns_but_still_passes (test_gate_tuning.TestExpiringExceptions.test_expiring_soon_warns_but_still_passes) ... ok
+test_far_expiry_does_not_warn (test_gate_tuning.TestExpiringExceptions.test_far_expiry_does_not_warn) ... ok
+test_baseline_records_line_sha (test_gate_tuning.TestMovedFindings.test_baseline_records_line_sha) ... ok
+test_create_is_quiet_for_line_zero_and_blank_lines (test_gate_tuning.TestMovedFindings.test_create_is_quiet_for_line_zero_and_blank_lines) ... ok
+test_create_warns_about_missing_flagged_lines (test_gate_tuning.TestMovedFindings.test_create_warns_about_missing_flagged_lines)
+Outside the repo root, or at another commit, line_sha would be null. It still writes ... ok
+test_entry_without_line_sha_matches_by_group (test_gate_tuning.TestMovedFindings.test_entry_without_line_sha_matches_by_group)
+Baselines written before line_sha keep the old behaviour until they are recreated. ... ok
+test_fixed_finding_does_not_hide_a_new_one (test_gate_tuning.TestMovedFindings.test_fixed_finding_does_not_hide_a_new_one) ... ok
+test_fixed_line_zero_slot_does_not_hide_a_new_finding (test_gate_tuning.TestMovedFindings.test_fixed_line_zero_slot_does_not_hide_a_new_finding)
+A whole-file finding (line 0, no line_sha) is fixed and the same rule fires on a real ... ok
+test_moved_and_reindented_finding_stays_known (test_gate_tuning.TestMovedFindings.test_moved_and_reindented_finding_stays_known) ... ok
+test_warning_counts_distinct_lines_including_one_past_the_end (test_gate_tuning.TestMovedFindings.test_warning_counts_distinct_lines_including_one_past_the_end) ... ok
+test_jinja_autoescape_rule_is_error (test_gate_tuning.TestPlantedClassesBlock.test_jinja_autoescape_rule_is_error) ... ok
+test_other_rules_keep_the_tool_rating (test_gate_tuning.TestPlantedClassesBlock.test_other_rules_keep_the_tool_rating) ... ok
+test_root_pod_is_high_in_both_tools (test_gate_tuning.TestPlantedClassesBlock.test_root_pod_is_high_in_both_tools) ... ok
+test_unscored_vulnerability_blocks (test_gate_tuning.TestPlantedClassesBlock.test_unscored_vulnerability_blocks) ... ok
+test_already_blocking_level_or_below_threshold_passes (test_gate_tuning.TestSeverityRaised.test_already_blocking_level_or_below_threshold_passes) ... ok
+test_exception_covers_a_raised_finding (test_gate_tuning.TestSeverityRaised.test_exception_covers_a_raised_finding) ... ok
+test_internal_fields_stay_out_of_the_output (test_gate_tuning.TestSeverityRaised.test_internal_fields_stay_out_of_the_output) ... ok
+test_low_rerated_critical_blocks (test_gate_tuning.TestSeverityRaised.test_low_rerated_critical_blocks) ... ok
+test_label_sheets_are_separate_and_blank (test_ground_truth_tools.TestGroundTruthTools.test_label_sheets_are_separate_and_blank) ... ok
+test_pipeline_sample_to_split_to_kappa (test_ground_truth_tools.TestGroundTruthTools.test_pipeline_sample_to_split_to_kappa) ... ok
+test_sample_is_one_row_per_group_and_deterministic (test_ground_truth_tools.TestGroundTruthTools.test_sample_is_one_row_per_group_and_deterministic) ... ok
+test_attack_variants_detected (test_injection.TestInjectionHeuristic.test_attack_variants_detected) ... ok
+test_benign_code_not_flagged (test_injection.TestInjectionHeuristic.test_benign_code_not_flagged) ... ok
+test_frame_cannot_be_escaped (test_injection.TestInjectionHeuristic.test_frame_cannot_be_escaped) ... ok
+test_scans_rule_id_and_file_name_too (test_injection.TestInjectionHeuristic.test_scans_rule_id_and_file_name_too) ... ok
+test_attack_is_routed_to_human_without_calling_the_model (test_injection.TestInjectionInPipeline.test_attack_is_routed_to_human_without_calling_the_model) ... ok
+test_prompt_sent_to_model_is_framed (test_injection.TestInjectionInPipeline.test_prompt_sent_to_model_is_framed) ... ok
+test_custom_hook_is_kept_unless_forced (test_install_hooks.TestInstallIntoRepo.test_custom_hook_is_kept_unless_forced) ... ok
+test_install_writes_hooks_and_binary (test_install_hooks.TestInstallIntoRepo.test_install_writes_hooks_and_binary) ... ok
+test_readme_pre_push_hook_is_upgraded_in_place (test_install_hooks.TestInstallIntoRepo.test_readme_pre_push_hook_is_upgraded_in_place) ... ok
+test_uninstall_removes_only_managed_hooks (test_install_hooks.TestInstallIntoRepo.test_uninstall_removes_only_managed_hooks) ... ok
+test_checksum_mismatch_refuses (test_install_hooks.TestPureHelpers.test_checksum_mismatch_refuses) ... ok
+test_download_refuses_unexpected_urls (test_install_hooks.TestPureHelpers.test_download_refuses_unexpected_urls) ... ok
+test_every_asset_has_a_sha256_and_matches_version (test_install_hooks.TestPureHelpers.test_every_asset_has_a_sha256_and_matches_version) ... ok
+test_extract_only_the_binary (test_install_hooks.TestPureHelpers.test_extract_only_the_binary) ... ok
+test_platform_key (test_install_hooks.TestPureHelpers.test_platform_key) ... ok
+test_tampered_download_is_not_installed (test_install_hooks.TestPureHelpers.test_tampered_download_is_not_installed) ... ok
+test_unsupported_platform (test_install_hooks.TestPureHelpers.test_unsupported_platform) ... ok
+test_real_hook_blocks_secret_and_allows_clean_commit (test_install_hooks.TestRealGitleaks.test_real_hook_blocks_secret_and_allows_clean_commit) ... skipped 'set GITLEAKS_TEST_BIN to a gitleaks 8.30.1 binary'
+test_committed_model_sbom_has_not_drifted_from_the_lock_file (test_integration_stubs.TestOtherRolesStubs.test_committed_model_sbom_has_not_drifted_from_the_lock_file) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpvr3j7qbv/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:225: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/sgautam/Downloads/capstone/artifacts/sbom/models.cdx.json' mode='r' encoding='UTF-8'>
+  committed = json.load(open(os.path.join(ROOT, "artifacts", "sbom", "models.cdx.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:228: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpvr3j7qbv/models.cdx.json' mode='r' encoding='UTF-8'>
+  self.assertEqual(committed, json.load(open(out)), "run: python3 eval/stubs/r3_model_sbom_stub.py")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_r1_post_comment_stub_records_the_command_without_network (test_integration_stubs.TestOtherRolesStubs.test_r1_post_comment_stub_records_the_command_without_network) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpt7ijy8nl/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:200: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpt7ijy8nl/c.md' mode='w' encoding='UTF-8'>
+  open(md, "w").write("## hi\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpt7ijy8nl/posted_comment_stub.txt' mode='r' encoding='UTF-8'>
+  self.assertIn("gh pr comment 42", open(os.path.join(self.tmp.name, "posted_comment_stub.txt")).read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_r3_model_sbom_stub_reads_the_lock_file_despite_its_comment_header (test_integration_stubs.TestOtherRolesStubs.test_r3_model_sbom_stub_reads_the_lock_file_despite_its_comment_header) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpqwdwu7pt/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:217: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpqwdwu7pt/models.cdx.json' mode='r' encoding='UTF-8'>
+  comps = {c["name"]: c for c in json.load(open(out))["components"]}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_r5_push_stub_accepts_real_metrics_and_rejects_garbage (test_integration_stubs.TestOtherRolesStubs.test_r5_push_stub_accepts_real_metrics_and_rejects_garbage) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp185214w0/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:208: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp185214w0/m.prom' mode='w' encoding='UTF-8'>
+  open(good, "w").write(metrics.render(res, tr))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:211: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp185214w0/bad.prom' mode='w' encoding='UTF-8'>
+  open(bad, "w").write("not prometheus {{{\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_ci_job_with_model_down_exits_zero_and_still_comments (test_integration_stubs.TestR1CommentAndCiJob.test_ci_job_with_model_down_exits_zero_and_still_comments) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp4144rwdi/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:161: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp4144rwdi/out/findings.triaged.json' mode='r' encoding='UTF-8'>
+  triaged = json.load(open(os.path.join(out, "findings.triaged.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:164: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp4144rwdi/out/pr_comment.md' mode='r' encoding='UTF-8'>
+  md = open(os.path.join(out, "pr_comment.md")).read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_comment_renders_counts_and_neutralises_untrusted_model_text (test_integration_stubs.TestR1CommentAndCiJob.test_comment_renders_counts_and_neutralises_untrusted_model_text) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpl5otcabb/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_garbage_and_minimal_findings_do_not_crash (test_integration_stubs.TestR2Contract.test_garbage_and_minimal_findings_do_not_crash) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpukh5hogt/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_injection_planted_in_sarif_never_reaches_model (test_integration_stubs.TestR2Contract.test_injection_planted_in_sarif_never_reaches_model) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpgii_1una/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_kev_finding_is_p1_by_code (test_integration_stubs.TestR2Contract.test_kev_finding_is_p1_by_code) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpwulz4o6z/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_output_matches_plan_schema_and_never_leaks_raw (test_integration_stubs.TestR2Contract.test_output_matches_plan_schema_and_never_leaks_raw) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmppgsjjju5/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_output_validates_against_r2_finding_schema_json (test_integration_stubs.TestR2Contract.test_output_validates_against_r2_finding_schema_json) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp1el3fx95/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:94: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/sgautam/Downloads/capstone/scanners/schema/finding.schema.json' mode='r' encoding='utf-8'>
+  schema = json.load(open(schema_path, encoding="utf-8"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_r2_cluster_ids_are_honoured_and_dedupe_to_one_call_each (test_integration_stubs.TestR2Contract.test_r2_cluster_ids_are_honoured_and_dedupe_to_one_call_each) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpxujjmgbq/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_sarif_path_traversal_is_blocked (test_integration_stubs.TestR2Contract.test_sarif_path_traversal_is_blocked) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp3hh96tpl/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_snippet_is_recovered_from_sarif_pointer_and_redacted (test_integration_stubs.TestR2Contract.test_snippet_is_recovered_from_sarif_pointer_and_redacted) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp4mfzklu2/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_stub_input_has_no_raw_snippet_or_rule_id (test_integration_stubs.TestR2Contract.test_stub_input_has_no_raw_snippet_or_rule_id) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp9_egosvr/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_validate_repo_root_checks_claims_against_a_stub_repo (test_integration_stubs.TestR3RepoTree.test_validate_repo_root_checks_claims_against_a_stub_repo) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp2f5xtfnq/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:131: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmp2f5xtfnq/repo/apps/vulnshop-api/routes/search.py' mode='w' encoding='UTF-8'>
+  open(os.path.join(repo, "search.py"), "w").write("\n".join(["x"] * 60))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_empty_run_renders_valid_text (test_integration_stubs.TestR5Metrics.test_empty_run_renders_valid_text) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpnwbvxfr8/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_prometheus_text_is_well_formed_and_counts_match (test_integration_stubs.TestR5Metrics.test_prometheus_text_is_well_formed_and_counts_match) ... /Users/sgautam/Downloads/capstone/tests/test_integration_stubs.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpo9_69375/findings.json' mode='r' encoding='UTF-8'>
+  self.findings = json.load(open(self.findings_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_every_todo_in_r4_files_names_an_owner (test_integration_stubs.TestTodosNameAnOwner.test_every_todo_in_r4_files_names_an_owner) ... ok
+test_bandit_json (test_normalize.TestNormalize.test_bandit_json) ... ok
+test_bandit_low_confidence_drops_one_level (test_normalize.TestNormalize.test_bandit_low_confidence_drops_one_level) ... ok
+test_checkov_level_is_not_severity_but_rule_overrides_are (test_normalize.TestNormalize.test_checkov_level_is_not_severity_but_rule_overrides_are) ... ok
+test_cli_accepts_bandit_and_checkov (test_normalize.TestNormalize.test_cli_accepts_bandit_and_checkov) ... ok
+test_cli_end_to_end_is_valid_and_deterministic (test_normalize.TestNormalize.test_cli_end_to_end_is_valid_and_deterministic) ... ok
+test_cli_passes_root_to_sarif (test_normalize.TestNormalize.test_cli_passes_root_to_sarif) ... ok
+test_duplicate_results_collapse_to_one_finding (test_normalize.TestNormalize.test_duplicate_results_collapse_to_one_finding) ... ok
+test_explicit_nulls_in_tool_output_do_not_crash_the_parsers (test_normalize.TestNormalize.test_explicit_nulls_in_tool_output_do_not_crash_the_parsers) ... ok
+test_finding_id_is_stable_and_16_hex (test_normalize.TestNormalize.test_finding_id_is_stable_and_16_hex) ... ok
+test_gitleaks_is_always_high (test_normalize.TestNormalize.test_gitleaks_is_always_high) ... ok
+test_output_has_lf_line_endings (test_normalize.TestNormalize.test_output_has_lf_line_endings) ... ok
+test_raw_ref_points_into_source (test_normalize.TestNormalize.test_raw_ref_points_into_source) ... ok
+test_rule_overrides_are_per_tool (test_normalize.TestNormalize.test_rule_overrides_are_per_tool) ... ok
+test_sarif_file_uris_become_repo_paths (test_normalize.TestNormalize.test_sarif_file_uris_become_repo_paths) ... ok
+test_schema_rejects_bad_finding (test_normalize.TestNormalize.test_schema_rejects_bad_finding) ... ok
+test_semgrep_cwe_and_severity_mapping (test_normalize.TestNormalize.test_semgrep_cwe_and_severity_mapping) ... ok
+test_semgrep_sarif_parsed_and_paths_normalized (test_normalize.TestNormalize.test_semgrep_sarif_parsed_and_paths_normalized) ... ok
+test_suppressed_sarif_results_are_kept (test_normalize.TestNormalize.test_suppressed_sarif_results_are_kept)
+Only a dated security-exception waives a finding, not an inline nosemgrep. ... ok
+test_trivy_vulns_and_misconfigs (test_normalize.TestNormalize.test_trivy_vulns_and_misconfigs) ... ok
+test_unmapped_severity_falls_back_with_warning (test_normalize.TestNormalize.test_unmapped_severity_falls_back_with_warning) ... ok
+test_announcement_prefix_is_stripped (test_policy_bot.TestPolicyBot.test_announcement_prefix_is_stripped) ... ok
+test_good_explanation_passes (test_policy_bot.TestPolicyBot.test_good_explanation_passes) ... ok
+test_injection_in_scanner_text_skips_the_model (test_policy_bot.TestPolicyBot.test_injection_in_scanner_text_skips_the_model) ... ok
+test_invented_identifiers_are_rejected (test_policy_bot.TestPolicyBot.test_invented_identifiers_are_rejected) ... ok
+test_long_reply_is_cut_to_two_sentences (test_policy_bot.TestPolicyBot.test_long_reply_is_cut_to_two_sentences) ... ok
+test_model_down_degrades_and_render_is_escaped (test_policy_bot.TestPolicyBot.test_model_down_degrades_and_render_is_escaped) ... ok
+test_no_rule_title_means_no_guessing (test_policy_bot.TestPolicyBot.test_no_rule_title_means_no_guessing) ... ok
+test_only_new_iac_findings_once_per_rule (test_policy_bot.TestPolicyBot.test_only_new_iac_findings_once_per_rule) ... ok
+test_overlong_reply_is_never_cut_mid_word (test_policy_bot.TestPolicyBot.test_overlong_reply_is_never_cut_mid_word) ... ok
+test_secret_never_reaches_the_model_and_bad_reply_falls_back (test_policy_bot.TestPolicyBot.test_secret_never_reaches_the_model_and_bad_reply_falls_back) ... ok
+test_computed_diff_always_applies (test_pr_bot.TestPrBot.test_computed_diff_always_applies) ... ok
+test_default_output_dir_does_not_clobber_reviewed_v1 (test_pr_bot.TestPrBot.test_default_output_dir_does_not_clobber_reviewed_v1) ... ok
+test_draft_pr_end_to_end_with_a_stubbed_model (test_pr_bot.TestPrBot.test_draft_pr_end_to_end_with_a_stubbed_model) ... ok
+test_echoed_data_frame_is_unwrapped_or_refused (test_pr_bot.TestPrBot.test_echoed_data_frame_is_unwrapped_or_refused) ... ok
+test_extract_file_strips_a_markdown_fence (test_pr_bot.TestPrBot.test_extract_file_strips_a_markdown_fence) ... ok
+test_lines_changed_counts_only_real_changes (test_pr_bot.TestPrBot.test_lines_changed_counts_only_real_changes) ... ok
+test_unchanged_file_yields_no_diff (test_pr_bot.TestPrBot.test_unchanged_file_yields_no_diff) ... ok
+test_feature_branch_push_is_allowed (test_pre_push_hook.TestPrePushHook.test_feature_branch_push_is_allowed) ... ok
+test_feature_push_while_main_is_checked_out_is_allowed (test_pre_push_hook.TestPrePushHook.test_feature_push_while_main_is_checked_out_is_allowed) ... ok
+test_one_main_ref_in_a_multi_ref_push_refuses_all (test_pre_push_hook.TestPrePushHook.test_one_main_ref_in_a_multi_ref_push_refuses_all) ... ok
+test_pushing_main_while_on_another_branch_is_refused (test_pre_push_hook.TestPrePushHook.test_pushing_main_while_on_another_branch_is_refused) ... ok
+test_refspec_onto_main_from_a_feature_branch_is_refused (test_pre_push_hook.TestPrePushHook.test_refspec_onto_main_from_a_feature_branch_is_refused) ... ok
+test_every_finding_is_triaged_and_output_matches_the_schema (test_r2_r4_contract.TestR2R4Contract.test_every_finding_is_triaged_and_output_matches_the_schema) ... ok
+test_fixtures_cover_every_parser_shape (test_r2_r4_contract.TestR2R4Contract.test_fixtures_cover_every_parser_shape) ... ok
+test_injection_in_our_snippet_skips_the_model (test_r2_r4_contract.TestR2R4Contract.test_injection_in_our_snippet_skips_the_model) ... ok
+test_missing_snippet_is_hydrated_from_raw_ref (test_r2_r4_contract.TestR2R4Contract.test_missing_snippet_is_hydrated_from_raw_ref) ... ok
+test_only_new_triages_exactly_what_the_gate_marks_new (test_r2_r4_contract.TestR2R4Contract.test_only_new_triages_exactly_what_the_gate_marks_new) ... ok
+test_raw_ref_is_repo_relative_and_resolves_for_r4 (test_r2_r4_contract.TestR2R4Contract.test_raw_ref_is_repo_relative_and_resolves_for_r4) ... ok
+test_raw_snippet_never_leaves_the_triage_step (test_r2_r4_contract.TestR2R4Contract.test_raw_snippet_never_leaves_the_triage_step) ... ok
+test_secret_in_our_snippet_is_redacted_before_the_model (test_r2_r4_contract.TestR2R4Contract.test_secret_in_our_snippet_is_redacted_before_the_model) ... ok
+test_snippets_reach_the_model_including_non_sarif_tools (test_r2_r4_contract.TestR2R4Contract.test_snippets_reach_the_model_including_non_sarif_tools) ... ok
+test_canary_is_not_added_to_the_payload (test_redaction.TestCanaryTripwire.test_canary_is_not_added_to_the_payload) ... ok
+test_selftest_passes_on_healthy_redactor (test_redaction.TestCanaryTripwire.test_selftest_passes_on_healthy_redactor) ... ok
+test_tripwire_catches_a_raw_secret_in_outbound_prompt (test_redaction.TestCanaryTripwire.test_tripwire_catches_a_raw_secret_in_outbound_prompt) ... ok
+test_tripwire_catches_canary_in_outbound_prompt (test_redaction.TestCanaryTripwire.test_tripwire_catches_canary_in_outbound_prompt) ... ok
+test_allows_only_exact_loopback (test_redaction.TestEgressGuard.test_allows_only_exact_loopback) ... ok
+test_denies_external_and_metadata (test_redaction.TestEgressGuard.test_denies_external_and_metadata) ... EGRESS BLOCKED: https://api.openai.com/v1
+EGRESS BLOCKED: http://169.254.169.254/latest/meta-data/
+ok
+test_denies_prefix_bypasses (test_redaction.TestEgressGuard.test_denies_prefix_bypasses) ... EGRESS BLOCKED: http://localhost.evil.com/v1
+EGRESS BLOCKED: http://localhost@evil.com/v1
+EGRESS BLOCKED: http://127.0.0.1.nip.io/v1
+EGRESS BLOCKED: ftp://localhost/x
+EGRESS BLOCKED: http://localhost:notaport/
+EGRESS BLOCKED: 
+ok
+test_every_adversarial_fixture_is_redacted (test_redaction.TestRedactionFixtures.test_every_adversarial_fixture_is_redacted) ... ok
+test_over_redaction_is_bounded (test_redaction.TestRedactionFixtures.test_over_redaction_is_bounded) ... ok
+test_property_test_no_known_secret_survives (test_redaction.TestRedactionFixtures.test_property_test_no_known_secret_survives) ... ok
+test_l1_scrubs_attacker_controlled_strings (test_redaction.TestRedactionLayers.test_l1_scrubs_attacker_controlled_strings) ... ok
+test_l1_structural_allowlist (test_redaction.TestRedactionLayers.test_l1_structural_allowlist) ... ok
+test_l2_does_not_redact_secret_lookups (test_redaction.TestRedactionLayers.test_l2_does_not_redact_secret_lookups) ... ok
+test_l2_known_shapes (test_redaction.TestRedactionLayers.test_l2_known_shapes) ... ok
+test_l2_unquoted_password (test_redaction.TestRedactionLayers.test_l2_unquoted_password) ... ok
+test_l3_email_and_private_ip (test_redaction.TestRedactionLayers.test_l3_email_and_private_ip) ... ok
+test_l3_ipv6_and_internal_host (test_redaction.TestRedactionLayers.test_l3_ipv6_and_internal_host) ... ok
+test_l3_version_string_not_treated_as_ip (test_redaction.TestRedactionLayers.test_l3_version_string_not_treated_as_ip) ... ok
+test_cli_and_markdown (test_sca_crosscheck.TestCrosscheck.test_cli_and_markdown) ... ok
+test_cli_empty_and_bad_input (test_sca_crosscheck.TestCrosscheck.test_cli_empty_and_bad_input) ... ok
+test_crosscheck_on_real_fixtures (test_sca_crosscheck.TestCrosscheck.test_crosscheck_on_real_fixtures) ... ok
+test_fix_availability_disagreement (test_sca_crosscheck.TestCrosscheck.test_fix_availability_disagreement) ... ok
+test_ghsa_alias_links_a_ghsa_only_finding (test_sca_crosscheck.TestCrosscheck.test_ghsa_alias_links_a_ghsa_only_finding)
+Real case (asteval): Grype reports only GHSA-9w56-46f6-3qhx; OSV reports the same group ... ok
+test_linking_is_transitive_and_name_normalized (test_sca_crosscheck.TestCrosscheck.test_linking_is_transitive_and_name_normalized) ... ok
+test_non_sca_findings_and_misconfigs_ignored (test_sca_crosscheck.TestCrosscheck.test_non_sca_findings_and_misconfigs_ignored) ... ok
+test_same_vuln_in_two_manifests_counts_twice (test_sca_crosscheck.TestCrosscheck.test_same_vuln_in_two_manifests_counts_twice) ... ok
+test_tool_with_zero_findings_still_counted (test_sca_crosscheck.TestCrosscheck.test_tool_with_zero_findings_still_counted) ... ok
+test_canonical_id_prefers_cve_then_ghsa (test_sca_crosscheck.TestHelpers.test_canonical_id_prefers_cve_then_ghsa) ... ok
+test_cvss_bucket_boundaries (test_sca_crosscheck.TestHelpers.test_cvss_bucket_boundaries) ... ok
+test_norm_path_with_root (test_sca_crosscheck.TestHelpers.test_norm_path_with_root) ... ok
+test_all_three_tools_parse_and_validate (test_sca_crosscheck.TestParsers.test_all_three_tools_parse_and_validate) ... ok
+test_empty_scanner_outputs (test_sca_crosscheck.TestParsers.test_empty_scanner_outputs) ... ok
+test_findings_without_non_cve_ids_have_no_aliases (test_sca_crosscheck.TestParsers.test_findings_without_non_cve_ids_have_no_aliases) ... ok
+test_grype_finding (test_sca_crosscheck.TestParsers.test_grype_finding) ... ok
+test_osv_falls_back_to_ghsa_label_without_score (test_sca_crosscheck.TestParsers.test_osv_falls_back_to_ghsa_label_without_score) ... ok
+test_osv_finding_uses_group_and_cvss (test_sca_crosscheck.TestParsers.test_osv_finding_uses_group_and_cvss) ... ok
+test_osv_fixed_version_matches_pep503_equivalent_names (test_sca_crosscheck.TestParsers.test_osv_fixed_version_matches_pep503_equivalent_names) ... ok
+test_osv_zero_score_is_unscored_not_info (test_sca_crosscheck.TestParsers.test_osv_zero_score_is_unscored_not_info) ... ok
+test_trivy_vendor_ids_feed_canonical_id (test_sca_crosscheck.TestParsers.test_trivy_vendor_ids_feed_canonical_id) ... ok
+test_model_down_cli_exits_zero_with_all_findings_needs_human_review (test_triage.TestFallbackEndToEnd.test_model_down_cli_exits_zero_with_all_findings_needs_human_review) ... ok
+test_non_loopback_url_is_blocked_by_egress_guard_and_degrades (test_triage.TestFallbackEndToEnd.test_non_loopback_url_is_blocked_by_egress_guard_and_degrades) ... ok
+test_stub_accepts_json_lines_and_echoes_ids (test_triage.TestStubTriage.test_stub_accepts_json_lines_and_echoes_ids) ... ok
+test_trace_records_pre_validator_claims_and_text (test_triage.TestTraceKeepsModelClaims.test_trace_records_pre_validator_claims_and_text) ... ok
+test_all_cluster_members_are_emitted (test_triage.TestTriage.test_all_cluster_members_are_emitted) ... ok
+test_canary_in_model_output_is_blocked (test_triage.TestTriage.test_canary_in_model_output_is_blocked) ... ok
+test_evidence_snippet_adr001_supported_and_stripped (test_triage.TestTriage.test_evidence_snippet_adr001_supported_and_stripped) ... ok
+test_hallucinated_claim_is_blocked_and_logged (test_triage.TestTriage.test_hallucinated_claim_is_blocked_and_logged) ... ok
+test_max_findings_caps_clusters (test_triage.TestTriage.test_max_findings_caps_clusters) ... ok
+test_model_failure_degrades_to_needs_human_review (test_triage.TestTriage.test_model_failure_degrades_to_needs_human_review) ... ok
+test_model_json_with_wrong_types_is_coerced (test_triage.TestTriage.test_model_json_with_wrong_types_is_coerced) ... ok
+test_non_dict_inputs_are_tolerated_and_filtered (test_triage.TestTriage.test_non_dict_inputs_are_tolerated_and_filtered) ... ok
+test_non_numeric_confidence_does_not_crash (test_triage.TestTriage.test_non_numeric_confidence_does_not_crash) ... ok
+test_output_keeps_contract_keys (test_triage.TestTriage.test_output_keeps_contract_keys) ... ok
+test_pre_egress_tripwire_blocks_call_when_redaction_fails (test_triage.TestTriage.test_pre_egress_tripwire_blocks_call_when_redaction_fails) ... ok
+test_provenance_is_set_by_code_not_model (test_triage.TestTriage.test_provenance_is_set_by_code_not_model) ... ok
+test_raw_secret_never_in_prompt (test_triage.TestTriage.test_raw_secret_never_in_prompt) ... ok
+test_raw_secret_never_reaches_output (test_triage.TestTriage.test_raw_secret_never_reaches_output) ... ok
+test_suggested_fix_is_capped_at_five_lines (test_triage.TestTriage.test_suggested_fix_is_capped_at_five_lines) ... ok
+test_unexpected_exception_does_not_crash_the_run (test_triage.TestTriage.test_unexpected_exception_does_not_crash_the_run) ... ok
+test_validator_rejection_resets_confidence_to_zero (test_triage.TestTriage.test_validator_rejection_resets_confidence_to_zero) ... ok
+test_wrong_typed_scanner_fields_degrade_instead_of_crashing (test_triage.TestTriage.test_wrong_typed_scanner_fields_degrade_instead_of_crashing) ... ok
+test_bare_basename_of_scanner_file_is_accepted (test_validate.TestValidator.test_bare_basename_of_scanner_file_is_accepted) ... ok
+test_catalogue_has_real_ids_the_old_26_entry_list_rejected (test_validate.TestValidator.test_catalogue_has_real_ids_the_old_26_entry_list_rejected) ... ok
+test_cve_invented_in_fix_summary_is_rejected (test_validate.TestValidator.test_cve_invented_in_fix_summary_is_rejected) ... ok
+test_file_line_in_free_text_is_checked (test_validate.TestValidator.test_file_line_in_free_text_is_checked) ... ok
+test_grounded_claims_pass (test_validate.TestValidator.test_grounded_claims_pass) ... ok
+test_invalid_verdict_enum_rejected (test_validate.TestValidator.test_invalid_verdict_enum_rejected) ... ok
+test_missing_file_claim_is_rejected (test_validate.TestValidator.test_missing_file_claim_is_rejected) ... ok
+test_rejected_claim_text_not_echoed_into_fix_summary (test_validate.TestValidator.test_rejected_claim_text_not_echoed_into_fix_summary) ... ok
+test_repo_root_checks_existence_and_exact_line_bounds (test_validate.TestValidator.test_repo_root_checks_existence_and_exact_line_bounds) ... ok
+test_structured_hallucinated_cve_and_cwe_rejected (test_validate.TestValidator.test_structured_hallucinated_cve_and_cwe_rejected) ... ok
+test_unproven_fixed_version_and_package_rejected (test_validate.TestValidator.test_unproven_fixed_version_and_package_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 237 tests in 9.788s
+
+OK (skipped=1)
+Drafted 4 patches (0 apply cleanly) -> /var/folders/2b/5d4hv6wx53s0c68x_hr9c24h0000gp/T/tmpoyla9hen/artifacts/prs/v2/
+-----------------------------------------------------------------------
+tests per module:
+    27 test_baseline
+    22 test_triage
+    21 test_sca_crosscheck
+    20 test_normalize
+    20 test_gate_tuning
+    19 test_integration_stubs
+    18 test_redaction
+    12 test_install_hooks
+    11 test_validate
+    10 test_policy_bot
+     9 test_r2_r4_contract
+     9 test_demo_site
+     9 test_cluster_priority_trace
+     7 test_pr_bot
+     6 test_injection
+     5 test_pre_push_hook
+     5 test_catch_rate
+     4 test_enrich_data
+     3 test_ground_truth_tools
+exit code: 0

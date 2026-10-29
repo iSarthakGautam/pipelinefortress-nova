@@ -1,0 +1,22 @@
+{
+  "population": "docs/metrics/data/candidate-population-2026-10-29/population.csv",
+  "population_sha256": "f0a8f0cd5a9b42c1b027fb3bec3c112bb53796820db24d0f59b6b35fbbff0e7b",
+  "population_findings": 264,
+  "duplicate_groups": 98,
+  "drawn": 98,
+  "seed": 20261029,
+  "method": "all duplicate groups",
+  "time_field": "advisory_published for SCA, first_seen otherwise",
+  "strata": {
+    "iac|HIGH": 5,
+    "iac|LOW": 3,
+    "iac|MEDIUM": 1,
+    "sast|HIGH": 10,
+    "sast|LOW": 2,
+    "sast|MEDIUM": 10,
+    "sca|CRITICAL": 2,
+    "sca|HIGH": 27,
+    "sca|LOW": 4,
+    "sca|MEDIUM": 34
+  }
+}

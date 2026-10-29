@@ -55,3 +55,16 @@ models:
     license_osi_approved: true
     source_url: "https://ollama.com/library/qwen2.5-coder"
     rationale: "Planned primary candidate. Pull it, then pin the digest."
+
+  - tag: "qwen2.5-coder:1.5b"
+    family: "qwen2.5-coder"
+    parameters: "1.5B"
+    quantisation: "Q4_K_M"
+    digest: "sha256:d7372fd828518a4d38b1eb196c673c31a85f2ed302b3d1e406c4c2d1b64a0668"
+    provider: "ollama"
+    installed: false
+    is_default: false
+    license: "Apache-2.0"
+    license_osi_approved: true
+    source_url: "https://ollama.com/library/qwen2.5-coder"
+    rationale: "The model the 30-triage-ai CI job actually pulls (LLM_MODEL in baseline-pipeline.yml). Manifest digest, quantisation and licence read from registry.ollama.ai on 2026-10-29 (the licence layer is the Apache-2.0 text). Not run locally and not in eval/results/: no quality claim is made for it."

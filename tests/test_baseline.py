@@ -77,6 +77,19 @@ class TestBaselineMatching(TmpRepo):
         assert fs[0]["baseline"]["is_new"] is False
         assert rep["result"] == "pass"
 
+    def test_rewriting_a_baselined_line_in_place_is_new(self):
+        # regression: an exact finding_id match inherited the accepted slot even when the flagged code was replaced
+        write(self.tmp, "app/search.py", "x = 1\n" * 9 + "os.system('ls')\n")
+        fs = [finding(line=10)]
+        base = b.build_baseline(fs, "c1", repo=self.tmp)
+        write(self.tmp, "app/search.py", "x = 1\n" * 9 + "os.system('ls ' + request.args['q'])\n")
+        same = copy.deepcopy(fs)
+        stats = b.apply_baseline(same, base, "c2", repo=self.tmp)
+        self.assertEqual((stats["new"], stats["known"]), (1, 0))
+        write(self.tmp, "app/search.py", "x = 1\n" * 9 + "os.system('ls')   \n")   # whitespace-only edit stays known
+        again = copy.deepcopy(fs)
+        self.assertEqual(b.apply_baseline(again, base, "c2", repo=self.tmp)["known"], 1)
+
     def test_extra_occurrence_of_known_rule_is_new(self):
         base = b.build_baseline([finding(line=10)], "c1")
         fs, rep = run_check([finding(line=10), finding(line=50)], base, self.tmp)
@@ -128,6 +141,15 @@ class TestExceptions(TmpRepo):
         fs, rep = run_check([finding(line=10)], self.no_baseline(), self.tmp)
         assert fs[0]["baseline"]["exception"] == {"id": "r.sqli", "expires": "2026-11-30", "owner": "r2"}
         assert rep["result"] == "pass" and rep["counts"]["excepted"] == 1
+
+    def test_trailing_comment_does_not_waive_the_next_line(self):
+        # regression: `code  # <annotation>` also counted as "the line above" the next line,
+        # so one annotation waived two findings of the same rule
+        ann = "# " + "security-exception: r.sqli expires:2026-11-30 owner:r2"
+        write(self.tmp, "app/search.py", f"x = 1\ndb.execute(a)  {ann}\ndb.execute(b)\n")
+        fs = [finding(line=2), finding(line=3)]
+        out, _ = run_check(fs, {"entries": []}, self.tmp)
+        self.assertEqual([("exception" in f["baseline"]) for f in out], [True, False])
 
     def test_exception_far_from_finding_does_not_apply(self):
         write(self.tmp, "app/search.py", "# security-exception: r.sqli expires:2026-11-30 owner:r2\n" + "x\n" * 20)
@@ -230,6 +252,13 @@ class TestAnnotationParsing(TmpRepo):
         write(self.tmp, "b.json", '{"d": "\'# security-exception: <id> expires:<date> owner:<name>\'"}\n')
         write(self.tmp, "c.md", "Use security-exception: <id> expires:YYYY-MM-DD owner:<name>\n")
         assert b.scan_annotations(self.tmp, TODAY, 90) == []
+
+    def test_annotation_text_inside_a_string_with_a_space_is_ignored(self):
+        # regression: whitespace before the '#' inside a string literal made it parse as a real, valid exception
+        ann = "# " + "security-exception: r.sqli expires:2026-11-30 owner:r2"
+        write(self.tmp, "a.py", f'x = "see {ann}"\ny = 1  {ann}\n')
+        found = b.scan_annotations(self.tmp, TODAY, 90)
+        self.assertEqual([a["line"] for a in found], [2])
 
     def test_trailing_comment_on_finding_line_applies(self):
         # Built in two parts so this test file does not itself contain a "trailing comment" annotation

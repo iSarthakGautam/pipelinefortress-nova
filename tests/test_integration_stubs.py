@@ -11,6 +11,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 sys.path.insert(0, os.path.join(ROOT, "ai"))
 sys.path.insert(0, os.path.join(ROOT, "eval", "stubs"))
 
+import llm_client
 import metrics
 import pr_comment
 import r2_normalizer_stub
@@ -214,9 +215,17 @@ class TestOtherRolesStubs(StubCase):
         out = os.path.join(self.tmp.name, "models.cdx.json")
         self.assertEqual(self._run("r3_model_sbom_stub.py", out).returncode, 0)
         comps = {c["name"]: c for c in json.load(open(out))["components"]}
-        self.assertEqual(set(comps), {"llama3:latest", "gemma2:latest", "llama3.1:8b", "qwen2.5-coder:14b"})
+        self.assertEqual(set(comps), {m["tag"] for m in llm_client.load_lock()})
         self.assertIn("hashes", comps["llama3:latest"])            # real digest pinned
         self.assertNotIn("hashes", comps["qwen2.5-coder:14b"])     # not installed, so no invented hash
+        self.assertIn("hashes", comps["qwen2.5-coder:1.5b"])       # the CI model's manifest digest is pinned
+
+    def test_committed_model_sbom_has_not_drifted_from_the_lock_file(self):
+        # regression: the committed SBOM listed llama3.1:8b as not installed with no hash and lacked the CI model
+        committed = json.load(open(os.path.join(ROOT, "artifacts", "sbom", "models.cdx.json")))
+        out = os.path.join(self.tmp.name, "models.cdx.json")
+        self.assertEqual(self._run("r3_model_sbom_stub.py", out).returncode, 0)
+        self.assertEqual(committed, json.load(open(out)), "run: python3 eval/stubs/r3_model_sbom_stub.py")
 
 
 class TestTodosNameAnOwner(unittest.TestCase):

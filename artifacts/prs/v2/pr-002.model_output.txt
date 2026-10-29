@@ -1,0 +1,3 @@
+<UNTRUSTED_INPUT_DATA>
+{"content": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: vulnshop-api\nspec:\n  replicas: 1\n  selector:\n    matchLabels:\n      app: vulnshop-api\n  template:\n    metadata:\n      labels:\n        app: vulnshop-api\n    spec:\n      containers:\n        - name: vulnshop-api\n          image: vulnshop-api:1.0.0\n          ports:\n            - containerPort: 3000\n          securityContext:\n            runAsNonRoot: true\n            runAsUser: 10001\n", "file": "deployment.yaml", "finding": "CKV_K8S_40", "task": "securityContext sets runAsNonRoot: false. Set runAsNonRoot: true and runAsUser: 10001. Change nothing else."}
+</UNTRUSTED_INPUT_DATA>

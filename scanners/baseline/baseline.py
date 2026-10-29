@@ -20,14 +20,15 @@ only 1 as a security verdict, so a bug here must never exit 1.
 Matching. finding_id hashes the line number, so matching on it alone would turn every
 finding below an inserted line into a "new" one. Findings are instead grouped by a
 line-independent match_key (tool|rule_id|file|package). Within a group, exact finding_id
-matches are known first. A remaining baseline slot then absorbs a moved finding only if the
+matches are known first, provided the flagged line still has the text that was accepted (line_sha); rewriting a
+baselined line in place makes it new. A remaining baseline slot then absorbs a moved finding only if the
 flagged source line has the same text (line_sha, whitespace ignored), so fixing one known
 finding does not hide a new one elsewhere in the file. Whatever is left over is new.
 
 Severity. A known finding still blocks if its severity has risen from below --fail-on (as
 accepted in the baseline) to at or above it: the debt accepted was not this severe.
 
-Exception annotation: a comment on the finding's line or the line above it, of the form
+Exception annotation: a comment on the finding's line, or a comment-only line directly above it, of the form
   security-exception: <rule_id|finding_id> expires:YYYY-MM-DD owner:<name>
 behind a comment leader (#, //, --, ;, /*, <!--) that starts the line or follows whitespace,
 so the syntax quoted in strings or docs is not mistaken for an annotation.
@@ -190,6 +191,11 @@ def apply_baseline(findings: list, baseline: dict, commit: str = None, repo: Pat
         # Pass 1: exact finding_id matches (same line)
         for f in sorted(cur, key=lambda x: x["location"]["line"]):
             e = base_by_id.get(f["finding_id"])
+            # same id = same rule, file and line; but if the code on that line was rewritten since it was accepted, the
+            # accepted slot does not cover the new code. (Without `repo` the text cannot be read: id match only.)
+            if e is not None and repo is not None and e.get("line_sha") is not None \
+                    and line_sha(repo, f["location"]["file"], f["location"]["line"], cache) != e["line_sha"]:
+                e = None
             if e is not None and e in unclaimed:
                 unclaimed.remove(e)
                 _mark(f, False, e.get("first_seen_commit"), e.get("severity_norm"))
@@ -263,9 +269,11 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
         # ast and semgrep don't. In a file containing those characters an exception below them can
         # sit one line off its finding. No tracked file contains them.
         for lineno, line in enumerate(text.splitlines(), start=1):
-            if ANNOTATION_MARKER not in line or not COMMENT_LEADER_RE.search(line):
+            if ANNOTATION_MARKER not in line or not _annotation_outside_string(line):
                 continue
-            ann = {"file": rel, "line": lineno, "raw": line.strip()}
+            # standalone = the line is only the comment; a trailing comment on a code line belongs to that line
+            ann = {"file": rel, "line": lineno, "raw": line.strip(),
+                   "standalone": COMMENT_LEADER_RE.match(line.lstrip()) is not None}
             m = ANNOTATION_RE.search(line)
             if not m:
                 ann.update(status="malformed", problem="expected '<id> expires:YYYY-MM-DD owner:<name>'")
@@ -289,6 +297,16 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
     return found
 
 
+def _annotation_outside_string(line: str) -> bool:
+    """False when the comment leader sits inside a quoted string: `x = "see #" + " security-exception: ..."`.
+    An odd number of quote characters before the leader means the leader is inside a string literal."""
+    m = COMMENT_LEADER_RE.search(line)
+    if not m:
+        return False
+    before = line[:m.start()]
+    return before.count('"') % 2 == 0 and before.count("'") % 2 == 0
+
+
 def attach_exceptions(findings: list, annotations: list) -> None:
     """Attach the matching annotation to each finding and mark annotations as used."""
     by_file = defaultdict(list)
@@ -300,7 +318,7 @@ def attach_exceptions(findings: list, annotations: list) -> None:
         for a in by_file.get(file, []):
             if a["id"] not in (f["rule_id"], f["finding_id"]):
                 continue
-            if line == 0 or a["line"] in (line, line - 1):
+            if line == 0 or a["line"] == line or (a["line"] == line - 1 and a.get("standalone", True)):
                 f["baseline"]["exception"] = {"id": a["id"], "expires": a["expires"], "owner": a["owner"]}
                 f["_exception_status"] = a["status"]
                 a.setdefault("applies_to", []).append(f["finding_id"])

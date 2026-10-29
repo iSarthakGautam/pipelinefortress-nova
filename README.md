@@ -32,15 +32,38 @@ We are a team of 5 working full-time. We build for async by default:
 
 ---
 
-## Project Structure (WIP)
+## Quickstart (rebuild check, target: under an hour)
 
-- `apps/`: Vulnerable target apps (`juice-shop` fork, `vulnshop-api`).
-- `.github/workflows/`: CI/CD pipeline definitions.
-- `infra/` & `docker/`: Kubernetes configurations and hardened Dockerfiles.
-- `scanners/`: Tool configurations and the baseline/security-baseline.json.
-- `ai/`: The GenAI triage subsystem (models.lock.yaml, llm_client, redaction, prompts).
-- `eval/`, `tests/`, `dashboards/`: Evaluation harnesses, test suites, and Grafana JSONs.
-- `docs/`: Project documentation, architecture decisions (ADRs), and evidence.
+Needs Python 3.12+ and `make`. Docker is only needed for `lab-up` and `dash`; Ollama only for the model-backed targets.
+
+```bash
+make bootstrap        # pip install (hash-pinned dev deps) + install the git hooks
+make test             # 190+ unit and contract tests, no network, no model needed
+make eval-report      # rebuild eval/results.md from the frozen runs in eval/results/ (no model call)
+make demo-local       # stub scanner input -> real local model -> PR comment, metrics, trace (needs Ollama + llama3)
+make catch-rate       # pre-merge catch rate vs the planted vulnerabilities (needs artifacts/findings.json from CI or make normalize)
+make policy           # Rego policy-as-code check with conftest (hardened manifest must pass, bad one must fail)
+make report           # assemble docs/report/ into build/report.md and build/report.html
+make runtime-baseline # probe the lab app on loopback and rewrite docs/BASELINE_VULNERABILITY_REPORT.md (needs Flask)
+make demo-prep        # build the offline results dashboard + report and open every demo window (see demo/DEMO_SCRIPT.md)
+make demo-slides      # the 20-slide animated demo deck (also: open demo/index.html); script in demo/DEMO_SCRIPT.md
+make dash             # Prometheus + Pushgateway + Grafana on http://localhost:3001 (admin/admin unless GRAFANA_ADMIN_PASSWORD is set; bound to 127.0.0.1)
+```
+
+Scanning (`make scan`, `make normalize`, `make gate`) needs the scanner binaries, which CI installs with pinned versions
+and sha256 checks (`.github/workflows/baseline-pipeline.yml`, job `10-security-scanners`). The CI run is the reference.
+
+## Project Structure
+
+- `apps/`: vulnerable targets: `vulnshop-api` (our service, planted vulns) and `juice-shop` (pointer + pinned SHA/digest).
+- `ground_truth/planted.yaml`: the planted vulnerabilities (R3). `eval/ground_truth.jsonl`: the 10-row synthetic smoke set.
+- `.github/workflows/`: the pipeline: build/test, scanners, normalize + baseline gate, AI triage, PR comment, security gate, staging + ZAP.
+- `scanners/`: normalizer, baseline diffing + exceptions, SCA cross-check, custom Semgrep rules, finding schema.
+- `ai/`: triage subsystem (redaction L1-L4, egress guard, injection defence, grounding validator, PR bot, `models.lock.yaml`).
+- `eval/`, `tests/`: evaluation harness with frozen results, ground-truth tooling (`eval/ground_truth/`), unit and contract tests.
+- `docker/`, `infra/`: vulnerable and hardened Dockerfiles, staging compose, Kubernetes manifests (bad and hardened).
+- `dashboards/`: Grafana + Prometheus + Pushgateway stack and the committed dashboard JSON.
+- `docs/`: ADRs, metrics catalogue, report drafts, `AI_DISCLOSURE.md`, `LICENSES.md`; `artifacts/evidence/INDEX.md`: evidence index.
 
 ---
 
@@ -56,12 +79,3 @@ python scripts/install_hooks.py
 If you installed the older copy-paste hook from this README, run the command anyway: it replaces it. That hook checked the checked-out branch, so `git push origin feature:main` from a feature branch got through.
 
 ---
-
-## Getting Started (Week 1 Foundation)
-- **R1**: Setup the `make bootstrap` process and basic `.github/workflows`.
-- **R2**: Propose the unified JSON finding schema.
-- **R3**: Pin the Juice Shop fork and start `vulnshop-api`.
-- **R4**: Ship `stub_triage.py` returning fake JSON data matching R2's schema.
-- **R5**: Setup `WEEKLOG.md` and report skeletons.
-
-Check `docs/CONTRIBUTIONS.md` (to be created by R1) to track progress.
