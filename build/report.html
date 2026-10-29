@@ -1,0 +1,2425 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PipelineFortress</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PipelineFortress: Secure CI/CD with GenAI-Assisted
+Triage</h1>
+<p class="subtitle">CAP-DSE-3W, IIT Roorkee x Futurense, DevSecOps
+Essentials</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#executive-summary" id="toc-executive-summary">Executive
+summary</a></li>
+<li><a href="#problem-and-context" id="toc-problem-and-context">1.
+Problem and context</a></li>
+<li><a href="#threat-model" id="toc-threat-model">3. Threat model</a>
+<ul>
+<li><a href="#application-vulnshop-api-and-juice-shop"
+id="toc-application-vulnshop-api-and-juice-shop">3.1 Application:
+<code>vulnshop-api</code> and Juice Shop</a></li>
+<li><a
+href="#pipeline-what-an-attacker-with-pull-request-access-could-try"
+id="toc-pipeline-what-an-attacker-with-pull-request-access-could-try">3.2
+Pipeline: what an attacker with pull-request access could try</a></li>
+<li><a href="#ai-path-owasp-llm-top-10"
+id="toc-ai-path-owasp-llm-top-10">3.3 AI path (OWASP LLM Top
+10)</a></li>
+</ul></li>
+<li><a href="#architecture" id="toc-architecture">4.
+Architecture</a></li>
+<li><a href="#capstone-report-contribution-r2-scanners-and-policy"
+id="toc-capstone-report-contribution-r2-scanners-and-policy">Capstone
+Report Contribution — R2 (Scanners and Policy)</a>
+<ul>
+<li><a href="#section-5-pipeline-implementation-and-baseline-diffing"
+id="toc-section-5-pipeline-implementation-and-baseline-diffing">Section
+5: Pipeline Implementation and Baseline Diffing</a>
+<ul>
+<li><a href="#stages" id="toc-stages">5.1 Stages</a></li>
+<li><a href="#one-schema-for-seven-tools"
+id="toc-one-schema-for-seven-tools">5.2 One schema for seven
+tools</a></li>
+<li><a href="#why-baseline-diffing" id="toc-why-baseline-diffing">5.3
+Why baseline diffing</a></li>
+<li><a href="#tuning-the-gate-from-real-data"
+id="toc-tuning-the-gate-from-real-data">5.4 Tuning the gate from real
+data</a></li>
+<li><a href="#detector-overlap" id="toc-detector-overlap">5.5 Detector
+overlap</a></li>
+<li><a href="#limitations" id="toc-limitations">5.6 Limitations</a></li>
+</ul></li>
+<li><a href="#section-3-threat-model-r2s-pipeline-rows"
+id="toc-section-3-threat-model-r2s-pipeline-rows">Section 3 (threat
+model): R2’s pipeline rows</a></li>
+</ul></li>
+<li><a href="#container-and-iac-hardening"
+id="toc-container-and-iac-hardening">6. Container and IaC
+hardening</a></li>
+<li><a href="#capstone-report-contribution-r4-ai-genai-lead"
+id="toc-capstone-report-contribution-r4-ai-genai-lead">Capstone Report
+Contribution — R4 (AI &amp; GenAI Lead)</a>
+<ul>
+<li><a href="#section-7-ai-triage-subsystem"
+id="toc-section-7-ai-triage-subsystem">Section 7: AI Triage
+Subsystem</a>
+<ul>
+<li><a href="#design-principle" id="toc-design-principle">7.1 Design
+principle</a></li>
+<li><a href="#open-weight-rationale" id="toc-open-weight-rationale">7.2
+Open-weight rationale</a></li>
+</ul></li>
+<li><a href="#section-8-the-redaction-layer-as-a-security-control"
+id="toc-section-8-the-redaction-layer-as-a-security-control">Section 8:
+The Redaction Layer as a Security Control</a>
+<ul>
+<li><a href="#layers-airedactionredactor.py"
+id="toc-layers-airedactionredactor.py">8.1 Layers
+(<code>ai/redaction/redactor.py</code>)</a></li>
+<li><a href="#egress-guard" id="toc-egress-guard">8.2 Egress
+guard</a></li>
+<li><a href="#measured-result-evalredaction_results.md"
+id="toc-measured-result-evalredaction_results.md">8.3 Measured result
+(<code>eval/redaction_results.md</code>)</a></li>
+</ul></li>
+<li><a href="#section-9-evaluation-bake-off-and-ablations"
+id="toc-section-9-evaluation-bake-off-and-ablations">Section 9:
+Evaluation, Bake-Off and Ablations</a>
+<ul>
+<li><a href="#method-and-its-limits" id="toc-method-and-its-limits">9.1
+Method and its limits</a></li>
+<li><a href="#results-n-10-full-table-and-definitions-in-evalresults.md"
+id="toc-results-n-10-full-table-and-definitions-in-evalresults.md">9.2
+Results (n = 10; full table and definitions in
+<code>eval/results.md</code>)</a></li>
+<li><a href="#what-we-actually-found"
+id="toc-what-we-actually-found">9.3 What we actually found</a></li>
+<li><a href="#honest-limitations" id="toc-honest-limitations">9.4 Honest
+limitations</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#devsecops-maturity-self-assessment"
+id="toc-devsecops-maturity-self-assessment">10. DevSecOps maturity
+self-assessment</a></li>
+<li><a href="#limitations-and-threats-to-validity"
+id="toc-limitations-and-threats-to-validity">11. Limitations and threats
+to validity</a></li>
+<li><a href="#ai-disclosure" id="toc-ai-disclosure">12. AI
+disclosure</a></li>
+<li><a href="#future-work" id="toc-future-work">13. Future work</a></li>
+<li><a href="#will-not-do-by-choice" id="toc-will-not-do-by-choice">Will
+not do (by choice)</a></li>
+<li><a href="#baseline-vulnerability-report"
+id="toc-baseline-vulnerability-report">Baseline vulnerability report</a>
+<ul>
+<li><a href="#static-baseline-scanners"
+id="toc-static-baseline-scanners">1. Static baseline (scanners)</a></li>
+<li><a href="#runtime-baseline-what-a-request-does"
+id="toc-runtime-baseline-what-a-request-does">2. Runtime baseline (what
+a request does)</a>
+<ul>
+<li><a href="#default-debug1-the-vulnerable-target"
+id="toc-default-debug1-the-vulnerable-target">default (DEBUG=1, the
+vulnerable target)</a></li>
+<li><a href="#hardened-debug0" id="toc-hardened-debug0">hardened
+(DEBUG=0)</a></li>
+</ul></li>
+<li><a href="#what-the-two-views-say-together"
+id="toc-what-the-two-views-say-together">3. What the two views say
+together</a></li>
+</ul></li>
+<li><a href="#ai-and-genai-use-disclosure-log"
+id="toc-ai-and-genai-use-disclosure-log">AI and GenAI Use Disclosure
+Log</a></li>
+</ul>
+</nav>
+<h1 id="executive-summary">Executive summary</h1>
+<p><strong>For the CISO.</strong> The goal was a shift-left pipeline
+that catches most vulnerabilities before merge and gives developers
+usable feedback. PipelineFortress wraps a deliberately vulnerable
+service (<code>vulnshop-api</code>, twelve catalogued items: ten planted
+vulnerabilities and two safe controls) and OWASP Juice Shop in a GitHub
+Actions pipeline with SAST, SCA, secrets, IaC and DAST stages, a
+baseline-diffing merge gate, and a local open-weight model that triages
+findings behind a redaction layer and a grounding validator.</p>
+<p><strong>Headline number: pre-merge catch rate on the planted
+vulnerabilities.</strong> On the committed 2026-10-27 scan of
+<code>main</code>, <strong>8 of 10</strong> catalogued true positives
+had a matching finding and 7 of 10 were rated HIGH or above, so the gate
+would block them. Of the two misses, the vulnerable <code>lodash</code>
+was not scanned yet at that commit (R2’s later analysis,
+<code>docs/metrics/DETECTOR_OVERLAP.md</code>, records it detected after
+the lockfile was added) and the Flask debug flag had moved lines since
+that old snapshot, so the real figure needs a run on current
+<code>main</code>. <code>make catch-rate</code> recomputes it from any
+CI run. This is recall on vulnerabilities we planted and tuned rules
+against, not a general false-negative rate (§11). Against the CISO’s 80%
+target the planted-vulnerability result meets it on the old snapshot,
+with n = 10; three of the ten were catalogued after the scanners were
+tuned, so they are the closest thing here to a blind test.</p>
+<p><strong>What the gate does.</strong> Juice Shop-style apps emit
+hundreds of HIGH findings, so a naive “fail on HIGH” gate is red on
+every pull request and gets switched off. The gate fails only on
+findings that are new relative to a reviewed baseline, fails closed when
+a scanner output is missing, and lets dated, owned exceptions expire.
+The latest tuned run: 162 findings, 152 known, 0 blocking
+(<code>docs/metrics/GATE_TUNING.md</code>).</p>
+<p><strong>What the AI does and does not do.</strong> The model is a
+component, not the system. It proposes a verdict and a short fix as
+constrained JSON; code does everything else: redaction before any prompt
+is built, an egress guard that allows loopback only, an injection
+detector, a grounding validator that drops any CVE, CWE, package or
+file:line the evidence does not support, and the priority score. It
+cannot merge or change anything. On a 10-row synthetic smoke set the
+models were confidently wrong on 1-2 rows; the validator stopped every
+ungrounded identifier from reaching a human. That is a design result,
+not an accuracy claim: the evaluation set is too small for one (§9).</p>
+<p><strong>Runtime evidence.</strong>
+<code>docs/BASELINE_VULNERABILITY_REPORT.md</code> records, from a live
+run of our own app on loopback, that the planted SQL injection reads
+another table, the XSS reflects unescaped, the injected shell command
+runs, and the two negative controls behave safely.</p>
+<p><strong>Where we fall short</strong> (detail in §11): the evaluation
+set is small and mostly synthetic; the SBOM and image scan are advisory
+CI stages with few green runs; DAST is advisory; model-drafted pull
+requests have not all been human-reviewed; the dashboard’s
+planted-vulnerability panels depend on a CI push that is manual.</p>
+<h1 id="problem-and-context">1. Problem and context</h1>
+<p>An e-commerce team ships 30+ times a day and reviews security at the
+end of each sprint, which blocks releases. The brief asks a small
+platform-security team to prototype a reference pipeline that catches
+about 80% of vulnerabilities before merge and returns developer-friendly
+feedback, with a GenAI assistant that triages findings, drafts
+remediation pull requests and refuses to act on anything that looks like
+a secret or a hallucination.</p>
+<p>We read the grading sentence as the design rule: <em>anyone can
+rebuild this from the repo in under an hour, and every claim the model
+makes is checkable against evidence we also ship.</em> Four rules follow
+from it and held throughout: held-out evaluation by time, never a random
+split; the LLM suggests and a human merges; nothing sensitive leaves the
+runner; every AI use is disclosed.</p>
+<p><strong>Team and ownership.</strong> Five roles, async by default
+(two 30-minute syncs a week): R1 pipeline and platform, R2 scanners and
+policy, R3 container and supply chain, R4 AI, R5 data, metrics and
+report. One contract, the unified finding schema
+(<code>scanners/schema/finding.schema.json</code>, ADR-001), let the
+five slices be built in parallel; ADR-002 added vulnerability-ID aliases
+without breaking it.</p>
+<p><strong>Scope decisions.</strong> Everything is open source including
+the model, so a grader can reproduce the numbers with
+<code>ollama pull</code> and no credentials. Out of scope, by choice:
+production deployment, fine-tuning (too little labelled data in three
+weeks), commercial scanner tiers, auto-merging anything the AI wrote,
+and any target outside our own lab.</p>
+<h1 id="threat-model">3. Threat model</h1>
+<p>Two models: the application we protect (and deliberately weaken), and
+the pipeline that protects it. R2’s pipeline rows are in §5
+(<code>REPORT_DRAFT_SECTION_5.md</code>, “Section 3 (threat model)”);
+this section adds the application, the AI path and the residual
+risk.</p>
+<h2 id="application-vulnshop-api-and-juice-shop">3.1 Application:
+<code>vulnshop-api</code> and Juice Shop</h2>
+<p>Both are intentionally vulnerable and run only in our lab (rules of
+engagement: no real-world targets). The planted vulnerabilities
+(<code>ground_truth/planted.yaml</code>) are the threats we model and
+measure against:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Class</th>
+<th>CWE</th>
+<th>Stage expected to catch it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PLANT-001</td>
+<td>SQL injection in search</td>
+<td>89</td>
+<td>SAST (Semgrep, Bandit)</td>
+</tr>
+<tr class="even">
+<td>PLANT-003</td>
+<td>Hard-coded cloud key</td>
+<td>798</td>
+<td>SAST custom rule (gitleaks does not flag the well-known example
+key)</td>
+</tr>
+<tr class="odd">
+<td>PLANT-004</td>
+<td>Command injection (<code>shell=True</code>)</td>
+<td>78</td>
+<td>SAST (Bandit, Semgrep)</td>
+</tr>
+<tr class="even">
+<td>PLANT-005</td>
+<td>Vulnerable <code>lodash</code></td>
+<td>1321</td>
+<td>SCA (Trivy, Grype, OSV)</td>
+</tr>
+<tr class="odd">
+<td>PLANT-006</td>
+<td><code>:latest</code> base image, root user</td>
+<td>250</td>
+<td>IaC / container (Checkov, Trivy, Semgrep)</td>
+</tr>
+<tr class="even">
+<td>PLANT-007</td>
+<td>Pod runs as root</td>
+<td>276</td>
+<td>IaC (Checkov, Trivy)</td>
+</tr>
+<tr class="odd">
+<td>PLANT-008</td>
+<td>Reflected XSS (<code>|safe</code>)</td>
+<td>79</td>
+<td>SAST custom rule, DAST</td>
+</tr>
+<tr class="even">
+<td>PLANT-002, 009</td>
+<td>Negative controls (safe code)</td>
+<td>n/a</td>
+<td>Must not be flagged</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="pipeline-what-an-attacker-with-pull-request-access-could-try">3.2
+Pipeline: what an attacker with pull-request access could try</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Threat</th>
+<th>Control in the repo</th>
+<th>Residual risk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Poisoned pipeline execution via a modified workflow</td>
+<td>Actions pinned by commit SHA;
+<code>persist-credentials: false</code>;
+<code>permissions: contents: read</code> by default, write only on the
+comment job</td>
+<td>Fork pull requests are not special-cased; the repo is private</td>
+</tr>
+<tr class="even">
+<td>Tampered scanner binaries</td>
+<td>Every binary pinned by version and sha256, cross-checked against the
+release checksums; Python scanners hash-locked</td>
+<td>The Ollama installer in the AI job is fetched unpinned</td>
+</tr>
+<tr class="odd">
+<td>Gate silently weakened</td>
+<td>Baseline file changes only in reviewed pull requests; exceptions
+need an owner and expire; the gate fails closed on missing scanner
+output and on a cancelled upstream job</td>
+<td>An exact finding id keeps its baseline slot even if the line is
+rewritten (known limitation, §11)</td>
+</tr>
+<tr class="even">
+<td>Secrets committed</td>
+<td>gitleaks in CI and as a pre-commit hook
+(<code>scripts/install_hooks.py</code>); inline
+<code>gitleaks:allow</code> ignored</td>
+<td>The planted example key is invisible to gitleaks by design</td>
+</tr>
+<tr class="odd">
+<td>Direct push to <code>main</code></td>
+<td>Pre-push hook that checks the pushed ref, not the checked-out branch
+(tested against a bare remote)</td>
+<td>Local hooks can be skipped; server-side protection is unavailable on
+a free private repo</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ai-path-owasp-llm-top-10">3.3 AI path (OWASP LLM Top 10)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Threat</th>
+<th>Control</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LLM01 prompt injection via scanner text</td>
+<td>Detector routes suspicious findings to a human without calling the
+model; data framing; schema with no “approve” field; no tools, no
+credentials</td>
+<td><code>eval/injection_demo_results.md</code>: framing alone failed,
+the detector held</td>
+</tr>
+<tr class="even">
+<td>LLM02 sensitive data to the model</td>
+<td>Four-layer redaction, canary self-test, pre-egress tripwire,
+loopback-only egress guard with a log</td>
+<td><code>eval/redaction_results.md</code>,
+<code>artifacts/evidence/egress/egress.log</code></td>
+</tr>
+<tr class="odd">
+<td>LLM09 hallucinated identifiers</td>
+<td>Grounding validator on the model’s claims; rejections logged</td>
+<td><code>eval/results.md</code>,
+<code>artifacts/llm_trace/rejections.jsonl</code></td>
+</tr>
+<tr class="even">
+<td>Model supply chain</td>
+<td>Digest-pinned local models, model SBOM, licences recorded</td>
+<td><code>ai/models.lock.yaml</code>,
+<code>artifacts/sbom/models.cdx.json</code>,
+<code>docs/LICENSES.md</code>; the CI model is pulled by tag
+(unpinned)</td>
+</tr>
+<tr class="odd">
+<td>Excessive agency</td>
+<td>The bot only drafts patches; review verdict is <code>PENDING</code>
+until a person writes it</td>
+<td><code>artifacts/prs/</code></td>
+</tr>
+</tbody>
+</table>
+<h1 id="architecture">4. Architecture</h1>
+<pre><code>push / pull request
+  -&gt; 00 build + tests (237 tests)
+  -&gt; 10 scanners: Semgrep, Bandit | Trivy, Grype, OSV-Scanner | gitleaks | Checkov     (raw SARIF/JSON)
+  -&gt; 20 normalize (one schema) -&gt; baseline diff (is this finding NEW?) -&gt; catch rate vs planted vulns
+  -&gt; 30 AI triage: cluster -&gt; redact L1-L4 -&gt; injection check -&gt; egress guard -&gt; local LLM -&gt; grounding validator -&gt; priority
+  -&gt; 40 PR comment (clustered, prioritised, advisory)
+  -&gt; 50 security gate: reads ONLY the deterministic baseline exit code (the AI stage can never block or unblock a merge)
+  -&gt; 55 container build, Trivy image scan, Syft SBOM (CycloneDX + SPDX), Rego policy   (advisory)
+  -&gt; 60 compose staging + ZAP baseline DAST (advisory)    61 kind deploy of the hardened manifest (advisory)</code></pre>
+<p><strong>The boundary that carries the safety argument.</strong>
+Everything under <code>triage</code> in a finding is model output;
+everything else is deterministic code. The model returns constrained
+JSON, has no tools and no credentials, and the stage that decides
+whether a merge is allowed does not read its output. If the model is
+down the pipeline still runs and every finding is emitted as
+<code>NEEDS_HUMAN_REVIEW</code> (degrade, don’t block).</p>
+<p><strong>Metrics path.</strong> The triage step writes Prometheus text
+(<code>metrics.prom</code>), the catch-rate step writes
+<code>catch-rate.prom</code>; <code>eval/metrics/push_metrics.py</code>
+pushes either to a Pushgateway; Grafana (<code>dashboards/</code>) reads
+Prometheus. Pushing from CI is manual (§11).</p>
+<p>Diagrams: <code>docs/demo/01-system-context.svg</code> to
+<code>05-schema-ownership.svg</code>.</p>
+<h1 id="capstone-report-contribution-r2-scanners-and-policy">Capstone
+Report Contribution — R2 (Scanners and Policy)</h1>
+<p>Draft text for <strong>Section 5</strong> (pipeline implementation
+and why baseline diffing, 2 pages; plan §12) and R2’s rows for
+<strong>Section 3</strong> (threat model, pipeline side). R1 owns the
+pipeline YAML and should review 5.1; R5 integrates. Every number comes
+from a committed file:</p>
+<ul>
+<li><code>docs/metrics/GATE_TUNING.md</code>: gate run history and
+threshold simulation (PR #30).</li>
+<li><code>docs/metrics/DETECTOR_OVERLAP.md</code>: detector overlap and
+planted-vuln coverage (PR #28).</li>
+<li><code>scanners/baseline/security-baseline.json</code> and the CI
+workflow <code>.github/workflows/baseline-pipeline.yml</code>.</li>
+</ul>
+<p>Measured on main at <code>1bb3381</code> (2026-10-27) unless stated
+otherwise.</p>
+<hr />
+<h2 id="section-5-pipeline-implementation-and-baseline-diffing">Section
+5: Pipeline Implementation and Baseline Diffing</h2>
+<h3 id="stages">5.1 Stages</h3>
+<p>One workflow, seven jobs. Each scanner writes raw output; everything
+downstream reads one schema.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Job</th>
+<th>What it does</th>
+<th>Fails the build?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>00-build-and-test</code></td>
+<td>unit and contract tests</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td><code>10-security-scanners</code></td>
+<td>7 scanners (below), raw output uploaded</td>
+<td>only if a scanner cannot run</td>
+</tr>
+<tr class="odd">
+<td><code>20-normalize-and-baseline</code></td>
+<td>raw output → <code>findings.json</code> (schema v1.0.0) → new vs
+known → gate verdict</td>
+<td>on bad input or a crash (exit 2)</td>
+</tr>
+<tr class="even">
+<td><code>30-triage-ai</code>, <code>40-pr-comment</code></td>
+<td>R4’s local-model triage and the PR comment (§7)</td>
+<td>no: degrade, don’t block</td>
+</tr>
+<tr class="odd">
+<td><code>50-security-gate</code></td>
+<td>reads the baseline verdict</td>
+<td><strong>yes: the only security verdict</strong></td>
+</tr>
+<tr class="even">
+<td><code>60-staging-smoke-test</code></td>
+<td>staging deploy, smoke test, ZAP baseline (R1)</td>
+<td>smoke test only; ZAP is advisory</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Category</th>
+<th>Tool (pinned)</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Secrets</td>
+<td>gitleaks 8.30.1</td>
+<td>whole repo, plus a pre-commit hook on staged changes</td>
+</tr>
+<tr class="even">
+<td>SAST</td>
+<td>Semgrep 1.179.0 (<code>p/default</code> + 4 custom rules),
+Bandit</td>
+<td>application code</td>
+</tr>
+<tr class="odd">
+<td>SCA</td>
+<td>Trivy 0.75.0, Grype 0.120.1, OSV-Scanner 2.6.0</td>
+<td>dependency manifests</td>
+</tr>
+<tr class="even">
+<td>IaC / config</td>
+<td>Checkov, Trivy misconfiguration</td>
+<td>Dockerfile, Kubernetes, GitHub Actions</td>
+</tr>
+</tbody>
+</table>
+<p>Two design rules govern this stage:</p>
+<ul>
+<li><strong>The scanners are supply chain too.</strong> Every binary is
+checked against a SHA-256 pinned in the workflow; Semgrep, Bandit and
+Checkov install from hash-locked requirement files. A tampered release
+fails the job instead of running with the job’s token.</li>
+<li><strong>Fail closed.</strong> A missing scanner output is an error,
+not “zero findings”. The normalizer requires all seven inputs, and the
+gate job runs even when an earlier job failed
+(<code>if: !cancelled()</code>) and fails unless the baseline step
+returned an explicit 0. We learned this the hard way: Checkov and OSV
+output was being silently dropped, and the gate passed on fewer findings
+than the scanners produced. Restoring them (#24) surfaced 141 findings
+the gate had never seen.</li>
+</ul>
+<p>The gate does not wait for the AI stage. The security verdict is
+deterministic code; the model’s output informs the human reviewer, and
+nothing the model says can turn the gate red or green.</p>
+<h3 id="one-schema-for-seven-tools">5.2 One schema for seven tools</h3>
+<p><code>scanners/normalize/normalize.py</code> maps SARIF and native
+JSON into the schema agreed with R4 in ADR-001
+(<code>scanners/schema/finding.schema.json</code>). Every finding is
+validated against the schema, gets a stable 16-hex
+<code>finding_id</code>, and the output is byte-identical for the same
+input. The schema assigns each block one writer: the normalizer writes
+the scanner facts, the baseline step writes <code>baseline</code>, and
+only R4’s validator may write <code>triage</code>. So the model cannot
+alter what a scanner reported.</p>
+<p><strong>Severity is not comparable across tools</strong>, so it is
+mapped explicitly in <code>scanners/normalize/severity_map.yaml</code>,
+and changing it needs a PR:</p>
+<ul>
+<li>Semgrep has no CRITICAL, so its ERROR maps to HIGH, not to Trivy’s
+top level.</li>
+<li>OSS Checkov reports every failure as <code>error</code>, which
+carries no information. Checkov failures are MEDIUM unless a per-rule
+override says otherwise (privileged containers, host namespaces, a
+container running as root: HIGH, matching Trivy’s rating of the same
+check).</li>
+<li>OSV-Scanner severity comes from the CVSS score, bucketed with CVSS
+v3 ranges.</li>
+<li>A gitleaks hit is always HIGH; a low-confidence Bandit result drops
+one level.</li>
+<li>A vulnerability with no score yet (<code>UNKNOWN</code>, often a CVE
+published days ago) is HIGH, so it needs a decision. It used to be INFO,
+which meant it could never block (#30).</li>
+</ul>
+<h3 id="why-baseline-diffing">5.3 Why baseline diffing</h3>
+<p>Main carries <strong>162 findings, 56 of them HIGH or
+CRITICAL</strong>: the planted vulnerabilities in vulnshop-api, plus
+real CVEs in dependencies we pin. A gate that fails on any HIGH finding
+would fail every PR, regardless of its content. Developers then learn to
+ignore it. The plan named this risk (“noise drowns the gate”) and gave
+R2 the counter: the gate fails only on what a PR
+<strong>adds</strong>.</p>
+<ul>
+<li><strong>The baseline</strong> (<code>security-baseline.json</code>,
+152 entries) is accepted existing debt. It is created by a command and
+changed only in a reviewed PR, like code.</li>
+<li><strong>Matching ignores line numbers, but not code.</strong>
+Findings are grouped by <code>tool|rule|file|package</code>, so
+inserting a line above a known finding does not make it “new”. A moved
+finding keeps its baseline slot only if its line still has the same
+text. The baseline stores a hash of it (<code>line_sha</code>), ignoring
+whitespace. Without that, fixing one known SQL injection and adding
+another elsewhere in the file let the new one take the old one’s slot. A
+code review found this hole, and #30 closed it.</li>
+<li><strong>The verdict:</strong> fail if a new finding is HIGH or above
+and has no valid exception. A known finding also blocks if it was
+accepted below HIGH and has since been re-rated to HIGH or above: the
+debt accepted was not that severe.</li>
+<li><strong>Exceptions</strong> are comments next to the finding:
+<code>security-exception: &lt;rule or id&gt; expires:&lt;date&gt; owner:&lt;name&gt;</code>.
+They need an owner and an expiry at most 90 days out. An expired or
+malformed exception fails the gate, so accepted risk cannot quietly
+become permanent. Main has 6, all on the scanners’ own dependencies, and
+each states why the vulnerable code is not reachable in CI.</li>
+</ul>
+<p>Baseline diffing does <strong>not</strong> hide the debt. All 162
+findings are still in <code>findings.json</code>, still triaged by §7,
+and still on the dashboard. It only decides what may block a merge.</p>
+<h3 id="tuning-the-gate-from-real-data">5.4 Tuning the gate from real
+data</h3>
+<p>After three weeks, we labelled all 71 CI runs
+(<code>GATE_TUNING.md</code> §2). Of the 49 runs that reached a
+verdict:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Outcome</th>
+<th>Runs</th>
+<th>What it was</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pass</td>
+<td>33</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Correct block</td>
+<td>5</td>
+<td>2 real issues in new changes, 3 debt main had never accepted</td>
+</tr>
+<tr class="odd">
+<td>Expected block</td>
+<td>3</td>
+<td>a scanner change surfacing old debt, rebaselined in the same PR</td>
+</tr>
+<tr class="even">
+<td><strong>False fail</strong></td>
+<td><strong>7</strong></td>
+<td>1 test fixture flagged as a secret; 6 PRs failing on main’s
+unbaselined debt</td>
+</tr>
+<tr class="odd">
+<td><strong>False pass</strong></td>
+<td><strong>1</strong></td>
+<td>the gate job was <em>skipped</em>, which GitHub counts as
+passing</td>
+</tr>
+</tbody>
+</table>
+<p>The false pass was the most damaging event of the project. On #17 the
+baseline step said FAIL (29 blocking), but a cancelled upstream job
+skipped the gate, and the PR merged. Main stayed red for about 27 hours,
+and that caused all six inherited false fails. The fix is the
+<code>!cancelled()</code> rule in 5.1. The remaining gap is that the
+repository has no branch protection, so the gate is still advisory
+(§5.6).</p>
+<p><strong>Threshold.</strong> We replayed main’s findings against each
+threshold, using the 7 planted true positives and 2 planted negative
+controls in <code>ground_truth/planted.yaml</code>:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fail on</th>
+<th>Planted vulns blocked</th>
+<th>Negative controls blocked</th>
+<th>Hardened manifest blocked</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CRITICAL</td>
+<td>0/7</td>
+<td>0/2</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td><strong>HIGH</strong> (chosen)</td>
+<td><strong>6/7</strong></td>
+<td>0/2</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td>MEDIUM</td>
+<td>6/7</td>
+<td>0/2</td>
+<td>yes (5 hygiene checks)</td>
+</tr>
+</tbody>
+</table>
+<p>HIGH blocked only 4/7 at first. The planted Jinja XSS was rated
+MEDIUM, and a root pod was MEDIUM in Kubernetes while a root Dockerfile
+was HIGH. Raising those two ratings (#30) fixed both, with no change to
+main’s verdict. MEDIUM adds 82 findings and no extra planted
+vulnerability.</p>
+<p>Since R3’s #42 committed the app’s <code>package-lock.json</code>,
+PLANT-005 (lodash CVE-2020-8203, HIGH in all three SCA tools) is
+detected as well, so <strong>HIGH now blocks 7/7</strong>. #42 also
+repeated #17’s mistake. It surfaced 112 new dependency findings, 32 of
+them blocking, and merged with the gate red, so main stayed red until
+#30 accepted them as target-app debt.</p>
+<h3 id="detector-overlap">5.5 Detector overlap</h3>
+<p>On the SCA side, three tools found 29 distinct vulnerabilities, and
+19 of those were found by all three (<code>DETECTOR_OVERLAP.md</code>,
+measured 2026-10-26, before the app had a lockfile). Every disagreement
+had a mechanical cause, not a data-quality one:</p>
+<ul>
+<li>OSV-Scanner resolves transitive dependencies; the other two do
+not.</li>
+<li>Trivy only parses files named <code>requirements.txt</code>, so it
+never scanned our scanner lockfiles.</li>
+<li>Grype missed every CVE published after 2026-03-09. Its pinned
+version could only download a vulnerability database built on that date,
+and it gave no warning.</li>
+</ul>
+<p>Grype found nothing unique. We upgraded it (#29) instead of dropping
+it, and it now refuses a database older than five days. We added that
+check because <strong>a stale vulnerability database is a silent false
+pass</strong>.</p>
+<p>On static coverage, our four custom Semgrep rules raised detection of
+the planted vulnerabilities from 4/7 to 6/7. They are the only detector
+for the hard-coded AWS key (gitleaks missed it) and the Jinja XSS. The
+seventh, PLANT-005, needed a lockfile rather than a rule: once #42
+committed one, all three SCA tools found it, so static detection is 7/7.
+Each rule has a <code>semgrep --test</code> fixture that runs in CI.</p>
+<h3 id="limitations">5.6 Limitations</h3>
+<ul>
+<li><strong>No branch protection.</strong> A red gate does not stop a
+merge; reviewers do. It happened twice: #17 merged through a skipped
+gate, and #42 merged with the gate red. Both left main red for every PR
+that followed. Protection needs a public repository or a paid plan.</li>
+<li><strong>We knew what we planted.</strong> The custom rules were
+written for the planted classes. 7/7 is a bound on this app, not a
+detection rate. Static detection is also not runtime detection: the DAST
+stage has not yet caught a planted vulnerability (see §6).</li>
+<li><strong>Matching by line text has edge cases.</strong> A known
+finding that is moved <em>and</em> edited in the same change counts as
+new, which is a false fail. A new finding whose line is an exact copy of
+a fixed one takes the fixed one’s slot. A renamed file makes all its
+findings new.</li>
+<li><strong>Database drift.</strong> A new advisory against an unchanged
+dependency fails the next PR, whatever it changes. We first saw it on
+2026-10-29: 6 findings (3 new <code>mcp</code> advisories, each from two
+tools) against Semgrep’s own dependencies. They did not block only
+because they are MEDIUM. Semgrep pins the vulnerable version, so they
+were excepted, not fixed. A nightly scan of main would surface drift
+before a contributor’s PR does.</li>
+<li><strong>Duplicates.</strong> One vulnerable line can produce up to 5
+findings from different tools. The verdict is unaffected, but the PR
+comment is noisier than it needs to be.</li>
+<li><strong>Inline suppressions don’t count.</strong> A
+<code>nosemgrep</code> or <code>checkov:skip</code> comment does not
+waive a finding; only a dated, owned exception does. That is deliberate
+(the same rule CI applies to gitleaks), but it means more findings to
+triage than the tools’ defaults.</li>
+<li><strong>Two versions of one package.</strong> A finding’s ID has no
+package version, so the same CVE in two versions in one lockfile is
+counted once. Putting the version in the ID made it change on every
+upgrade, so we kept the limitation. None of today’s findings is
+affected.</li>
+<li><strong>Scanners disagree on line breaks.</strong> Checkov and YAML
+parsers treat form feeds and <code>\u2028</code> as line breaks;
+Python’s parser and Semgrep don’t. In a file containing them, an
+exception can sit one line off its finding. No file in the repository
+contains them.</li>
+<li><strong>Rebaselining from the wrong checkout.</strong>
+<code>baseline.py create</code> fingerprints each flagged line in the
+checkout it is given. It warns when a line doesn’t exist there (#44),
+but not when lines have only shifted; it must run at the scanned
+commit.</li>
+</ul>
+<hr />
+<h2 id="section-3-threat-model-r2s-pipeline-rows">Section 3 (threat
+model): R2’s pipeline rows</h2>
+<p>Threats to the scanning and gating stage itself. R5 owns the threat
+model and may merge these into the overall table.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Threat</th>
+<th>Example</th>
+<th>Control</th>
+<th>Evidence</th>
+<th>Residual risk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gate silently fails open</td>
+<td>a scanner crashes or is skipped; the gate passes on fewer
+findings</td>
+<td>every scanner output is required; gate runs
+<code>!cancelled()</code> and fails unless exit 0</td>
+<td>#24; the #17 false pass in <code>GATE_TUNING.md</code> §2</td>
+<td>no branch protection, so a red gate is advisory</td>
+</tr>
+<tr class="even">
+<td>Tampered scanner</td>
+<td>a compromised release runs with the CI token</td>
+<td>SHA-256-pinned binaries, hash-locked Python installs, Actions pinned
+by commit SHA in the scan and gate jobs</td>
+<td>workflow install step; <code>requirements-*.txt</code></td>
+<td>the pins themselves must be reviewed when bumped</td>
+</tr>
+<tr class="odd">
+<td>Stale detector</td>
+<td>an old vulnerability database misses new CVEs</td>
+<td>Grype refuses a database older than 5 days</td>
+<td>#29; <code>DETECTOR_OVERLAP.md</code> §1</td>
+<td>Trivy and OSV have no equivalent age check</td>
+</tr>
+<tr class="even">
+<td>Risk accepted forever</td>
+<td>an exception with no owner or end date</td>
+<td>exceptions need an owner and an expiry at most 90 days out; expired
+or malformed fails the gate; 14-day warning (#30)</td>
+<td><code>baseline.py</code>;
+<code>tests/test_gate_tuning.py</code></td>
+<td>all 6 current exceptions expire on one day</td>
+</tr>
+<tr class="odd">
+<td>Debt laundered into the baseline</td>
+<td>a PR rebaselines to hide a new finding</td>
+<td>baseline changes only in a reviewed PR; its diff shows every
+accepted finding</td>
+<td><code>security-baseline.json</code> history</td>
+<td>relies on the reviewer reading the diff</td>
+</tr>
+<tr class="even">
+<td>New finding hidden as old</td>
+<td>fix one known finding and add another of the same rule in the same
+file; or a known CVE re-rated from LOW to CRITICAL</td>
+<td>a moved finding must keep its line text (<code>line_sha</code>); a
+known finding re-rated across the threshold blocks again; an unscored
+CVE is HIGH</td>
+<td>#30; <code>tests/test_gate_tuning.py</code></td>
+<td>an exact copy of a fixed line still inherits its slot</td>
+</tr>
+<tr class="odd">
+<td>Secret committed</td>
+<td>a developer commits a key</td>
+<td>gitleaks pre-commit hook (staged changes) and gitleaks in CI</td>
+<td><code>scripts/install_hooks.py</code>,
+<code>.gitleaks.toml</code></td>
+<td>the hook is opt-in per clone; the custom Semgrep rule is the only
+detector for the planted AWS key</td>
+</tr>
+<tr class="even">
+<td>Scanner input evaluates code</td>
+<td>a PR adds a Terraform file that Checkov evaluates with
+<code>asteval</code></td>
+<td>Checkov limited to Dockerfile, Kubernetes and GitHub Actions</td>
+<td>workflow comment; exception rationale in
+<code>requirements-scanners.txt</code></td>
+<td>re-enable other frameworks only after an <code>asteval</code>
+fix</td>
+</tr>
+<tr class="odd">
+<td>Model alters the verdict</td>
+<td>prompt injection makes the model clear a finding</td>
+<td>the gate reads only <code>baseline.py</code>’s exit code; the model
+writes only <code>triage</code></td>
+<td>ADR-001; gate job <code>needs</code></td>
+<td>none known for the gate; see §7 for the comment</td>
+</tr>
+</tbody>
+</table>
+<h1 id="container-and-iac-hardening">6. Container and IaC hardening</h1>
+<p><strong>Images.</strong> <code>docker/Dockerfile</code> is the
+planted bad image (<code>node:latest</code>, root).
+<code>docker/Dockerfile.hardened</code> is multi-stage, both stages
+pinned to <code>node:20.11.1-alpine@sha256:bf77dc26…</code>, runs as UID
+10001, installs only production dependencies, and has a health check.
+<code>apps/vulnshop-api/.dockerignore</code> keeps <code>.git</code>,
+<code>.env</code>, <code>*.db</code> and host <code>node_modules</code>
+out of the build context.</p>
+<p><strong>Kubernetes.</strong> <code>infra/k8s/deployment.yaml</code>
+is the planted bad manifest (<code>runAsNonRoot: false</code>).
+<code>deployment.hardened.yaml</code> sets <code>runAsNonRoot</code>,
+UID/GID 10001, <code>readOnlyRootFilesystem</code>,
+<code>allowPrivilegeEscalation: false</code>,
+<code>capabilities.drop: [ALL]</code>,
+<code>seccompProfile: RuntimeDefault</code>, CPU/memory limits and
+requests, probes, a <code>/tmp</code> <code>emptyDir</code> and no
+service-account token. Four Checkov findings on it remain accepted in
+the baseline (default namespace, no NetworkPolicy, image pull policy,
+image digest) and are listed rather than hidden.</p>
+<p><strong>Policy as code.</strong> Checkov (Dockerfile, Kubernetes,
+GitHub Actions frameworks) plus our own OPA/Rego policy
+<code>infra/policy/k8s.rego</code>, mapped to CIS Kubernetes Benchmark
+5.2.x. CI and <code>make policy</code> require the hardened manifest to
+pass and the planted bad manifest to fail, which proves the policy
+bites. Terraform and CloudFormation frameworks stay off on purpose
+(Checkov’s pinned <code>asteval</code> has known sandbox escapes; see
+<code>requirements-scanners.txt</code>).</p>
+<p><strong>SBOM and image scan.</strong> Stage
+<code>55-container-sbom</code> builds both images, writes a CycloneDX
+and an SPDX SBOM per image with Syft (pinned, sha256-checked) and scans
+each with <code>trivy image</code>. Model components have their own
+SBOM: <code>artifacts/sbom/models.cdx.json</code>, generated from
+<code>ai/models.lock.yaml</code> and checked for drift by a test.
+Licences (including the Grafana AGPL note and the
+open-weights-versus-open-source point) are in
+<code>docs/LICENSES.md</code>.</p>
+<p><strong>Runtime.</strong> Stage <code>61-kind-deploy</code> loads the
+hardened image into a kind cluster, applies the hardened manifest and
+smoke-tests <code>/healthz</code>. Falco and a SIEM stub, cosign signing
+and Kyverno admission were stretch goals and are <strong>not
+built</strong>.</p>
+<p><strong>Policy bot (the brief’s stretch goal).</strong>
+<code>ai/policy_bot.py</code> explains each newly failed IaC check in
+two plain sentences, in the pull request, using the scanner’s own rule
+title as input (no title: no model call). Code rejects any reply that
+names a CVE, CWE, URL or a rule id it was not given. On five real
+Checkov rules the local llama3 was right and actionable for three, vague
+for one and wrong for one (it invented a Kubernetes setting that does
+not exist), which code cannot catch:
+<code>artifacts/demo/policy_explain_sample.md</code>. It is advisory,
+never a gate.</p>
+<p><strong>Status.</strong> Stages 55 and 61 are advisory
+(<code>continue-on-error</code>) until they have several green runs on
+<code>main</code>; they were written without being able to run Actions
+locally. The first CI run is the test.</p>
+<h1 id="capstone-report-contribution-r4-ai-genai-lead">Capstone Report
+Contribution — R4 (AI &amp; GenAI Lead)</h1>
+<p>Draft text for <strong>Sections 7, 8 and 9</strong>. Every number
+below comes from a committed run (<code>eval/results/*.jsonl</code>,
+<code>eval/results.md</code>, <code>eval/redaction_results.md</code>,
+<code>eval/injection_demo_results.md</code>). Regenerate them with the
+commands in <code>CLAUDE.md</code>. Revised 2026-10-21 after the R4
+audit; see <code>docs/R4_AUDIT_2026-10-21.md</code>.</p>
+<hr />
+<h2 id="section-7-ai-triage-subsystem">Section 7: AI Triage
+Subsystem</h2>
+<h3 id="design-principle">7.1 Design principle</h3>
+<p><em>The LLM is a component, not the system. The safety is in the
+plumbing, not the prompt.</em> The model returns JSON only. It has no
+tools, no credentials, and cannot merge anything. A human merges.</p>
+<p>Pipeline (<code>ai/triage.py</code>): 1. <strong>Cluster
+(deterministic):</strong> findings are grouped by
+<code>tool :: rule_id :: full path</code> (<code>ai/cluster.py</code>),
+one model call per cluster. We have not yet measured a reduction ratio
+on real scanner output, so none is claimed. Embedding-based clustering
+is deliberately not used (no embedding calls, one cheap key); on 264
+real findings that key gives 1.03x. 2. <strong>Protect
+(deterministic):</strong> four-layer redaction before any prompt is
+built (§8), then an injection check on every attacker-controllable
+string (<code>ai/injection.py</code>). 3. <strong>Generate (stochastic,
+bounded):</strong> a local open-weight model via Ollama,
+<code>temperature=0</code>, <code>seed=42</code>, decoding constrained
+to a JSON Schema (<code>ai/schemas/triage_output.schema.json</code>).
+The model proposes a verdict, a short fix, and a structured list of the
+identifiers it relies on (<code>claims</code>). 4. <strong>Verify
+(deterministic):</strong> the grounding validator
+(<code>ai/validate.py</code>) checks the model’s claims, not the
+scanner’s input. CWE IDs must exist in the MITRE catalogue (v4.20, 1,391
+IDs, committed offline). CVEs, packages, fixed versions and file:line
+must match the scanner record (or a small offline CVE registry).
+CVE/CWE/file:line mentioned in the free-text <code>fix_summary</code>
+are extracted and checked too. Unproven claims are dropped, logged to
+<code>artifacts/llm_trace/rejections.jsonl</code>, and the finding
+becomes <code>NEEDS_HUMAN_REVIEW</code>. No retry. 5. <strong>Decide
+(deterministic):</strong> priority is computed in code from severity,
+KEV, EPSS and reachability (<code>ai/priority.py</code>).
+<code>model</code> and <code>prompt_version</code> are set by code. The
+model chooses neither.</p>
+<p>Degrade, don’t block: if the model is down, malformed, or blocked by
+a guard, every finding is emitted as <code>NEEDS_HUMAN_REVIEW</code> and
+the run exits 0 (tested end to end in
+<code>tests/test_triage.py</code>). Every model call is written to a
+hash-chained append-only log (<code>ai/trace.py</code>: prompt sha256,
+model digest, raw response, verdict).</p>
+<h3 id="open-weight-rationale">7.2 Open-weight rationale</h3>
+<p>Local inference means no source code, secret or infrastructure detail
+leaves the runner, and anyone can reproduce the numbers with
+<code>ollama pull</code> and no API key. Model digests and licences are
+recorded in <code>ai/models.lock.yaml</code>. Three models have frozen
+evaluation runs: <code>llama3:latest</code> (Meta Llama 3 Community
+License, <strong>not</strong> OSI-approved), <code>gemma2:latest</code>
+(Gemma Terms of Use, <strong>not</strong> OSI-approved) and
+<code>llama3.1:8b</code> (Llama 3.1 Community License,
+<strong>not</strong> OSI-approved; run 2026-10-28). The plan’s
+Apache-2.0 candidate <code>qwen2.5-coder:14b</code> was not available on
+the capture machine and has <strong>not been run</strong>. The CI job
+(<code>30-triage-ai</code>) pulls <code>qwen2.5-coder:1.5b</code> by tag
+with no pinned digest; it has <strong>no evaluation</strong>, so no
+quality claim is made for it. All five models are in
+<code>artifacts/sbom/models.cdx.json</code> and
+<code>docs/LICENSES.md</code>, generated from the lock file.</p>
+<hr />
+<h2 id="section-8-the-redaction-layer-as-a-security-control">Section 8:
+The Redaction Layer as a Security Control</h2>
+<h3 id="layers-airedactionredactor.py">8.1 Layers
+(<code>ai/redaction/redactor.py</code>)</h3>
+<ul>
+<li><strong>L1 structural allowlist:</strong> only tool, rule id,
+severity, CWE/CVE, file <em>name</em>, line and snippet reach the model.
+Runner IDs, emails, full paths and commit data are dropped.
+<code>rule_id</code> and file names are attacker-chosen, so they are
+scrubbed and length-capped too.</li>
+<li><strong>L2 secrets:</strong> regex rules for AWS, GitHub (classic
+and fine-grained), Slack, GCP, Stripe, JWT, PEM (including truncated),
+connection-string credentials, and <code>key = value</code> where the
+key name says secret; plus base64-wrapped secrets, secrets split across
+lines, Cyrillic/Greek homoglyph folding, and a Shannon-entropy scan for
+unknown token shapes. These are our own rules, <strong>not</strong> the
+gitleaks rule set.</li>
+<li><strong>L3 entities:</strong> emails, private/link-local IPv4, IPv4
+with host/ip/<code>@</code>/<code>://</code> context, IPv6, and internal
+hostnames (<code>.internal</code>, <code>.corp</code>,
+<code>.local</code>, <code>.svc</code>…). Version strings like
+<code>lodash 4.17.21.0</code> are deliberately left alone. This is
+regex, <strong>not</strong> Presidio/NER.</li>
+<li><strong>L4 canary tripwire (pre-egress):</strong> fake secrets that
+look real are planted in a self-test finding at the start of each run;
+if any survives redaction, no model call is made. Before every call the
+outbound prompt is also checked: no canary value, and no secret that L2
+detects in the raw snippet, may appear in it. A hit blocks the call and
+records only a count. (An earlier design appended the canary to the
+prompt itself, which proved nothing.)</li>
+</ul>
+<h3 id="egress-guard">8.2 Egress guard</h3>
+<p><code>egress_guard_check</code> parses the URL and allows only
+http(s) to an exact loopback host (<code>localhost</code>,
+<code>127.0.0.1</code>, <code>::1</code>) with no userinfo. The earlier
+<code>startswith</code> check allowed
+<code>http://localhost.evil.com</code>; that and other bypasses are now
+regression tests. The client also ignores <code>HTTP(S)_PROXY</code>.
+Decisions are logged (<code>artifacts/evidence/egress/egress.log</code>:
+host, request sha256, allow/deny); the committed log from the evaluation
+run shows only loopback calls, and denials are exercised in
+<code>tests/test_redaction.py</code>. A containerised deny-by-default
+proxy (simulated-cloud mode) is <strong>not built</strong>.</p>
+<h3 id="measured-result-evalredaction_results.md">8.3 Measured result
+(<code>eval/redaction_results.md</code>)</h3>
+<p>63 adversarial fixtures: all removed. 400 randomised known-shape
+cases: all removed. 1 of 30 benign snippets over-redacted (a MAC
+address, treated like IPv6). Before this work, a probe of 12 common
+secret shapes let 9 through. <strong>Caveat:</strong> the fixtures and
+the redactor have the same author and the redactor was tuned until they
+passed, so 63/63 is an optimistic bound, not a proof. Redaction is
+defence in depth, because the model is local.</p>
+<hr />
+<h2 id="section-9-evaluation-bake-off-and-ablations">Section 9:
+Evaluation, Bake-Off and Ablations</h2>
+<h3 id="method-and-its-limits">9.1 Method and its limits</h3>
+<p>The ground truth is <strong>10 synthetic findings</strong>
+(<code>eval/ground_truth.jsonl</code>) written and labelled by one
+person: no inter-rater agreement, no time split, and the rows are not
+drawn from real scanner output (R2’s frozen candidate population of 264
+findings,
+<code>docs/metrics/data/candidate-population-2026-10-29/</code>, is not
+labelled yet) or from the 9 entries of R3’s
+<code>ground_truth/planted.yaml</code>. <strong>The frozen results
+predate two edits to <code>eval/ground_truth.jsonl</code> (gt-002
+snippet, <code>package</code> blocks on gt-005/gt-006);
+<code>eval/results.md</code> flags them STALE until
+<code>make eval</code> is re-run.</strong> This is a <strong>smoke set,
+not a held-out evaluation</strong>, and a one-finding difference is
+noise. Prompts were not tuned on these rows. Models are called through
+the real pipeline; outputs are frozen in <code>eval/results/</code>.</p>
+<h3 id="results-n-10-full-table-and-definitions-in-evalresults.md">9.2
+Results (n = 10; full table and definitions in
+<code>eval/results.md</code>)</h3>
+<p>Re-run on 2026-10-29 against the current
+<code>eval/ground_truth.jsonl</code> (sha <code>55cfb6cf125d…</code>),
+so the table matches the file in the repo.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Configuration</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>Abstain</th>
+<th>Confidently wrong</th>
+<th>p50 latency</th>
+<th>Ungrounded claims produced → reaching a human</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Keyword baseline (no LLM)</td>
+<td>0.75</td>
+<td>0.50</td>
+<td>0.0</td>
+<td>4</td>
+<td>n/a</td>
+<td>n/a</td>
+</tr>
+<tr class="even">
+<td>llama3:latest, full pipeline</td>
+<td>0.667</td>
+<td>0.667</td>
+<td>0.3</td>
+<td>2</td>
+<td>1.62 s</td>
+<td>1 → <strong>0</strong></td>
+</tr>
+<tr class="odd">
+<td>llama3:latest, no validator (same run, counterfactual)</td>
+<td>0.667</td>
+<td>0.667</td>
+<td>0.2</td>
+<td>2</td>
+<td>1.62 s</td>
+<td>1 → <strong>1</strong></td>
+</tr>
+<tr class="even">
+<td>gemma2:latest, full pipeline</td>
+<td>0.667</td>
+<td>0.333</td>
+<td>0.6</td>
+<td>1</td>
+<td>2.80 s</td>
+<td>2 → 0</td>
+</tr>
+<tr class="odd">
+<td>llama3:latest, JSON mode (no schema)</td>
+<td>0.667</td>
+<td>0.333</td>
+<td>0.5</td>
+<td>2</td>
+<td>1.43 s</td>
+<td>2 → 0</td>
+</tr>
+<tr class="even">
+<td>llama3:latest, no format constraint</td>
+<td>0.667</td>
+<td>0.333</td>
+<td>0.5</td>
+<td>2</td>
+<td>1.46 s</td>
+<td>2 → 0</td>
+</tr>
+</tbody>
+</table>
+<p>Recall counts an abstention on a real true positive as a miss. Both
+models were 100% identical across two runs at temperature 0 / seed 42
+(verdict and text). Peak RAM was not measured (<code>ollama ps</code>
+reports 5.7 GB loaded for llama3). <code>llama3.1:8b</code> was run on
+2026-10-28 against the <em>previous</em> ground truth; those frozen
+files are kept in <code>eval/results/</code> but are not in this table
+because they are not comparable. The earlier run of this table (before
+the ground truth gained <code>package</code> blocks) gave llama3
+precision 0.714 / recall 0.833: the one-row difference is the size of
+the noise at n = 10.</p>
+<h3 id="what-we-actually-found">9.3 What we actually found</h3>
+<ol type="1">
+<li><strong>The model is confidently wrong.</strong> llama3 called
+gt-002 (a parameterised query) and gt-010
+(<code>helmet.frameguard deny</code>) true positives. The validator
+cannot catch these: they are judgement errors, not unproven claims. This
+is why abstention and human review exist.</li>
+<li><strong>The validator works on what it can check.</strong> llama3
+echoed a made-up CWE-99999 from the fake gt-006 finding; gemma2
+additionally proposed a <code>fixed_version</code> (2.17.2) that appears
+nowhere in the scanner record for gt-005. With the validator on, 0 of
+these reached a human; with it off, llama3’s one did. It does not
+improve precision here. Its value is the claim-level guarantee, not a
+better F1.</li>
+<li><strong>Schema decoding vs weaker constraints:</strong> with
+JSON-mode or no format, llama3’s recall fell from 0.667 to 0.333 and it
+abstained more (0.5 vs 0.3) and produced more ungrounded claims (2 vs
+1). With n = 10 we do not claim this is significant.</li>
+<li><strong>Prompt injection
+(<code>eval/injection_demo_results.md</code>, llama3, one
+payload):</strong> with no defence the model followed the injected
+instruction and returned FALSE_POSITIVE. <strong>Delimiter framing alone
+did not help; the model was still owned.</strong> Only the heuristic,
+which routes the finding to a human without calling the model, held. So
+the real control is the detector plus “the LLM never acts”, not the
+prompt. The detector catches 15/15 tested variants and 0/8 benign
+snippets (<code>tests/test_injection.py</code>), which is a small
+hand-written corpus and not a detection rate.</li>
+<li><strong>Model-drafted PRs.</strong> The first batch (llama3 asked to
+write a unified diff) failed: <strong>0 of 4 pass
+<code>git apply --check</code></strong> because the model cannot count
+hunk lines (<code>artifacts/prs/</code>, reviewed and rejected by R2 for
+PR-003/004). We changed the method: the model returns the whole file and
+code computes the diff (<code>ai/pr_bot.py</code>, prompt
+<code>patch_draft_v2</code>). The second batch
+(<code>artifacts/prs/v2/</code>) applies 4 of 4. Applying is not
+correctness: the first run of v2 “applied” four garbage patches because
+llama3 echoed our data wrapper into the file, which is why the bot now
+unwraps or refuses it and reports lines changed. Human review of the v2
+batch is pending.</li>
+</ol>
+<h3 id="honest-limitations">9.4 Honest limitations</h3>
+<p>Small n and a single labeller; synthetic inputs; only three 8-9B
+local models were run (<code>qwen2.5-coder:14b</code> was not, and the
+CI model <code>qwen2.5-coder:1.5b</code> has no evaluation); the
+validator’s CVE registry (7 ids plus the CISA KEV catalogue) and the
+EPSS table (only the CVEs this repository can meet) are not complete, so
+it rejects real-but-unlisted CVEs by design; reachability is not
+computed; redaction is regex plus entropy, not NER; the egress proxy is
+not built and clustering is by key only.</p>
+<h1 id="devsecops-maturity-self-assessment">10. DevSecOps maturity
+self-assessment</h1>
+<p>Scored against the OWASP DevSecOps Maturity Model (DSOMM) levels 1
+(basic) to 4 (advanced), by the team, from what the repository
+evidences. A level is claimed only if an artifact exists.</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 35%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>DSOMM dimension</th>
+<th style="text-align: center;">Level</th>
+<th>Evidence</th>
+<th>What stops the next level</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Static depth (SAST)</td>
+<td style="text-align: center;">3</td>
+<td>Semgrep with our own rules (<code>scanners/semgrep/rules/</code>,
+tested with <code>semgrep --test</code> in CI) plus Bandit</td>
+<td>No taint-level analysis or IDE integration</td>
+</tr>
+<tr class="even">
+<td>Dynamic depth (DAST)</td>
+<td style="text-align: center;">2</td>
+<td>ZAP baseline against staging, advisory</td>
+<td>Passive scan only; not gating; no authenticated scan</td>
+</tr>
+<tr class="odd">
+<td>Dependencies / SCA</td>
+<td style="text-align: center;">3</td>
+<td>Trivy, Grype and OSV-Scanner cross-checked; detector-overlap metric;
+exceptions with owner and expiry</td>
+<td>No reachability analysis; EPSS/KEV tables are a sample</td>
+</tr>
+<tr class="even">
+<td>Secrets</td>
+<td style="text-align: center;">3</td>
+<td>gitleaks in CI and pre-commit, suppressions only as exact values,
+inline allow ignored</td>
+<td>The planted example key is invisible to it; no secret rotation
+drill</td>
+</tr>
+<tr class="odd">
+<td>Infrastructure as code</td>
+<td style="text-align: center;">3</td>
+<td>Checkov + Rego policy mapped to CIS; hardened manifest; a test that
+the bad manifest fails</td>
+<td>Admission control (Kyverno) not built</td>
+</tr>
+<tr class="even">
+<td>Build and deployment</td>
+<td style="text-align: center;">3</td>
+<td>SHA-pinned actions, hash-pinned scanners, least-privilege
+permissions, kind deploy stage</td>
+<td>No signing or provenance (cosign/SLSA)</td>
+</tr>
+<tr class="odd">
+<td>Hardening of images</td>
+<td style="text-align: center;">2</td>
+<td>Non-root multi-stage image, digest-pinned base, SBOM (CycloneDX +
+SPDX), image scan</td>
+<td>Not yet signed; scan results advisory</td>
+</tr>
+<tr class="even">
+<td>Test and verification (gate)</td>
+<td style="text-align: center;">4</td>
+<td>Baseline diffing, fail-closed gate, expiring exceptions, gate tuned
+from 71 real runs</td>
+<td>The known baseline-slot weakness (§11)</td>
+</tr>
+<tr class="odd">
+<td>Monitoring and metrics</td>
+<td style="text-align: center;">2</td>
+<td>Prometheus + Grafana dashboard, catch rate, anti-vanity
+catalogue</td>
+<td>No push from CI; no trend over time</td>
+</tr>
+<tr class="even">
+<td>AI-assisted triage (extension)</td>
+<td style="text-align: center;">3</td>
+<td>Redaction, grounding validator, injection defence, replay log,
+bake-off with ablations</td>
+<td>Evaluation set too small to claim accuracy</td>
+</tr>
+<tr class="odd">
+<td>Governance and process</td>
+<td style="text-align: center;">2</td>
+<td>ADRs, evidence index, AI-disclosure log, local branch
+protection</td>
+<td>Server-side branch protection unavailable; reviews were not always
+recorded on GitHub</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall: level 2-3.</strong> The weakest honest spots are
+runtime (Falco not built), signing, and an evaluation set large enough
+to support a quality claim.</p>
+<h1 id="limitations-and-threats-to-validity">11. Limitations and threats
+to validity</h1>
+<p>Written to be unflattering. Each item is something a reader could use
+to discount a result.</p>
+<p><strong>Evaluation</strong> - The model-evaluation set is <strong>10
+synthetic findings written and labelled by one person</strong>: no
+inter-rater agreement, no time split, no confidence interval. A one-row
+change moves precision by 5-10 points (llama3 precision was 0.714 before
+and 0.667 after a data fix). It is a smoke set, not a held-out
+evaluation. - The real candidate population (264 findings in 98
+duplicate groups,
+<code>docs/metrics/data/candidate-population-2026-10-29/</code>) is
+frozen but <strong>not yet labelled by two reviewers</strong>, so there
+is no Cohen’s κ and no frozen time split. Its time range is four days
+and splits by “which pull request added the file”, not by age. 98 groups
+cannot reach the plan’s 150-250 items. - <strong>Planted-vulnerability
+bias.</strong> We knew what we planted and wrote rules for it. The catch
+rates are recall on known plants, not a false-negative rate on unknown
+bugs. The catalogue has 12 rows (10 true positives, 2 controls); three
+of them were added on 2026-10-29 for code that was already there, which
+is why they are not a blind test. A few rule ids in it are mislabelled
+(they are matched by location, so results are unaffected). - Redaction
+recall (63/63 fixtures) is an upper bound: the fixtures and the redactor
+have the same author. Redaction is regex plus entropy, not NER. - Model
+non-determinism is controlled (temperature 0, seed 42, identical across
+two runs) but only for the hardware and Ollama version used.</p>
+<p><strong>AI subsystem</strong> - The validator’s offline CVE registry
+is 7 hand-picked ids plus the 1,762 CISA KEV ids, and EPSS scores exist
+only for the CVEs this repository can meet, so it fails closed and
+rejects real-but-unlisted CVEs. Reachability is not computed. -
+Rules-only clustering barely helps on real data: 264 findings become 257
+clusters (1.03x); grouping across tools gives 98 (2.7x). The plan’s 8x
+was an example, not a result. Embedding clustering was deliberately not
+used: clustering is by key, with no embedding calls. The cheap win left
+is a deterministic cross-tool key for SCA findings (R2’s
+<code>dup_group</code>, about 2.7x on the measured population). - The CI
+job runs <code>qwen2.5-coder:1.5b</code>, which was never evaluated and
+is pulled by tag; local evaluations used llama3 and gemma2.
+<code>qwen2.5-coder:14b</code> was never run. The Ollama installer in CI
+is fetched unpinned. - Model-drafted patches target synthetic fixture
+files, and human review of the second batch
+(<code>artifacts/prs/v2/</code>) is pending. The first batch (0 of 4
+applied) was rejected. “Applies cleanly” is not “correct”.</p>
+<p><strong>Policy bot:</strong> it checks identifiers, not truth. In the
+sample run one of five explanations invented a Kubernetes field; that is
+the failure mode to expect from an 8B model, and why the output is a
+draft.</p>
+<p><strong>Pipeline</strong> - The merge gate treats an exact finding id
+as known without re-checking the line text, so a baselined line
+rewritten in place keeps its accepted slot. The ID of an SCA finding can
+change when a vulnerability database adds an alias, which makes it “new”
+until re-baselined (fail-closed but noisy). - DAST is advisory and
+passive-only, and runs against docker compose; the kind deployment is a
+separate advisory stage. Checkov runs with <code>--soft-fail</code>. -
+The image-scan, SBOM, policy and kind stages (55, 61) are advisory and
+were written without a local Actions run; treat them as unproven until
+the first green runs. - Metrics are not pushed from CI; the dashboard
+needs a manual push. Grafana ships with default credentials for the lab.
+- Lab, not production: no real traffic, one app, one cloud-less
+cluster.</p>
+<h1 id="ai-disclosure">12. AI disclosure</h1>
+<p>Every use of GenAI in this project is logged, with date, tool,
+purpose and how a person verified it, in
+<code>docs/AI_DISCLOSURE.md</code> (reproduced as the appendix).
+Summary:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Use</th>
+<th>Tool</th>
+<th>How it was verified</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The triage subsystem’s model under test</td>
+<td>Ollama: <code>llama3:latest</code>, <code>gemma2:latest</code> (and
+<code>llama3.1:8b</code>, run once); <code>qwen2.5-coder:1.5b</code> in
+CI</td>
+<td>Digests recorded per run; outputs frozen in
+<code>eval/results/</code>; every claim passes the grounding
+validator</td>
+</tr>
+<tr class="even">
+<td>Drafting patches for the sample pull requests</td>
+<td><code>llama3:latest</code> via <code>ai/pr_bot.py</code></td>
+<td><code>git apply --check</code>, a lines-changed count, and a human
+review note per patch</td>
+</tr>
+<tr class="odd">
+<td>Writing and reviewing code, tests and documents</td>
+<td>Claude Code (Sonnet 5.5, Opus 5.5) and, early on, Antigravity
+(Gemini 3.1 Pro)</td>
+<td>Test suite (237 tests), reproduction of each reported bug before
+fixing, review of diffs by the role owner; every R2 commit carries a
+<code>Co-Authored-By: Claude</code> trailer</td>
+</tr>
+</tbody>
+</table>
+<p>Two entries in the log were <strong>corrected after the fact</strong>
+because they were wrong when first written: the PR bot’s first patches
+were hard-coded strings, and the first bake-off copied labels into
+predictions. Both were replaced by real runs. No real credentials,
+customer data or copyrighted content were pasted into any model; the
+only secrets in the repository are the public AWS documentation example
+key and test fixtures.</p>
+<h1 id="future-work">13. Future work</h1>
+<ol type="1">
+<li>Label the frozen candidate population with two reviewers, compute κ,
+freeze the time split, and re-run the bake-off on it (the tooling
+exists: <code>eval/ground_truth/</code>).</li>
+<li>Close the gate’s baseline-slot weakness by also checking the line
+text on exact matches, replaying the change against a CI artifact
+first.</li>
+<li>Push metrics from CI to a Pushgateway and add a trend panel; promote
+stages 55/61 from advisory to required after several green runs.</li>
+<li>Sign images (cosign), add admission control (Kyverno), and build the
+Falco + SIEM stretch goal.</li>
+<li>Replace the sample CVE/KEV/EPSS tables with pinned full feeds;
+evaluate <code>qwen2.5-coder:14b</code> (Apache-2.0) and the CI model;
+use R2’s cross-tool <code>dup_group</code> key in the triage clusterer
+(about 2.7x on the measured population); embedding clustering was
+deliberately left out.</li>
+<li>Plant 12-18 vulnerabilities, including a non-example secret so the
+secrets scanner has something to find.</li>
+<li>Pin the Ollama installer and the ZAP image by digest.</li>
+</ol>
+<h1 id="will-not-do-by-choice">Will not do (by choice)</h1>
+<p>Production deployment, fine-tuning, commercial scanner tiers,
+auto-merging anything the AI wrote, and any target outside our own
+lab.</p>
+<h1 id="baseline-vulnerability-report">Baseline vulnerability
+report</h1>
+<p>Brief, Week 1: <em>document the baseline vulnerabilities at
+runtime.</em> Two views of the same lab target
+(<code>apps/vulnshop-api</code> and its manifests): what the scanners
+report (static), and what a request actually does (runtime). Lab only:
+every request goes to a loopback copy of our own app.</p>
+<h2 id="static-baseline-scanners">1. Static baseline (scanners)</h2>
+<p>Source: CI run 40762500169 on <code>main</code> @
+<code>fbe9686</code>, normalized by R2 and frozen in
+<code>docs/metrics/data/candidate-population-2026-10-29/population.csv</code>
+(SHA-256 in its README). <strong>264 findings, 98 distinct
+issues</strong> (the same CVE is reported by up to three SCA tools).
+Accepted as known debt in
+<code>scanners/baseline/security-baseline.json</code>; the gate only
+fails on new findings.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Tool</th>
+<th style="text-align: right;">CRITICAL</th>
+<th style="text-align: right;">HIGH</th>
+<th style="text-align: right;">MEDIUM</th>
+<th style="text-align: right;">LOW</th>
+<th style="text-align: right;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>iac</td>
+<td>checkov</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="even">
+<td>iac</td>
+<td>trivy</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr class="odd">
+<td>sast</td>
+<td>bandit</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td>sast</td>
+<td>semgrep</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr class="odd">
+<td>sca</td>
+<td>grype</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">62</td>
+</tr>
+<tr class="even">
+<td>sca</td>
+<td>osv</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">65</td>
+</tr>
+<tr class="odd">
+<td>sca</td>
+<td>trivy</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">55</td>
+</tr>
+</tbody>
+</table>
+<p>Distinct issues by severity (highest severity per issue): CRITICAL 2,
+HIGH 42, MEDIUM 45, LOW 9.</p>
+<p>Findings by severity: CRITICAL 4, HIGH 88, MEDIUM 133, LOW 39.</p>
+<p>Not in this table: gitleaks (no findings: it cannot see the AWS
+documentation example key, only the custom Semgrep rule does), ZAP
+(advisory, runs in stage 60), and the Juice Shop target (a pinned
+pointer; it is not scanned in CI).</p>
+<h2 id="runtime-baseline-what-a-request-does">2. Runtime baseline (what
+a request does)</h2>
+<p>Captured 2026-10-29T16:28:56Z by
+<code>scripts/runtime_baseline.py</code> (evidence:
+<code>artifacts/evidence/runtime/2026-10-29-runtime-baseline.json</code>),
+Python 3.13.3. The app is started from a temporary copy on 127.0.0.1 and
+probed twice: as shipped (<code>DEBUG=1</code>) and with the hardened
+image’s setting (<code>DEBUG=0</code>).</p>
+<h3 id="default-debug1-the-vulnerable-target">default (DEBUG=1, the
+vulnerable target)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Planted</th>
+<th>Probe</th>
+<th>Request</th>
+<th>Observed</th>
+<th>Exploitable</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>-</td>
+<td>Health endpoint (control)</td>
+<td><code>GET /healthz</code></td>
+<td>HTTP 200</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-001/010</td>
+<td>SQL injection (search): reads another table</td>
+<td><code>GET /api/search/?q=' UNION SELECT ... FROM users --</code></td>
+<td>HTTP 200; the users table row came back through the items endpoint:
+True</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="odd">
+<td>PLANT-001</td>
+<td>SQL error leaks the query</td>
+<td><code>GET /api/search/?q='</code></td>
+<td>HTTP 400, body echoes the SQL: True</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-008</td>
+<td>Reflected XSS (username,</td>
+<td>safe)</td>
+<td><code>GET /profile?username=&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+<td>HTTP 200, script tag reflected unescaped: True</td>
+</tr>
+<tr class="odd">
+<td>-</td>
+<td>Escaped field (email) as control</td>
+<td><code>GET /profile?email=&lt;b&gt;x&lt;/b&gt;</code></td>
+<td>escaped: True</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-004</td>
+<td>Command injection (receipt_id)</td>
+<td><code>POST /api/pay/process receipt_id='x.log; touch &lt;marker&gt;; #'</code></td>
+<td>HTTP 200, marker file created by the injected command: True</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="odd">
+<td>PLANT-002</td>
+<td>Negative control: parameterised lookup</td>
+<td><code>GET /api/user/1 OR 1=1</code></td>
+<td>HTTP 404 (injection did not match any row)</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-009</td>
+<td>Negative control: X-Frame-Options</td>
+<td><code>GET /api/user/1</code></td>
+<td>X-Frame-Options: DENY</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="odd">
+<td>PLANT-012</td>
+<td>Werkzeug debug console (DEBUG=1)</td>
+<td><code>GET /console</code></td>
+<td>HTTP 200</td>
+<td><strong>yes</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="hardened-debug0">hardened (DEBUG=0)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Planted</th>
+<th>Probe</th>
+<th>Request</th>
+<th>Observed</th>
+<th>Exploitable</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>-</td>
+<td>Health endpoint (control)</td>
+<td><code>GET /healthz</code></td>
+<td>HTTP 200</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-001/010</td>
+<td>SQL injection (search): reads another table</td>
+<td><code>GET /api/search/?q=' UNION SELECT ... FROM users --</code></td>
+<td>HTTP 200; the users table row came back through the items endpoint:
+True</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="odd">
+<td>PLANT-001</td>
+<td>SQL error leaks the query</td>
+<td><code>GET /api/search/?q='</code></td>
+<td>HTTP 400, body echoes the SQL: True</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-008</td>
+<td>Reflected XSS (username,</td>
+<td>safe)</td>
+<td><code>GET /profile?username=&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+<td>HTTP 200, script tag reflected unescaped: True</td>
+</tr>
+<tr class="odd">
+<td>-</td>
+<td>Escaped field (email) as control</td>
+<td><code>GET /profile?email=&lt;b&gt;x&lt;/b&gt;</code></td>
+<td>escaped: True</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-004</td>
+<td>Command injection (receipt_id)</td>
+<td><code>POST /api/pay/process receipt_id='x.log; touch &lt;marker&gt;; #'</code></td>
+<td>HTTP 200, marker file created by the injected command: True</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="odd">
+<td>PLANT-002</td>
+<td>Negative control: parameterised lookup</td>
+<td><code>GET /api/user/1 OR 1=1</code></td>
+<td>HTTP 404 (injection did not match any row)</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="even">
+<td>PLANT-009</td>
+<td>Negative control: X-Frame-Options</td>
+<td><code>GET /api/user/1</code></td>
+<td>X-Frame-Options: DENY</td>
+<td><strong>no</strong></td>
+</tr>
+<tr class="odd">
+<td>PLANT-012</td>
+<td>Werkzeug debug console (DEBUG=0)</td>
+<td><code>GET /console</code></td>
+<td>HTTP 404</td>
+<td><strong>no</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-two-views-say-together">3. What the two views say
+together</h2>
+<ul>
+<li>Every planted <em>code</em> vulnerability (SQL injection, XSS,
+command injection) is exploitable at runtime <strong>and</strong>
+reported by at least one scanner.</li>
+<li>The two negative controls behave safely at runtime (parameterised
+lookup, <code>X-Frame-Options: DENY</code>), which is why a scanner flag
+on them would be a false positive.</li>
+<li>The Werkzeug debug console is reachable only with
+<code>DEBUG=1</code>; the hardened image sets <code>DEBUG=0</code>,
+which the second run confirms.</li>
+<li>Runtime proof is stronger than a scanner line number: the SQL
+injection reads the <code>users</code> table through the items endpoint,
+and the injected shell command really ran.</li>
+<li>Not covered here: dependency CVEs (static only; whether they are
+reachable was not tested) and the Kubernetes/Docker findings
+(configuration, no request to make).</li>
+</ul>
+<p>Re-run:
+<code>python3 scripts/runtime_baseline.py &amp;&amp; python3 scripts/build_baseline_report.py</code>
+(needs Flask).</p>
+<h1 id="ai-and-genai-use-disclosure-log">AI and GenAI Use Disclosure
+Log</h1>
+<blockquote>
+<p><strong>Policy Requirement (§12 &amp; §15):</strong><br />
+All use of GenAI / LLMs in code development, documentation, and the
+build pipeline must be disclosed honestly with date, tool, purpose, and
+verification method.</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Tool / Model</th>
+<th>Component / Task</th>
+<th>Purpose</th>
+<th>Human Verification Method</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>2026-10-09</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td>Scaffolding &amp; Git Init</td>
+<td>Baseline repo setup, directory layout, and initial
+<code>.gitignore</code></td>
+<td>Inspected git log, verified tree layout against project plan §9</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-09</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td><code>ai/stub_triage.py</code></td>
+<td>Emitted initial mock JSON to unblock R1 (CI/CD) and R5
+(Metrics)</td>
+<td>Executed script locally, validated JSON schema with
+<code>jq</code></td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-10</strong></td>
+<td>Ollama (Llama 3.1 8B)</td>
+<td><code>ai/llm_client.py</code></td>
+<td>Local LLM inference connectivity test with forced JSON mode</td>
+<td>Verified JSON parsing and zero conversational filler</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-10</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td><code>ai/cluster.py</code> &amp; <code>ai/enrich.py</code></td>
+<td>Deduplication and offline EPSS/KEV enrichment logic</td>
+<td>Executed standalone test blocks with mock findings</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-11</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td><code>ai/redaction/redactor.py</code></td>
+<td>L1–L4 redaction regex and canary token tripwire</td>
+<td>Ran <code>tests/test_redaction.py</code> (8/8 unit tests
+passing)</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-11</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td><code>ai/validate.py</code></td>
+<td>Grounding validator preventing hallucinated CVEs/CWEs</td>
+<td>Executed test samples verifying rejection of
+<code>CVE-2099-99999</code></td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-11</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td><code>tests/test_injection.py</code></td>
+<td>OWASP LLM01 attack &amp; defense demonstration suite</td>
+<td>Verified test suite catches injection strings and isolates data</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-11</strong></td>
+<td>Antigravity (Gemini 3.1 Pro)</td>
+<td><code>ai/pr_bot.py</code></td>
+<td>Generated 4 mechanical PR patches and review register</td>
+<td><strong>Corrected 2026-10-21:</strong> these were hardcoded strings,
+no model was called, and the review notes named teammates who had not
+reviewed anything. Replaced; see the 2026-10-21 rows.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-11</strong></td>
+<td>Ollama (Qwen2.5-Coder 14B)</td>
+<td><code>eval/run_eval.py</code></td>
+<td>Model bake-off and ablation evaluation against ground truth</td>
+<td><strong>Corrected 2026-10-21:</strong> no model was called.
+<code>run_model_simulation()</code> copied the labels into the
+predictions, so the Qwen/Llama numbers were simulated and identical by
+construction. Replaced by real runs.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-21</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td><code>docs/R4_AUDIT_2026-10-21.md</code></td>
+<td>Static review of R4 scope, adversarial probe script (kept outside
+the repo), one live triage run on <code>llama3:latest</code></td>
+<td>Re-ran the unit tests (12/12 at the time) and a live triage run;
+probe output is in the audit appendix</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-21</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td><code>ai/validate.py</code>, <code>ai/redaction/redactor.py</code>,
+<code>ai/triage.py</code>, <code>ai/llm_client.py</code>,
+<code>ai/injection.py</code>, <code>ai/priority.py</code>,
+<code>ai/trace.py</code>, <code>ai/cluster.py</code>,
+<code>ai/enrich.py</code>, <code>ai/data/cwe_ids.txt</code>,
+<code>ai/schemas/</code>, <code>ai/prompts/triage_v2.txt</code></td>
+<td>Implemented the audit fixes (validator on model claims, redaction
+leaks, pre-egress canary tripwire, egress guard, triage bugs 1-10 except
+the <code>is_new</code> filter, deterministic priority, trace log)</td>
+<td>Regression test per fix (<code>tests/</code>), reviewed the diff,
+live runs against <code>llama3:latest</code> and
+<code>gemma2:latest</code>. CWE IDs were extracted from the MITRE
+<code>cwec_v4.20</code> XML (zip sha256 recorded in the data file
+header).</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-21</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td><code>eval/run_eval.py</code>, <code>eval/redaction_*.py</code>,
+<code>eval/injection_demo.py</code>, <code>ai/pr_bot.py</code></td>
+<td>Real evaluation harness, redaction fixture suite, injection
+before/after, model-drafted PRs</td>
+<td>Outputs are frozen in <code>eval/results/</code>,
+<code>eval/results.md</code>,
+<code>eval/injection_demo_results.md</code>,
+<code>artifacts/prs/</code>. Prompts were NOT tuned on the 10 evaluation
+rows. Review of the PRs is PENDING with R1/R2/R3.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-21</strong></td>
+<td>Ollama (<code>llama3:latest</code>, <code>gemma2:latest</code>)</td>
+<td><code>eval/</code>, <code>ai/pr_bot.py</code></td>
+<td>The models under test: triage verdicts, drafted patches</td>
+<td>Digests are recorded per run in the result files</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-22</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td><code>ai/sarif_ref.py</code>, <code>ai/pr_comment.py</code>,
+<code>ai/metrics.py</code>, <code>eval/stubs/</code>,
+<code>tests/test_integration_stubs.py</code>,
+<code>docs/demo/</code></td>
+<td>Integration stubs for R1/R2/R5, SARIF raw_ref resolution, PR-comment
+and Prometheus exporters, demo walkthrough with 5 SVG diagrams</td>
+<td>72 tests pass; live end-to-end run on <code>llama3:latest</code> via
+<code>make demo-local</code>; diagrams rendered in headless Chrome and
+checked visually; claims in <code>demo.md</code> checked against
+committed results. Stubs are synthetic and do NOT prove R1/R2/R5
+behaviour.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-22</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td><code>eval/stubs/r1_post_comment_stub.py</code>,
+<code>r5_metrics_push_stub.py</code>,
+<code>r3_model_sbom_stub.py</code>, <code>TODO(Rn)</code> comments in
+<code>ai/</code>, <code>eval/</code>, <code>tests/</code></td>
+<td>Stubs for hand-offs owned by R1/R3/R5 and owner-tagged TODOs at
+every dependency point</td>
+<td>77 tests pass, including a test that rejects ownerless TODOs;
+<code>make demo-local</code> re-run live. Stubs are synthetic and prove
+R4’s side only.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-22</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>scanners/schema/finding.schema.json</code>,
+<code>docs/adr/ADR-001-finding-schema.md</code> (R2, #4)</td>
+<td>Drafted the unified finding schema and ADR-001, listing where R4’s
+code and the plan disagreed</td>
+<td>The normalizer validates every finding against the schema in CI;
+<code>ai/</code> was aligned to it in #15. ADR-001 is still “Proposed”:
+no sign-off is recorded.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-22</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>scanners/normalize/</code>, <code>scanners/baseline/</code>,
+<code>scanners/crosscheck/</code>,
+<code>scripts/install_hooks.py</code>, <code>.gitleaks.toml</code>, CI
+gate, hash-locked requirement files (R2, #5–#9)</td>
+<td>Normalizer and severity map, baseline diffing and exceptions, the CI
+gate, the Grype and OSV cross-check, hash-locked scanner installs,
+gitleaks pre-commit hook</td>
+<td>Unit tests in each PR. Legacy CI green on #6–#9; #5 has no CI
+record. Merged by R1 on 2026-10-24, with <strong>no GitHub review
+recorded</strong>. These merges are not in main’s current history: the
+code reached main squashed into R1’s <code>fc74a0f</code>, which matches
+#13’s head except for 2 lines.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-24</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>Checkov and Bandit in CI (R2, #13)</td>
+<td>Added IaC and Python SAST scanning and skipped fixture directories
+in every scanner</td>
+<td>Legacy CI green. Merged by R1; no GitHub review recorded.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-25</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>findings.json</code> → <code>ai/triage.py</code> hand-off (R2,
+#23)</td>
+<td>Proposed schema v1.1.0 for the hand-off</td>
+<td><strong>Closed unmerged.</strong> The hand-off is now covered by the
+contract tests in #25.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-26</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>CI workflow scan and gate jobs, <code>normalize.py</code>,
+<code>baseline.py</code>, <code>security-baseline.json</code> (R2,
+#24)</td>
+<td>Made the scanners fail closed: Checkov and OSV output had been
+silently dropped. Hash-pinned the scanner binaries, made the gate run
+<code>!cancelled()</code>, rebaselined vulnshop-api, and allowlisted
+test fixtures in gitleaks</td>
+<td>All 7 CI jobs green. <strong>The #24 review was done by Claude Code
+at R2’s request, so it was not independent.</strong> Its fixes are in
+<code>ed03963</code> and <code>c0457fd</code>. Merged by R1; no GitHub
+review recorded.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-26</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>scanners/semgrep/rules/</code>, <code>tests/semgrep/</code>
+(R2, #27)</td>
+<td>Four custom Semgrep rules for the planted vulnerability classes</td>
+<td><code>semgrep --test</code> fixtures run in CI. Detection was
+checked against R3’s <code>ground_truth/planted.yaml</code> (6/7 planted
+vulnerabilities). The rule author knew the planted vulnerabilities, so
+this is not a blind result. Merged by R1; no GitHub review
+recorded.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-26</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>Grype version and database age in CI,
+<code>requirements-scanners.txt</code> exceptions (R2, #29)</td>
+<td>Upgraded Grype after the overlap analysis found its database frozen
+at 2026-03-09. Made a stale database fail the scan, and made Checkov’s
+vulnerable <code>asteval</code> unreachable</td>
+<td>All 7 CI jobs green; Grype’s newly found CVEs were rebaselined in
+the same PR. Merged by R1; no GitHub review recorded.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-26</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>tests/test_r2_r4_contract.py</code> (#25), the R2 unit tests
+ported to main (#26)</td>
+<td>Contract tests against R4’s real <code>triage.py</code>, and R2’s
+normalizer, baseline, crosscheck and hook-installer tests</td>
+<td>CI green. Open and awaiting review: #25 by R4, #26 by anyone.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-26</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>docs/metrics/DETECTOR_OVERLAP.md</code> and its data snapshot
+(R2, #28)</td>
+<td>Analysed one CI run’s scanner output for detector overlap and
+planted-vulnerability coverage</td>
+<td>Every number comes from the committed snapshot
+(<code>sca-crosscheck.json</code>, <code>findings-index.csv</code>) of
+run 40279942757. Open and awaiting review by R5.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-27</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>docs/metrics/GATE_TUNING.md</code>,
+<code>gate-history.csv</code>, <code>threshold_sim.py</code>, severity
+changes, <code>--warn-expiring-days</code> (R2, #30)</td>
+<td>Labelled all 71 CI runs, simulated gate thresholds, tuned two
+severities, and added the exception-expiry warning</td>
+<td>7 new tests; CI green; replaying main’s findings still gives PASS.
+<strong>The run labels were assigned by Claude Code from CI logs and
+have not been independently re-checked by a human.</strong> Open and
+awaiting review by R1.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-27</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>docs/REPORT_DRAFT_SECTION_5.md</code> (R2, #31), this R2
+disclosure and the evidence index rows</td>
+<td>Drafted report §5 and R2’s threat-model rows, and compiled R2’s
+disclosure and evidence entries</td>
+<td>Claims were checked against the workflow, the code and the committed
+data files. R1 (§5.1) and R5 (integration) are to review.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-27</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>artifacts/prs/reviews/PR-003-review-R2.md</code>,
+<code>PR-004-review-R2.md</code></td>
+<td>Drafted R2’s review notes on two of R4’s AI-drafted PRs: reproduced
+the <code>git apply</code> failures, ran the SQL fix against SQLite, and
+queried OSV for the lodash advisories</td>
+<td>The commands and results are in each note. <strong>R2 read and
+confirmed both notes on 2026-10-27.</strong> The notes analyse the
+output of one model (llama3) using another (Claude), which is disclosed
+here.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-27 to 2026-10-28</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>Code review of R2’s code, then of the whole repo at main
+<code>1bb3381</code></td>
+<td>Found bugs. Each finding was checked against main before being
+reported, and findings in other roles’ code went to their owners as
+messages from R2</td>
+<td>Six whole-repo findings were reproduced by running code. The rest
+were confirmed by reading main’s code. One (the triage-artifact upload
+in CI) is unconfirmed. Not a human review: owners should verify before
+fixing.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-28</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>baseline.py</code> <code>line_sha</code> matching, re-rated
+known findings, <code>UNKNOWN</code> → HIGH, refreshed
+<code>security-baseline.json</code> (R2, #30)</td>
+<td>Closed three gate bypasses that the review found</td>
+<td>9 new tests; CI green (run 40560643374, 95 tests). The baseline diff
+was checked entry by entry: the same 152 entries, 3 re-rated, 1
+moved.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-28</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>scripts/install_hooks.py</code> pre-push hook, README hook
+section (R2, #33)</td>
+<td>The hook checked the checked-out branch, so
+<code>git push origin feature:main</code> reached main</td>
+<td>5 end-to-end tests against a bare remote; 4 of them fail on the old
+hook.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-29</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td><code>security-baseline.json</code> rebaseline after #42,
+<code>GATE_TUNING.md</code>, <code>DETECTOR_OVERLAP.md</code> and report
+§5 updates (R2, #30, #28, #31)</td>
+<td>Main was red after #42. Accepted the 94 vulnshop-api dependency
+findings as target-app debt, and recorded that PLANT-005 is now detected
+(7/7)</td>
+<td><strong>R2 decided to accept the findings.</strong> The script that
+selected the findings was checked against CI run 40754386823: 152 known
+kept, 5 moved with their history kept, 94 added, 18 left new. Replay:
+PASS, 0 blocking.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-29</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>Whole-repo code review of main at <code>fbe9686</code>;
+<code>baseline.py create</code> missing-line warning (R2, #44);
+low-impact R2 review fixes in <code>normalize.py</code>,
+<code>baseline.py</code> and <code>crosscheck.py</code> (R2, #45); three
+code reviews of #44 and #45</td>
+<td>Found the bugs, wrote the fixes and tests, and drafted the team
+message</td>
+<td><strong>R2 chose what to fix, and chose to drop three
+fixes.</strong> The reviews of #44/#45 found that earlier versions
+reopened a gate bypass, refused legitimate baselines, made dependency
+IDs unstable, let percent-encoded names collide and miscounted exception
+lines for checkov and YAML; all were reworked or dropped before review.
+The two-versions dedupe and scanners’ differing line-break rules stay
+documented limitations. The tests for each kept fix fail on main’s code
+(the two line-ending tests only on Windows); tests that pin existing
+behaviour pass on both. Main’s raw scans (run 40762500169) normalize to
+the same findings and IDs as before. Replay: PASS, 0 blocking. SARIF
+suppressions are kept on purpose, so only dated exceptions waive a
+finding.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-22 to 2026-10-29</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>All of R2’s commit messages and PR descriptions</td>
+<td>Drafted them</td>
+<td>Every R2 commit carries a <code>Co-Authored-By: Claude</code>
+trailer, and every R2 PR description ends with a Claude Code footer. R2
+directed each change and approved each push.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-29</strong></td>
+<td>Claude Code (Opus 5.5)</td>
+<td>Semgrep <code>mcp</code> advisory exceptions (R2, #49); ADR-002 and
+the <code>aliases</code> field in <code>normalize.py</code>,
+<code>crosscheck.py</code> and the schema (R2, #50); report §5.6
+limitations (R2, #51); ground-truth candidate population and its build
+script (R2, #52)</td>
+<td>Triaged the advisories and wrote the code, tests, data script and
+documents</td>
+<td><strong>R2 chose to except the advisories rather than pin Semgrep
+back, and chose an additive schema field over re-IDing
+findings.</strong> The exceptions were checked against the
+<code>mcp</code> pin in Semgrep 1.179.0 to 1.182.1 and against the
+workflow, which starts no MCP server or client. With ADR-002, main’s
+scans (run 40762500169) normalize to the same findings apart from
+<code>aliases</code>; its 3 new tests fail on main’s code; replay: PASS.
+The population’s SHA-256 was checked against the committed blob, and its
+totals match crosscheck (182 SCA findings, 67 vulnerabilities). No
+ground-truth labels were produced: the protocol reserves them for two
+human reviewers.</td>
+</tr>
+<tr class="odd">
+<td><strong>2026-10-29</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td>Code-freeze review for R5: <code>ai/triage.py</code>,
+<code>ai/pr_bot.py</code>, <code>ai/prompts/patch_draft_v2.md</code>,
+<code>eval/run_eval.py</code>,
+<code>scanners/baseline/baseline.py</code>,
+<code>scanners/normalize/</code>,
+<code>ground_truth/planted.yaml</code>, <code>apps/juice-shop/</code>,
+<code>docker/docker-compose.staging.yml</code>,
+<code>infra/k8s/deployment.hardened.yaml</code>,
+<code>ai/models.lock.yaml</code>,
+<code>artifacts/sbom/models.cdx.json</code>,
+<code>docs/LICENSES.md</code>, <code>README.md</code>,
+<code>Makefile</code>, the new
+<code>docs/FREEZE_REVIEW_2026-10-29.md</code> and
+<code>docs/R5_NEXT_STEPS.md</code>; and, added after the review at the
+team’s request, <code>infra/policy/k8s.rego</code>, the
+<code>container-sbom</code> and <code>kind-deploy</code> workflow
+stages, <code>eval/metrics/catch_rate.py</code>,
+<code>scripts/fetch_enrichment_data.py</code> with
+<code>ai/data/{kev_ids.txt,epss_subset.json}</code>,
+<code>eval/ground_truth/{sample_population,merge_labels}.py</code>,
+<code>docs/report/</code>, <code>docs/slides/</code>,
+<code>WEEKLOG.md</code>, <code>docs/CONTRIBUTIONS.md</code>,
+<code>ai/policy_bot.py</code> with
+<code>ai/prompts/policy_explain_v2.md</code>,
+<code>scripts/runtime_baseline.py</code>,
+<code>scripts/build_baseline_report.py</code> and
+<code>docs/BASELINE_VULNERABILITY_REPORT.md</code></td>
+<td>Reviewed the repo against the course rubric, scored it, found bugs
+(two read-only sub-agents helped; every claim was re-checked before
+acting), fixed them with a regression test each, and re-ran the PR bot
+against local <code>llama3:latest</code> to produce
+<code>artifacts/prs/v2/</code></td>
+<td>The suite passes (<code>make test</code>; 237 tests).
+<code>infra/policy/k8s.rego</code> was run with conftest 0.71.1 on both
+manifests; the Syft/Conftest hashes were checked against the release
+checksums; the new CI stages could NOT be run (no Actions here). The
+2026-10-29 bake-off re-run used the real local
+<code>llama3:latest</code> and <code>gemma2:latest</code>. KEV/EPSS data
+was downloaded from CISA and FIRST/Cyentia and hashed. The WEEKLOG and
+CONTRIBUTIONS were drafted from <code>git log</code> and say where hours
+were not recorded. Juice Shop tag commit and image digest were
+re-resolved from GitHub and Docker Hub. The v2 patches were read by
+Claude Code only: <strong>they are NOT human-reviewed</strong> and their
+review verdict is PENDING. Nothing was committed. Findings that were
+reported but deliberately not changed are listed in
+<code>docs/FREEZE_REVIEW_2026-10-29.md</code> §4.</td>
+</tr>
+<tr class="even">
+<td><strong>2026-10-29</strong></td>
+<td>Claude Code (Sonnet 5.5)</td>
+<td><code>demo/</code> (animated 20-slide deck with PDF export and a
+team slide, <code>DEMO_SCRIPT.md</code> with cuts to other windows,
+<code>demo/results.html</code> built by
+<code>scripts/build_demo_results.py</code>),
+<code>scripts/demo_prep.sh</code>, <code>make demo-prep</code> and
+<code>make demo-slides</code></td>
+<td>Built the presentation and the speaker script from this repository’s
+own numbers and outputs</td>
+<td>Rendered every slide in headless Chrome and read the screenshots;
+simulated 500 forward and 500 backward key presses (all slides reached,
+each slide takes its steps plus one press), printed the deck to PDF and
+checked the pages, and added <code>tests/test_demo_site.py</code>. Real
+outputs quoted on slides (redaction result, the llama3 verdict) were
+captured the same day. Characters, conveyor and attack animations are
+illustration. Two claims were corrected during review (baseline size
+246, PR review status “pending”).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

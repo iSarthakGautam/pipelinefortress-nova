@@ -7,7 +7,7 @@ EGRESS_LOG ?= artifacts/evidence/egress/egress.log
 FINDINGS ?= artifacts/demo/findings.json
 HEAD_SHA ?= $(shell git rev-parse HEAD 2>/dev/null || echo "dev")
 
-.PHONY: help all bootstrap test test-ai scan normalize gate triage eval eval-report redaction-eval injection-demo prs lab-up lab-down demo demo-local clean
+.PHONY: help test-report demo-prep demo-slides runtime-baseline catch-rate policy report slides all bootstrap test test-ai scan normalize gate triage eval eval-report redaction-eval injection-demo prs lab-up lab-down dash dash-down demo demo-local
 
 help:
 	@echo "PipelineFortress Developer & CI Commands:"
@@ -21,7 +21,12 @@ help:
 	@echo "  make lab-up       - Start local staging containers (vulnshop-api & juice-shop)"
 	@echo "  make lab-down     - Stop staging containers"
 	@echo "  make demo-local   - Run end-to-end local pipeline simulation"
-	@echo "  make all          - Run bootstrap, test, scan, and normalize"
+	@echo "  make catch-rate   - Pre-merge catch rate vs planted vulns (needs artifacts/findings.json from 'make normalize' or CI)"
+	@echo "  make policy       - Rego policy-as-code check with conftest (hardened must pass, bad must fail)"
+	@echo "  make report       - Assemble docs/report/ into build/report.md (and PDF/HTML if pandoc is installed)"
+	@echo "  make dash         - Start Prometheus + Pushgateway + Grafana (http://localhost:3001, admin/admin)"
+	@echo "  make dash-down    - Stop the dashboard stack"
+	@echo "  make all          - Run bootstrap and the test suite (scan needs the scanner binaries from the CI workflow)"
 
 # =============================================================================
 # Platform & Pipeline Targets (R1 Ownership)
@@ -99,6 +104,37 @@ lab-up:
 lab-down:
 	docker compose -f docker/docker-compose.staging.yml down
 	@echo "✅ Staging environment stopped."
+
+runtime-baseline:
+	$(PY) scripts/runtime_baseline.py && $(PY) scripts/build_baseline_report.py
+
+test-report:
+	PY=$(PY) bash scripts/test_report.sh
+
+demo-prep:
+	bash scripts/demo_prep.sh
+
+demo-slides:
+	@echo "Demo deck: http://localhost:8080  (Ctrl+C to stop; or just open demo/index.html)"
+	$(PY) -m http.server 8080 --directory demo
+
+catch-rate:
+	$(PY) eval/metrics/catch_rate.py artifacts/findings.json --md artifacts/catch-rate.md --prom artifacts/catch-rate.prom
+
+policy:
+	conftest test infra/k8s/deployment.hardened.yaml --policy infra/policy
+	! conftest test infra/k8s/deployment.yaml --policy infra/policy >/dev/null 2>&1
+
+report:
+	$(PY) scripts/build_report.py
+
+dash:
+	docker compose -f dashboards/docker-compose.yml up -d
+	@echo "✅ Grafana: http://localhost:3001 (admin/admin, change it)   Pushgateway: http://localhost:9091"
+	@echo "   Push a run: $(PY) eval/metrics/push_metrics.py artifacts/demo/out/metrics.prom http://localhost:9091/metrics/job/pipelinefortress_ai"
+
+dash-down:
+	docker compose -f dashboards/docker-compose.yml down
 
 # =============================================================================
 # AI Triage & Evaluation Targets (R4 Ownership)
