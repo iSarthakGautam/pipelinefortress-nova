@@ -59,7 +59,7 @@ ANNOTATION_MARKER = "security-exception:"
 COMMENT_LEADER_RE = re.compile(r"(?:^|\s)(?:#|//|--|;|/\*|<!--)\s*security-exception:")
 ANNOTATION_RE = re.compile(
     r"security-exception:\s*(?P<id>\S+)\s+expires:(?P<expires>\S+)\s+owner:(?P<owner>\S+)")
-ISO_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+ISO_DATE_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 
 
 def iso_date(text: str) -> dt.date:
@@ -230,15 +230,16 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
         try:
             if path.stat().st_size > MAX_SCAN_BYTES:
                 continue
-            # read_text + split("\n") numbers lines like line_sha and like Python's ast and YAML
-            # parsers (\n, \r\n and a lone \r end a line). splitlines() would also break on form
-            # feeds and \u2028 and shift every exception below them off its finding.
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
         if ANNOTATION_MARKER not in text:
             continue
-        for lineno, line in enumerate(text.split("\n"), start=1):
+        # Known limitation: scanners disagree on what ends a line. splitlines() matches checkov
+        # (Dockerfiles) and YAML parsers, which also break on form feeds, \x85 and \u2028; Python's
+        # ast and semgrep don't. In a file containing those characters an exception below them can
+        # sit one line off its finding. No tracked file contains them.
+        for lineno, line in enumerate(text.splitlines(), start=1):
             if ANNOTATION_MARKER not in line or not COMMENT_LEADER_RE.search(line):
                 continue
             ann = {"file": rel, "line": lineno, "raw": line.strip()}

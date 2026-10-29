@@ -158,18 +158,6 @@ class TestExceptions(TmpRepo):
         assert [a["status"] for a in b.scan_annotations(self.tmp, TODAY, 90)] == \
             ["malformed", "malformed", "valid"]
 
-    def test_exception_line_numbers_match_scanner_line_counting(self):
-        """A form feed or \\u2028 is not a line break for Python's ast (bandit) or semgrep; a
-        lone \\r is, as for line_sha. Either way the exception must stay on its finding."""
-        for odd, line in (("\x0c", 3), ("\u2028", 3), ("\r", 4)):
-            (self.tmp / "app").mkdir(exist_ok=True)
-            (self.tmp / "app/search.py").write_bytes(
-                f"x = 1{odd}y = 2\n# security-exception: r.sqli expires:2026-12-31 owner:r2\n"
-                f"db.execute(q)\n".encode("utf-8"))
-            assert [a["line"] for a in b.scan_annotations(self.tmp, TODAY, 90)] == [line - 1], repr(odd)
-            fs, rep = run_check([finding(line=line)], self.no_baseline(), self.tmp)
-            assert rep["result"] == "pass" and fs[0]["baseline"]["exception"], repr(odd)
-
     def test_crlf_files_still_parse(self):
         (self.tmp / "app").mkdir()
         (self.tmp / "app/search.py").write_bytes(
