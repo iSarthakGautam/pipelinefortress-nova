@@ -20,9 +20,7 @@ import hashlib
 import json
 import re
 import sys
-from collections import defaultdict
 from pathlib import Path
-from urllib.parse import unquote
 
 import yaml
 from jsonschema import Draft202012Validator
@@ -110,12 +108,8 @@ def cvss_bucket(score):
     return "INFO"
 
 
-def make_finding_id(tool, rule_id, file, line, pkg, version=None) -> str:
-    """`version` is only passed to tell apart two versions of one package in the same file
-    (see dedupe_exact); usually the ID is version-free, so an upgrade keeps it."""
+def make_finding_id(tool, rule_id, file, line, pkg) -> str:
     key = f"{tool}|{rule_id}|{file}|{line}|{pkg or ''}"
-    if version is not None:
-        key += f"|{version}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
 
 
@@ -185,8 +179,9 @@ def parse_sarif(path: Path, tool: str, ref: str = None, root: str = None) -> lis
                 severity_raw=level,
                 cwe=extract_cwes(tags),
                 cve=[],
-                # SARIF uris are URI references: percent-decode before treating them as paths
-                file=norm_path(unquote(phys.get("artifactLocation", {}).get("uri", "")), root),
+                # Not percent-decoded: these tools write raw paths, so a file literally named
+                # apps%2Fx.py must not turn into apps/x.py and collide with a real finding
+                file=norm_path(phys.get("artifactLocation", {}).get("uri", ""), root),
                 line=int(region.get("startLine", 0)),
                 package=None,
                 snippet=snippet,
@@ -349,24 +344,16 @@ def parse_osv(path: Path, ref: str = None, root: str = None) -> list:
 
 
 def dedupe_exact(findings: list) -> list:
-    """Drop exact duplicates (same finding_id and package version); keep first, sort for
-    deterministic output. The same vulnerability in two versions of one package in one file
-    shares a finding_id: the lowest version keeps it, the others get the version in theirs."""
+    """Drop exact duplicates (same finding_id); keep first, sort for deterministic output.
+    Known limitation: finding_id has no package version, so the same vulnerability in two
+    versions of one package in one file is kept once. Adding the version to the ID makes it
+    change on every upgrade (and with OSV's unpinned transitive dependencies, between runs)."""
     seen, out = set(), []
     for f in findings:
-        key = (f["finding_id"], (f.get("package") or {}).get("version"))
-        if key in seen:
+        if f["finding_id"] in seen:
             continue
-        seen.add(key)
+        seen.add(f["finding_id"])
         out.append(f)
-    by_id = defaultdict(list)
-    for f in out:
-        by_id[f["finding_id"]].append(f)
-    for same in by_id.values():
-        for f in sorted(same, key=lambda f: str(f["package"].get("version")))[1:]:
-            f["finding_id"] = make_finding_id(f["tool"], f["rule_id"], f["location"]["file"],
-                                              f["location"]["line"], f["package"].get("name"),
-                                              f["package"].get("version"))
     return sorted(out, key=lambda f: (f["location"]["file"], f["location"]["line"], f["tool"], f["rule_id"]))
 
 

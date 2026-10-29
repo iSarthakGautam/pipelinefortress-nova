@@ -230,10 +230,10 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
         try:
             if path.stat().st_size > MAX_SCAN_BYTES:
                 continue
-            # bytes + split("\n"): count lines the way scanners do. read_text would turn a lone
-            # \r into a line break and splitlines() also breaks on form feeds and \u2028, either
-            # of which shifts every exception below it off its finding
-            text = path.read_bytes().decode("utf-8")
+            # read_text + split("\n") numbers lines like line_sha and like Python's ast and YAML
+            # parsers (\n, \r\n and a lone \r end a line). splitlines() would also break on form
+            # feeds and \u2028 and shift every exception below them off its finding.
+            text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
         if ANNOTATION_MARKER not in text:

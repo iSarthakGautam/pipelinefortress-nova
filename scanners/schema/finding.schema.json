@@ -9,7 +9,7 @@
   "properties": {
     "schema_version": { "const": "1.0.0" },
     "finding_id": {
-      "description": "sha256(tool|rule_id|file|line|pkg)[:16], lowercase hex. When one file has the same finding for two versions of a package, every version after the lowest uses sha256(tool|rule_id|file|line|pkg|version)[:16].",
+      "description": "sha256(tool|rule_id|file|line|pkg)[:16], lowercase hex.",
       "type": "string",
       "pattern": "^[0-9a-f]{16}$"
     },

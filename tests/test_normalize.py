@@ -96,29 +96,6 @@ class TestNormalize(unittest.TestCase):
         assert n.normalize_severity("checkov", "error", "CKV_K8S_16") == "HIGH"
         assert n.normalize_severity("hadolint", "warning", "CKV_K8S_16") == "MEDIUM"
 
-    def dep(self, version, tool="trivy"):
-        return n.build_finding(tool=tool, rule_id="CVE-2020-8203", message=None, severity_raw="HIGH",
-                               cwe=[], cve=["CVE-2020-8203"], file="package-lock.json", line=0,
-                               package={"name": "lodash", "version": version, "fixed_version": "4.17.19"},
-                               snippet=None, raw_ref="x", severity_norm="HIGH")
-
-    def test_two_versions_of_a_package_stay_two_findings(self):
-        out = n.dedupe_exact([self.dep("4.17.15"), self.dep("4.17.11"), self.dep("4.17.15")])
-        assert sorted(f["package"]["version"] for f in out) == ["4.17.11", "4.17.15"]
-        assert len({f["finding_id"] for f in out}) == 2
-
-    def test_one_version_keeps_the_version_free_id(self):
-        """An upgrade must not change the ID, or every version bump would look like new debt."""
-        ids = {v: n.dedupe_exact([self.dep(v)])[0]["finding_id"] for v in ("4.17.15", "4.17.21")}
-        assert ids["4.17.15"] == ids["4.17.21"] == n.make_finding_id("trivy", "CVE-2020-8203",
-                                                                     "package-lock.json", 0, "lodash")
-        lowest = [f for f in n.dedupe_exact([self.dep("4.17.15"), self.dep("4.17.11")])
-                  if f["package"]["version"] == "4.17.11"][0]
-        assert lowest["finding_id"] == ids["4.17.15"]
-
-    def test_version_is_its_own_id_field(self):
-        assert n.make_finding_id("t", "r", "f", 0, "a@b", "c") != n.make_finding_id("t", "r", "f", 0, "a", "b@c")
-
     def sarif(self, uri):
         doc = {"runs": [{"tool": {"driver": {"rules": []}}, "results": [
             {"ruleId": "r", "level": "error", "message": {"text": "m"},
@@ -131,10 +108,10 @@ class TestNormalize(unittest.TestCase):
 
     def test_sarif_file_uris_become_repo_paths(self):
         root = "/home/runner/work/pf/pf"
-        cases = {"file:///home/runner/work/pf/pf/apps/a%20b.py": "apps/a b.py",
+        cases = {"file:///home/runner/work/pf/pf/apps/x.py": "apps/x.py",
                  "file://localhost/home/runner/work/pf/pf/apps/x.py": "apps/x.py",
-                 "apps/a%20b.py": "apps/a b.py",
-                 "apps/x.py": "apps/x.py"}
+                 "apps/x.py": "apps/x.py",
+                 "apps%2Fsearch.py": "apps%2Fsearch.py"}      # raw path, not decoded
         for uri, want in cases.items():
             assert n.parse_sarif(self.sarif(uri), "semgrep", root=root)[0]["location"]["file"] == want, uri
         assert n.norm_path("file:///C:/src/pf/apps/x.py", "C:/src/pf") == "apps/x.py"
