@@ -8,7 +8,7 @@ import shutil
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 import yaml
@@ -97,6 +97,25 @@ class TestMovedFindings(unittest.TestCase):
         cur = [finding("s.py", 40)]
         b.apply_baseline(cur, base, "c2", self.repo)
         assert not cur[0]["baseline"]["is_new"]
+
+    def test_entry_with_unknown_line_sha_matches_by_group(self):
+        """An entry created where its file was unreadable has line_sha null. It must not turn
+        every later move of that finding into a new one."""
+        base = b.build_baseline([finding("s.py", 2)], "c1", None, self.repo)   # s.py not written
+        assert base["entries"][0]["line_sha"] is None
+        self.write("import os", "", "db.execute(q)")
+        cur = [finding("s.py", 3)]
+        b.apply_baseline(cur, base, "c2", self.repo)
+        assert cur[0]["baseline"] == {"is_new": False, "first_seen_commit": "c1"}
+
+    def test_create_warns_about_unreadable_files(self):
+        found = self.repo / "findings.json"
+        found.write_text(json.dumps([finding("s.py", 2)]), encoding="utf-8")
+        err = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(err):
+            rc = b.main(["create", "--findings", str(found), "--baseline", str(self.repo / "base.json"),
+                         "--commit", "c1", "--repo", str(self.repo / "elsewhere")])
+        assert rc == 0 and "WARNING 1 flagged file(s) not found" in err.getvalue()
 
 
 class TestSeverityRaised(unittest.TestCase):
