@@ -60,6 +60,7 @@ hadolint:
   warning: MEDIUM
   info: LOW
   style: INFO
+  note: LOW         # SARIF has no "info"/"style" level; hadolint's lowest findings arrive as "note"
 
 # Per-rule severities for tools whose own severity is missing or meaningless. Checked before the
 # tool table. Checkov HIGHs: the container-escape / host-access checks, matching Trivy's rating of

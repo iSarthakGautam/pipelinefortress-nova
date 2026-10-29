@@ -114,6 +114,24 @@ class TestParsers(unittest.TestCase):
         assert (f["rule_id"], f["severity_raw"], f["severity_norm"]) == ("GHSA-aaaa", "MODERATE", "MEDIUM")
         assert f["cve"] == [] and f["package"]["fixed_version"] == "1.1"
 
+    def test_osv_zero_score_is_unscored_not_info(self):
+        # regression: max_severity "0" was bucketed INFO, which never gates, so an unscored advisory slipped through
+        doc = {"results": [{"source": {"path": "/r/req.txt"}, "packages": [{
+            "package": {"name": "x", "version": "1.0", "ecosystem": "PyPI"},
+            "groups": [{"ids": ["GHSA-aaaa"], "aliases": ["GHSA-aaaa"], "max_severity": "0"}],
+            "vulnerabilities": [{"id": "GHSA-aaaa", "database_specific": {"severity": "HIGH"}}],
+        }]}]}
+        p = self.tmp / "osv0.json"
+        p.write_text(json.dumps(doc))
+        f = n.parse_osv(p, root="/r")[0]
+        assert (f["severity_raw"], f["severity_norm"]) == ("HIGH", "HIGH")
+
+    def test_osv_fixed_version_matches_pep503_equivalent_names(self):
+        # regression: only .lower() was applied, so zope.interface vs zope-interface found no fixed version
+        vuln = {"affected": [{"package": {"name": "zope.interface"}, "ranges": [{"events": [{"fixed": "5.0"}]}]}]}
+        for name in ("zope-interface", "Zope_Interface", "zope.interface"):
+            assert n._osv_fixed_versions([vuln], name) == ["5.0"], name
+
     def test_trivy_vendor_ids_feed_canonical_id(self):
         doc = {"Results": [{"Target": "req.txt", "Vulnerabilities": [
             {"VulnerabilityID": "GHSA-zzzz", "VendorIDs": ["CVE-2020-1234"], "PkgName": "x",

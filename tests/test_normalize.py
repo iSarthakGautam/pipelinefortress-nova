@@ -21,6 +21,21 @@ def by_rule(findings, rule_id):
 
 class TestNormalize(unittest.TestCase):
 
+    def test_explicit_nulls_in_tool_output_do_not_crash_the_parsers(self):
+        # regression: startLine/rules/results/Results = null raised TypeError/AttributeError and failed the whole job
+        sarif = {"runs": [{"tool": {"driver": {"rules": None}}, "results": [
+            {"ruleId": "r", "locations": [{"physicalLocation": {"region": {"startLine": None}, "artifactLocation": None}}]}]},
+            {"tool": None, "results": None}, None][:2]}
+        p = self.tmp / "null.sarif"
+        p.write_text(json.dumps(sarif))
+        out = n.parse_sarif(p, "semgrep")
+        self.assertEqual([f["location"]["line"] for f in out], [0])
+        t = self.tmp / "null.json"
+        t.write_text(json.dumps({"Results": None}))
+        self.assertEqual(n.parse_trivy(t), [])
+        t.write_text(json.dumps({"results": None}))
+        self.assertEqual(n.parse_bandit(t), [])
+
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
