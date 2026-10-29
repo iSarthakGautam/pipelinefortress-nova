@@ -189,13 +189,8 @@ def parse_sarif(path: Path, tool: str, ref: str = None, root: str = None) -> lis
                 cve=[],
                 # Not percent-decoded: these tools write raw paths, so a file literally named
                 # apps%2Fx.py must not turn into apps/x.py and collide with a real finding
-<<<<<<< Updated upstream
-                file=norm_path(phys.get("artifactLocation", {}).get("uri", ""), root),
-                line=int(region.get("startLine", 0)),
-=======
                 file=norm_path((phys.get("artifactLocation") or {}).get("uri") or "", root),
                 line=int(region.get("startLine") or 0),
->>>>>>> Stashed changes
                 package=None,
                 snippet=snippet,
                 raw_ref=f"{ref}#/runs/{ri}/results/{i}",
