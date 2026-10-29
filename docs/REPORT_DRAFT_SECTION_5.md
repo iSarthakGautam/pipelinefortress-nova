@@ -159,9 +159,10 @@ one, all three SCA tools found it, so static detection is 7/7. Each rule has a `
   change counts as new, which is a false fail. A new finding whose line is an exact copy of a fixed
   one takes the fixed one's slot. A renamed file makes all its findings new.
 - **Database drift.** A new advisory against an unchanged dependency fails the next PR, whatever it
-  changes. We first saw it on 2026-10-29: 6 newly published CVEs against Semgrep's own
-  dependencies. They did not block only because they are MEDIUM. A nightly scan of main would
-  surface drift before a contributor's PR does.
+  changes. We first saw it on 2026-10-29: 6 findings (3 new `mcp` advisories, each from two
+  tools) against Semgrep's own dependencies. They did not block only because they are MEDIUM.
+  Semgrep pins the vulnerable version, so they were excepted, not fixed. A nightly scan of main
+  would surface drift before a contributor's PR does.
 - **Duplicates.** One vulnerable line can produce up to 5 findings from different tools. The verdict
   is unaffected, but the PR comment is noisier than it needs to be.
 

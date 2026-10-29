@@ -10,6 +10,7 @@
 #
 # Cooldown exception (--exclude-newer-package), the oldest release that fixes a finding:
 #   certifi 2026.10.19   GHSA-6q48-6c7w-9gw2 (CRITICAL), released 2026-10-20
-# Not upgradable: semgrep 1.179.0 pins mcp==1.29.0 and opentelemetry-api~=1.37.0; see the
-# exception lines in requirements-semgrep.txt.
+# Not upgradable: semgrep 1.179.0 pins mcp==1.29.0 and opentelemetry-api~=1.37.0, and so does
+# every release up to 1.182.1 (checked 2026-10-29); see the exception lines in
+# requirements-semgrep.txt.
 semgrep==1.179.0

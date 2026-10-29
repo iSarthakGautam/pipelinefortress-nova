@@ -1125,3 +1125,6 @@ zipp==4.1.1 \
 
 # security-exception: CVE-2026-59951 expires:2027-01-15 owner:AmirdeshSU mcp 1.29.0 (pinned exactly by semgrep 1.179.0) session accumulation DoS in the Streamable HTTP *server*. Not reachable: CI runs only `semgrep scan` and `semgrep --test`, which start no MCP server and accept no connections.
 # security-exception: CVE-2026-114603 expires:2027-01-15 owner:AmirdeshSU opentelemetry-api 1.37 (semgrep pins ~=1.37.0) O(N^2) parsing of an inbound `tracestate` HTTP header. Not reachable: semgrep in CI handles no inbound HTTP requests, and runs with --metrics off.
+# security-exception: CVE-2026-116684 expires:2027-01-15 owner:AmirdeshSU mcp 1.29.0 (pinned exactly by semgrep 1.179.0 through 1.182.x) server-side bearer auth accepts tokens for another audience. Not reachable: CI starts no MCP server.
+# security-exception: CVE-2026-116685 expires:2027-01-15 owner:AmirdeshSU mcp 1.29.0 HTTP/SSE *client* transports follow cross-origin redirects with custom headers. Not reachable: CI never connects to an MCP server.
+# security-exception: CVE-2026-116686 expires:2027-01-15 owner:AmirdeshSU mcp 1.29.0 *client* fetches $ref URLs from a server's tool output schema. Not reachable: CI never calls an MCP tool.

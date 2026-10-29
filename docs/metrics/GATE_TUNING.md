@@ -156,8 +156,10 @@ were measured before this, at `1bb3381`, when PLANT-005 was undetected.
 
 - 10 scanner-dependency CVEs, covered by the dated exceptions;
 - 6 MEDIUM CVEs newly published against Semgrep's own dependencies (`requirements-semgrep.txt`).
-  This is the first observed vulnerability-database drift (section 4). They don't block; R2 to
-  triage after the freeze;
+  This is the first observed vulnerability-database drift (section 4). They don't block. Triaged
+  2026-10-29: three `mcp` 1.29.0 advisories (CVE-2026-116684/5/6) reported by Grype and OSV. Semgrep
+  pins `mcp==1.29.0` in every release up to 1.182.1, so there is no upgrade; all three need an MCP
+  server or client, which CI never runs, so they got dated exceptions like CVE-2026-59951;
 - 2 MEDIUM Semgrep findings in R3's new `server.js` proxy code. They don't block.
 
 Five known findings moved in #42's edits (in `app.py`, `server.js`, `docker/Dockerfile` and the
