@@ -159,11 +159,12 @@ def main(argv=None) -> int:
     groups = group_findings(findings, tools)
     summary = summarize(groups, tools)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps({"summary": summary, "vulnerabilities": groups},
-                                      indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # bytes, not text: write_text turns \n into \r\n on Windows
+    args.output.write_bytes((json.dumps({"summary": summary, "vulnerabilities": groups},
+                                        indent=2, sort_keys=True) + "\n").encode("utf-8"))
     md = to_markdown(summary, groups)
     if args.markdown:
-        args.markdown.write_text(md, encoding="utf-8")
+        args.markdown.write_bytes(md.encode("utf-8"))
     print(md)
     return 0
 

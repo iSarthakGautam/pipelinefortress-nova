@@ -59,6 +59,14 @@ ANNOTATION_MARKER = "security-exception:"
 COMMENT_LEADER_RE = re.compile(r"(?:^|\s)(?:#|//|--|;|/\*|<!--)\s*security-exception:")
 ANNOTATION_RE = re.compile(
     r"security-exception:\s*(?P<id>\S+)\s+expires:(?P<expires>\S+)\s+owner:(?P<owner>\S+)")
+ISO_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def iso_date(text: str) -> dt.date:
+    """YYYY-MM-DD only. date.fromisoformat alone also takes 20261130 and 2026-W48-1 (3.11+)."""
+    if not ISO_DATE_RE.fullmatch(text):
+        raise ValueError(f"not YYYY-MM-DD: {text!r}")
+    return dt.date.fromisoformat(text)
 
 
 # --------------------------------------------------------------------------- matching
@@ -222,12 +230,15 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
         try:
             if path.stat().st_size > MAX_SCAN_BYTES:
                 continue
-            text = path.read_text(encoding="utf-8")
+            # bytes + split("\n"): count lines the way scanners do. read_text would turn a lone
+            # \r into a line break and splitlines() also breaks on form feeds and \u2028, either
+            # of which shifts every exception below it off its finding
+            text = path.read_bytes().decode("utf-8")
         except (OSError, UnicodeDecodeError):
             continue
         if ANNOTATION_MARKER not in text:
             continue
-        for lineno, line in enumerate(text.splitlines(), start=1):
+        for lineno, line in enumerate(text.split("\n"), start=1):
             if ANNOTATION_MARKER not in line or not COMMENT_LEADER_RE.search(line):
                 continue
             ann = {"file": rel, "line": lineno, "raw": line.strip()}
@@ -238,7 +249,7 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
                 continue
             ann.update(id=m["id"], owner=m["owner"], expires=m["expires"])
             try:
-                expires = dt.date.fromisoformat(m["expires"])
+                expires = iso_date(m["expires"])
             except ValueError:
                 ann.update(status="malformed", problem=f"invalid date {m['expires']!r}")
                 found.append(ann)
@@ -354,7 +365,9 @@ def format_summary(report: dict) -> str:
 
 def _write_json(path: Path, obj) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # bytes, not text: write_text turns \n into \r\n on Windows and the next Linux rebaseline
+    # would rewrite every line of security-baseline.json
+    path.write_bytes((json.dumps(obj, indent=2, sort_keys=True) + "\n").encode("utf-8"))
 
 
 def cmd_create(args) -> int:
@@ -369,7 +382,7 @@ def cmd_create(args) -> int:
 def cmd_check(args) -> int:
     findings = json.loads(args.findings.read_text(encoding="utf-8"))
     baseline = load_baseline(args.baseline)
-    today = dt.date.fromisoformat(args.today) if args.today else dt.date.today()
+    today = iso_date(args.today) if args.today else dt.date.today()
 
     stats = apply_baseline(findings, baseline, args.commit, args.repo)
     annotations = scan_annotations(args.repo, today, args.max_exception_days)

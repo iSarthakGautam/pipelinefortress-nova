@@ -96,6 +96,68 @@ class TestNormalize(unittest.TestCase):
         assert n.normalize_severity("checkov", "error", "CKV_K8S_16") == "HIGH"
         assert n.normalize_severity("hadolint", "warning", "CKV_K8S_16") == "MEDIUM"
 
+    def dep(self, version, tool="trivy"):
+        return n.build_finding(tool=tool, rule_id="CVE-2020-8203", message=None, severity_raw="HIGH",
+                               cwe=[], cve=["CVE-2020-8203"], file="package-lock.json", line=0,
+                               package={"name": "lodash", "version": version, "fixed_version": "4.17.19"},
+                               snippet=None, raw_ref="x", severity_norm="HIGH")
+
+    def test_two_versions_of_a_package_stay_two_findings(self):
+        out = n.dedupe_exact([self.dep("4.17.15"), self.dep("4.17.11"), self.dep("4.17.15")])
+        assert sorted(f["package"]["version"] for f in out) == ["4.17.11", "4.17.15"]
+        assert len({f["finding_id"] for f in out}) == 2
+
+    def test_one_version_keeps_the_version_free_id(self):
+        """An upgrade must not change the ID, or every version bump would look like new debt."""
+        ids = {v: n.dedupe_exact([self.dep(v)])[0]["finding_id"] for v in ("4.17.15", "4.17.21")}
+        assert ids["4.17.15"] == ids["4.17.21"] == n.make_finding_id("trivy", "CVE-2020-8203",
+                                                                     "package-lock.json", 0, "lodash")
+        lowest = [f for f in n.dedupe_exact([self.dep("4.17.15"), self.dep("4.17.11")])
+                  if f["package"]["version"] == "4.17.11"][0]
+        assert lowest["finding_id"] == ids["4.17.15"]
+
+    def test_version_is_its_own_id_field(self):
+        assert n.make_finding_id("t", "r", "f", 0, "a@b", "c") != n.make_finding_id("t", "r", "f", 0, "a", "b@c")
+
+    def sarif(self, uri):
+        doc = {"runs": [{"tool": {"driver": {"rules": []}}, "results": [
+            {"ruleId": "r", "level": "error", "message": {"text": "m"},
+             "suppressions": [{"kind": "inSource"}],
+             "locations": [{"physicalLocation": {"artifactLocation": {"uri": uri},
+                                                 "region": {"startLine": 3}}}]}]}]}
+        p = self.tmp / "s.sarif"
+        p.write_text(json.dumps(doc), encoding="utf-8")
+        return p
+
+    def test_sarif_file_uris_become_repo_paths(self):
+        root = "/home/runner/work/pf/pf"
+        cases = {"file:///home/runner/work/pf/pf/apps/a%20b.py": "apps/a b.py",
+                 "file://localhost/home/runner/work/pf/pf/apps/x.py": "apps/x.py",
+                 "apps/a%20b.py": "apps/a b.py",
+                 "apps/x.py": "apps/x.py"}
+        for uri, want in cases.items():
+            assert n.parse_sarif(self.sarif(uri), "semgrep", root=root)[0]["location"]["file"] == want, uri
+        assert n.norm_path("file:///C:/src/pf/apps/x.py", "C:/src/pf") == "apps/x.py"
+        assert n.norm_path("/apps/x.py") == "apps/x.py"                 # grype dir: scans
+
+    def test_cli_passes_root_to_sarif(self):
+        root = self.tmp.resolve()
+        p = self.sarif("file:///" + root.as_posix().lstrip("/") + "/apps/x.py")
+        out = self.tmp / "f.json"
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            n.main(["--semgrep", str(p), "--root", str(root), "-o", str(out)])
+        assert json.loads(out.read_text(encoding="utf-8"))[0]["location"]["file"] == "apps/x.py"
+
+    def test_suppressed_sarif_results_are_kept(self):
+        """Only a dated security-exception waives a finding, not an inline nosemgrep."""
+        assert len(n.parse_sarif(self.sarif("a.py"), "semgrep")) == 1
+
+    def test_output_has_lf_line_endings(self):
+        out = self.tmp / "f.json"
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            n.main(["--semgrep", str(FIX / "semgrep.sarif"), "-o", str(out)])
+        assert b"\r\n" not in out.read_bytes()
+
     def test_finding_id_is_stable_and_16_hex(self):
         a = n.make_finding_id("semgrep", "r", "a.py", 1, None)
         assert a == n.make_finding_id("semgrep", "r", "a.py", 1, None)

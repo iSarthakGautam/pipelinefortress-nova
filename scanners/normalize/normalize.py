@@ -20,7 +20,9 @@ import hashlib
 import json
 import re
 import sys
+from collections import defaultdict
 from pathlib import Path
+from urllib.parse import unquote
 
 import yaml
 from jsonschema import Draft202012Validator
@@ -61,10 +63,12 @@ def norm_path(uri: str, root: str = None) -> str:
     """Repo-relative, forward-slash path. `root` strips absolute prefixes (OSV reports
     absolute paths); a leading '/' is dropped (Grype reports '/apps/x' for dir: scans)."""
     p = (uri or "").replace("\\", "/")
-    if p.startswith("file:///"):
-        p = p[len("file:///"):]
-    elif p.startswith("file://"):
-        p = p[len("file://"):]
+    if p.startswith("file://localhost/"):
+        p = "file:///" + p[len("file://localhost/"):]
+    if p.startswith("file://"):
+        p = p[len("file://"):]                  # file:///home/x -> /home/x, so `root` still matches
+        if re.match(r"/[A-Za-z]:/", p):
+            p = p[1:]                           # file:///C:/x -> C:/x
     if root:
         r = str(root).replace("\\", "/").rstrip("/") + "/"
         if p.lower().startswith(r.lower()):
@@ -106,8 +110,12 @@ def cvss_bucket(score):
     return "INFO"
 
 
-def make_finding_id(tool, rule_id, file, line, pkg) -> str:
+def make_finding_id(tool, rule_id, file, line, pkg, version=None) -> str:
+    """`version` is only passed to tell apart two versions of one package in the same file
+    (see dedupe_exact); usually the ID is version-free, so an upgrade keeps it."""
     key = f"{tool}|{rule_id}|{file}|{line}|{pkg or ''}"
+    if version is not None:
+        key += f"|{version}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
 
 
@@ -150,13 +158,16 @@ def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line,
     return finding
 
 
-def parse_sarif(path: Path, tool: str, ref: str = None) -> list:
+def parse_sarif(path: Path, tool: str, ref: str = None, root: str = None) -> list:
     """Generic SARIF 2.1.0 parser (Semgrep, gitleaks, Checkov, hadolint)."""
     doc = json.loads(path.read_text(encoding="utf-8"))
     ref = ref or path.as_posix()
     findings = []
     for ri, run in enumerate(doc.get("runs", [])):
         rules = {r.get("id"): r for r in run.get("tool", {}).get("driver", {}).get("rules", [])}
+        # Results the tool marks as suppressed (SARIF `suppressions`, e.g. an inline nosemgrep or
+        # checkov:skip) are kept on purpose: only a dated security-exception may waive a finding,
+        # the same rule CI applies to gitleaks with --ignore-gitleaks-allow.
         for i, res in enumerate(run.get("results", [])):
             rule_id = res.get("ruleId") or "unknown"
             rule = rules.get(rule_id, {})
@@ -174,7 +185,8 @@ def parse_sarif(path: Path, tool: str, ref: str = None) -> list:
                 severity_raw=level,
                 cwe=extract_cwes(tags),
                 cve=[],
-                file=norm_path(phys.get("artifactLocation", {}).get("uri", "")),
+                # SARIF uris are URI references: percent-decode before treating them as paths
+                file=norm_path(unquote(phys.get("artifactLocation", {}).get("uri", "")), root),
                 line=int(region.get("startLine", 0)),
                 package=None,
                 snippet=snippet,
@@ -337,13 +349,24 @@ def parse_osv(path: Path, ref: str = None, root: str = None) -> list:
 
 
 def dedupe_exact(findings: list) -> list:
-    """Drop exact duplicates (same finding_id); keep first, sort for deterministic output."""
+    """Drop exact duplicates (same finding_id and package version); keep first, sort for
+    deterministic output. The same vulnerability in two versions of one package in one file
+    shares a finding_id: the lowest version keeps it, the others get the version in theirs."""
     seen, out = set(), []
     for f in findings:
-        if f["finding_id"] in seen:
+        key = (f["finding_id"], (f.get("package") or {}).get("version"))
+        if key in seen:
             continue
-        seen.add(f["finding_id"])
+        seen.add(key)
         out.append(f)
+    by_id = defaultdict(list)
+    for f in out:
+        by_id[f["finding_id"]].append(f)
+    for same in by_id.values():
+        for f in sorted(same, key=lambda f: str(f["package"].get("version")))[1:]:
+            f["finding_id"] = make_finding_id(f["tool"], f["rule_id"], f["location"]["file"],
+                                              f["location"]["line"], f["package"].get("name"),
+                                              f["package"].get("version"))
     return sorted(out, key=lambda f: (f["location"]["file"], f["location"]["line"], f["tool"], f["rule_id"]))
 
 
@@ -385,7 +408,7 @@ def main(argv=None) -> int:
     findings = []
     for t in SARIF_TOOLS:
         for p in getattr(args, t):
-            findings += parse_sarif(p, t, ref=ref(p))
+            findings += parse_sarif(p, t, ref=ref(p), root=args.root)
     for p in args.bandit:
         findings += parse_bandit(p, ref=ref(p))
     for p in args.trivy:
@@ -398,7 +421,8 @@ def main(argv=None) -> int:
     findings = dedupe_exact(findings)
     validate(findings)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(findings, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # bytes, not text: write_text turns \n into \r\n on Windows
+    args.output.write_bytes((json.dumps(findings, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     print(f"normalized {len(findings)} findings -> {args.output}")
     return 0
 
