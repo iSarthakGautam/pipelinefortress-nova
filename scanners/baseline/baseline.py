@@ -85,10 +85,28 @@ def line_sha(repo: Path, file: str, line: int, cache: dict):
 
 
 def _same_code(entry: dict, sha) -> bool:
-    """May a moved finding with fingerprint `sha` take this baseline slot? Entries with no
-    recorded line (written before line_sha existed, or whose file could not be read at create
-    time) fall back to matching by group only."""
-    return entry.get("line_sha") is None or (sha is not None and entry["line_sha"] == sha)
+    """May a moved finding with fingerprint `sha` take this baseline slot? Entries written
+    before line_sha existed fall back to matching by group only. A null line_sha (line 0, or a
+    blank line) matches nothing, so a fixed slot can never hide a new finding."""
+    return "line_sha" not in entry or (sha is not None and entry["line_sha"] == sha)
+
+
+def unreadable_lines(repo: Path, entries: list) -> list:
+    """`file:line` of entries whose flagged line does not exist under `repo`: `create` was run
+    outside the repo root or against a different commit than the one scanned. Their line_sha
+    would be null, and the finding would turn new the first time its line moves."""
+    lines, bad = {}, []
+    for e in entries:
+        if e["line"] < 1:
+            continue
+        if e["file"] not in lines:
+            try:
+                lines[e["file"]] = (Path(repo) / e["file"]).read_text(encoding="utf-8", errors="replace").split("\n")
+            except OSError:
+                lines[e["file"]] = []
+        if e["line"] > len(lines[e["file"]]):
+            bad.append(f"{e['file']}:{e['line']}")
+    return bad
 
 
 def load_baseline(path: Path) -> dict:
@@ -362,12 +380,11 @@ def cmd_create(args) -> int:
     findings = json.loads(args.findings.read_text(encoding="utf-8"))
     previous = load_baseline(args.baseline) if args.baseline.exists() else None
     baseline = build_baseline(findings, args.commit, previous, args.repo)
-    unread = sorted({e["file"] for e in baseline["entries"]
-                     if e["line"] > 0 and not (args.repo / e["file"]).is_file()})
-    if unread:
-        print(f"baseline: WARNING {len(unread)} flagged file(s) not found under --repo {args.repo}, "
-              f"so their findings have no line_sha and match moved lines by group only: "
-              f"{', '.join(unread[:5])}{' ...' if len(unread) > 5 else ''}", file=sys.stderr)
+    bad = unreadable_lines(args.repo, baseline["entries"])
+    if bad:
+        raise ValueError(f"{len(bad)} flagged line(s) not found under --repo {args.repo} (run from the "
+                         f"repo root, at the scanned commit): {', '.join(bad[:5])}"
+                         f"{' ...' if len(bad) > 5 else ''}")
     _write_json(args.baseline, baseline)
     print(f"baseline: {len(baseline['entries'])} accepted findings -> {args.baseline}")
     return 0

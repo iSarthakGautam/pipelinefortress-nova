@@ -98,24 +98,38 @@ class TestMovedFindings(unittest.TestCase):
         b.apply_baseline(cur, base, "c2", self.repo)
         assert not cur[0]["baseline"]["is_new"]
 
-    def test_entry_with_unknown_line_sha_matches_by_group(self):
-        """An entry created where its file was unreadable has line_sha null. It must not turn
-        every later move of that finding into a new one."""
-        base = b.build_baseline([finding("s.py", 2)], "c1", None, self.repo)   # s.py not written
+    def test_fixed_line_zero_slot_does_not_hide_a_new_finding(self):
+        """A whole-file finding (line 0, no line_sha) is fixed and the same rule fires on a real
+        line: that is new code, not the old finding moved."""
+        base = self.accept(finding("s.py", 0))
         assert base["entries"][0]["line_sha"] is None
-        self.write("import os", "", "db.execute(q)")
-        cur = [finding("s.py", 3)]
-        b.apply_baseline(cur, base, "c2", self.repo)
-        assert cur[0]["baseline"] == {"is_new": False, "first_seen_commit": "c1"}
+        self.write("FROM node", "USER root")
+        cur = [finding("s.py", 2)]
+        stats = b.apply_baseline(cur, base, "c2", self.repo)
+        assert cur[0]["baseline"]["is_new"] and stats["fixed_since_baseline"] == 1
 
-    def test_create_warns_about_unreadable_files(self):
-        found = self.repo / "findings.json"
-        found.write_text(json.dumps([finding("s.py", 2)]), encoding="utf-8")
+    def create(self, found, repo):
+        path = self.repo / "findings.json"
+        path.write_text(json.dumps(found), encoding="utf-8")
         err = io.StringIO()
         with redirect_stdout(io.StringIO()), redirect_stderr(err):
-            rc = b.main(["create", "--findings", str(found), "--baseline", str(self.repo / "base.json"),
-                         "--commit", "c1", "--repo", str(self.repo / "elsewhere")])
-        assert rc == 0 and "WARNING 1 flagged file(s) not found" in err.getvalue()
+            rc = b.main(["create", "--findings", str(path), "--baseline", str(self.repo / "base.json"),
+                         "--commit", "c1", "--repo", str(repo)])
+        return rc, err.getvalue()
+
+    def test_create_refuses_a_checkout_without_the_flagged_lines(self):
+        """Outside the repo root, or at another commit, every line_sha would be null."""
+        self.write("x = 1", "db.execute(q)")
+        rc, err = self.create([finding("s.py", 2)], self.repo / "elsewhere")
+        assert rc == 2 and "1 flagged line(s) not found" in err and "s.py:2" in err
+        rc, err = self.create([finding("s.py", 40)], self.repo)            # older/other commit
+        assert rc == 2 and "s.py:40" in err
+        assert not (self.repo / "base.json").exists()
+
+    def test_create_accepts_line_zero_and_blank_lines(self):
+        self.write("x = 1", "", "db.execute(q)")
+        rc, _ = self.create([finding("s.py", 0), finding("s.py", 2), finding("s.py", 3)], self.repo)
+        assert rc == 0
 
 
 class TestSeverityRaised(unittest.TestCase):
