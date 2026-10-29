@@ -74,20 +74,43 @@ def line_sha(repo: Path, file: str, line: int, cache: dict):
     re-indents. None when there is no line to read (line 0, missing file, empty line)."""
     if repo is None or not file or line < 1:
         return None
-    if file not in cache:
-        try:
-            cache[file] = (Path(repo) / file).read_text(encoding="utf-8", errors="replace").split("\n")
-        except OSError:
-            cache[file] = []
-    lines = cache[file]
+    lines = _source_lines(repo, file, cache)
     text = "".join(lines[line - 1].split()) if line <= len(lines) else ""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16] if text else None
 
 
+def _source_lines(repo: Path, file: str, cache: dict) -> list:
+    """Lines of a repo file, split on \\n as line_sha numbers them; [] if it can't be read."""
+    if file not in cache:
+        try:
+            cache[file] = (Path(repo) / file).read_text(encoding="utf-8", errors="replace").split("\n")
+        except (OSError, ValueError):
+            cache[file] = []
+    return cache[file]
+
+
 def _same_code(entry: dict, sha) -> bool:
     """May a moved finding with fingerprint `sha` take this baseline slot? Entries written
-    before line_sha existed fall back to matching by group only."""
+    before line_sha existed fall back to matching by group only. A null line_sha (line 0, or a
+    blank line) matches nothing, so a fixed slot can never hide a new finding."""
     return "line_sha" not in entry or (sha is not None and entry["line_sha"] == sha)
+
+
+def missing_lines(repo: Path, entries: list) -> list:
+    """`file:line` of entries whose flagged line does not exist under `repo`. Usually `create` was
+    run outside the repo root or at another commit than the one scanned, and those findings get
+    no line_sha (they turn new the first time their line moves). It can also be legitimate:
+    gitleaks scans history, so a deleted secret's file is gone at HEAD."""
+    cache, missing = {}, []
+    for e in entries:
+        if e["line"] < 1:
+            continue
+        lines = _source_lines(repo, e["file"], cache)
+        count = len(lines) - (1 if lines and lines[-1] == "" else 0)   # a final \n ends a line
+        loc = f"{e['file']}:{e['line']}"
+        if e["line"] > count and loc not in missing:
+            missing.append(loc)
+    return missing
 
 
 def load_baseline(path: Path) -> dict:
@@ -361,6 +384,12 @@ def cmd_create(args) -> int:
     findings = json.loads(args.findings.read_text(encoding="utf-8"))
     previous = load_baseline(args.baseline) if args.baseline.exists() else None
     baseline = build_baseline(findings, args.commit, previous, args.repo)
+    missing = missing_lines(args.repo, baseline["entries"])
+    if missing:
+        print(f"baseline: WARNING {len(missing)} flagged line(s) not found under --repo {args.repo}; "
+              f"run create from the repo root at the scanned commit, or check these are deleted "
+              f"files from history: {', '.join(missing[:5])}{' ...' if len(missing) > 5 else ''}",
+              file=sys.stderr)
     _write_json(args.baseline, baseline)
     print(f"baseline: {len(baseline['entries'])} accepted findings -> {args.baseline}")
     return 0

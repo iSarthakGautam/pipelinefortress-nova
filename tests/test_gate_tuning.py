@@ -8,7 +8,7 @@ import shutil
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 import yaml
@@ -97,6 +97,46 @@ class TestMovedFindings(unittest.TestCase):
         cur = [finding("s.py", 40)]
         b.apply_baseline(cur, base, "c2", self.repo)
         assert not cur[0]["baseline"]["is_new"]
+
+    def test_fixed_line_zero_slot_does_not_hide_a_new_finding(self):
+        """A whole-file finding (line 0, no line_sha) is fixed and the same rule fires on a real
+        line: that is new code, not the old finding moved."""
+        base = self.accept(finding("s.py", 0))
+        assert base["entries"][0]["line_sha"] is None
+        self.write("FROM node", "USER root")
+        cur = [finding("s.py", 2)]
+        stats = b.apply_baseline(cur, base, "c2", self.repo)
+        assert cur[0]["baseline"]["is_new"] and stats["fixed_since_baseline"] == 1
+
+    def create(self, found, repo):
+        path = self.repo / "findings.json"
+        path.write_text(json.dumps(found), encoding="utf-8")
+        err = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(err):
+            rc = b.main(["create", "--findings", str(path), "--baseline", str(self.repo / "base.json"),
+                         "--commit", "c1", "--repo", str(repo)])
+        return rc, err.getvalue()
+
+    def test_create_warns_about_missing_flagged_lines(self):
+        """Outside the repo root, or at another commit, line_sha would be null. It still writes
+        the baseline: a secret gitleaks found in history may sit in a file deleted since."""
+        self.write("x = 1", "db.execute(q)")
+        rc, err = self.create([finding("s.py", 2)], self.repo / "elsewhere")
+        assert rc == 0 and "WARNING 1 flagged line(s) not found" in err and "s.py:2" in err
+        rc, err = self.create([finding("s.py", 40)], self.repo)            # older/other commit
+        assert rc == 0 and "s.py:40" in err
+        assert (self.repo / "base.json").exists()
+
+    def test_warning_counts_distinct_lines_including_one_past_the_end(self):
+        self.write("x = 1", "db.execute(q)")                              # ends with \n: 2 lines
+        rc, err = self.create([finding("s.py", 3), finding("s.py", 3, rule="r.other")], self.repo)
+        assert rc == 0 and "WARNING 1 flagged line(s)" in err and "s.py:3" in err
+        assert err.count("s.py:3") == 1
+
+    def test_create_is_quiet_for_line_zero_and_blank_lines(self):
+        self.write("x = 1", "", "db.execute(q)")
+        rc, err = self.create([finding("s.py", 0), finding("s.py", 2), finding("s.py", 3)], self.repo)
+        assert rc == 0 and err == ""
 
 
 class TestSeverityRaised(unittest.TestCase):

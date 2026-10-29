@@ -166,11 +166,12 @@ class TestCli(TmpRepo):
         base_path = self.tmp / "security-baseline.json"
         repo = self.tmp / "repo"
         repo.mkdir()
+        write(repo, "app/search.py", "x = 1\n" * 9 + "db.execute(q)\n")
 
         findings_path.write_text(json.dumps([finding()]))
         with redirect_stdout(io.StringIO()):
             assert b.main(["create", "--findings", str(findings_path), "--baseline", str(base_path),
-                           "--commit", "c1"]) == 0
+                           "--commit", "c1", "--repo", str(repo)]) == 0
 
         findings_path.write_text(json.dumps([finding(), finding(rule="r.new", line=30)]))
         out, report = self.tmp / "diffed.json", self.tmp / "report.json"
