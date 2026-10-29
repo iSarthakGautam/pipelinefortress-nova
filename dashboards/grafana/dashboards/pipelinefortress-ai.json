@@ -281,6 +281,162 @@
           "sort": "none"
         }
       }
+    },
+    {
+      "id": 8,
+      "title": "Planted vulns caught (pre-merge catch rate numerator)",
+      "type": "stat",
+      "description": "Caught = a scanner finding sits on the planted vulnerability. Computed by eval/metrics/catch_rate.py from the CI findings.",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "pipelinefortress_planted_caught_total",
+          "refId": "A",
+          "legendFormat": "{{__name__}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Planted vulns in the catalogue",
+      "type": "stat",
+      "description": "True-positive rows of ground_truth/planted.yaml.",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "pipelinefortress_planted_planted_total",
+          "refId": "A",
+          "legendFormat": "{{__name__}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Planted vulns the gate would block (>= HIGH)",
+      "type": "stat",
+      "description": "Caught AND rated HIGH or CRITICAL: what the merge gate actually stops.",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "pipelinefortress_planted_blocking_total",
+          "refId": "A",
+          "legendFormat": "{{__name__}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Negative controls flagged (false alarms)",
+      "type": "stat",
+      "description": "Known-safe code a scanner flagged on its own line.",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "pipelinefortress_planted_false_alarms_total",
+          "refId": "A",
+          "legendFormat": "{{__name__}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
     }
   ],
   "refresh": "15s",
@@ -299,9 +455,9 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "PipelineFortress \u2014 AI Triage Monitoring",
+  "title": "PipelineFortress — AI Triage Monitoring",
   "uid": "pipelinefortress-ai",
   "version": 1,
   "weekStart": "",
-  "description": "R5 dashboard for current-run AI triage snapshots. Metrics are exported as gauges even where names end in _total; do not use rate() or interpret them as cumulative counters. This dashboard does not by itself establish evaluation quality or live scanner coverage."
+  "description": "R5 dashboard for current-run AI triage snapshots. Metrics are exported as gauges even where names end in _total; do not use rate() or interpret them as cumulative counters. This dashboard does not by itself establish evaluation quality or live scanner coverage. The four \"Planted\" panels come from eval/metrics/catch_rate.py (push its --prom output to the Pushgateway)."
 }

@@ -16,7 +16,7 @@ services:
 
   # 2. OWASP Juice Shop (Pinned Benchmark Staging Container)
   juice-shop:
-    image: bkimminich/juice-shop:v16.0.0
+    image: bkimminich/juice-shop:v16.0.0@sha256:5aef8464395d101d984d255166b079a52a573fba900450612f8cf3da2ad3a2dd
     ports:
       - "3000:3000"
     restart: unless-stopped

@@ -1,21 +1,21 @@
 services:
   pushgateway:
     image: prom/pushgateway:v1.11.1
-    ports: ["9091:9091"]
+    ports: ["127.0.0.1:9091:9091"]
     restart: unless-stopped
   prometheus:
     image: prom/prometheus:v3.5.0
-    ports: ["9090:9090"]
+    ports: ["127.0.0.1:9090:9090"]
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on: [pushgateway]
     restart: unless-stopped
   grafana:
     image: grafana/grafana:12.1.1
-    ports: ["3001:3000"]
+    ports: ["127.0.0.1:3001:3000"]
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}   # lab default; export GRAFANA_ADMIN_PASSWORD to change it
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro

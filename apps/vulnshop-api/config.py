@@ -4,7 +4,7 @@ WARNING: Planted security vulnerabilities for DevSecOps testing.
 """
 import os
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "1") == "1"   # vulnerable by default (planted); the hardened image sets DEBUG=0
 APP_PORT = int(os.getenv("APP_PORT", "3000"))
 DATABASE_PATH = os.getenv("DB_PATH", "/tmp/vulnshop.db")
 SECRET_KEY = "dev-insecure-flask-secret-key"

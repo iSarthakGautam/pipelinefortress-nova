@@ -15,7 +15,7 @@ While `apps/vulnshop-api` is our custom microservice containing carefully plante
 To prevent repository bloat (>150MB of upstream source code), this directory maintains a **pinned fork pointer**:
 - **Upstream Repository:** `https://github.com/juice-shop/juice-shop.git`
 - **Pinned Tag:** `v16.0.0`
-- **Pinned Commit:** `5cb904bc2368c46006f7435f29d46924d5ba89c3`
+- **Pinned Commit:** `a9b1dffd0e0bc1c046d0c68c66a6dac42341f290`
 - **Pre-Built Staging Container:** `bkimminich/juice-shop:v16.0.0`
 
 ---
