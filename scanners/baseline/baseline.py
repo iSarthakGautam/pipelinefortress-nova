@@ -298,7 +298,7 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
 
 
 def _annotation_outside_string(line: str) -> bool:
-    """False when the comment leader sits inside a quoted string: `x = "see # security-exception: ..."`.
+    """False when the comment leader sits inside a quoted string: `x = "see #" + " security-exception: ..."`.
     An odd number of quote characters before the leader means the leader is inside a string literal."""
     m = COMMENT_LEADER_RE.search(line)
     if not m:

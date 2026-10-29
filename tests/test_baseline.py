@@ -143,7 +143,7 @@ class TestExceptions(TmpRepo):
         assert rep["result"] == "pass" and rep["counts"]["excepted"] == 1
 
     def test_trailing_comment_does_not_waive_the_next_line(self):
-        # regression: `code  # security-exception: ...` also counted as "the line above" the next line,
+        # regression: `code  # <annotation>` also counted as "the line above" the next line,
         # so one annotation waived two findings of the same rule
         ann = "# " + "security-exception: r.sqli expires:2026-11-30 owner:r2"
         write(self.tmp, "app/search.py", f"x = 1\ndb.execute(a)  {ann}\ndb.execute(b)\n")
