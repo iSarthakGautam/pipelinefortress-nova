@@ -165,6 +165,18 @@ one, all three SCA tools found it, so static detection is 7/7. Each rule has a `
   would surface drift before a contributor's PR does.
 - **Duplicates.** One vulnerable line can produce up to 5 findings from different tools. The verdict
   is unaffected, but the PR comment is noisier than it needs to be.
+- **Inline suppressions don't count.** A `nosemgrep` or `checkov:skip` comment does not waive a
+  finding; only a dated, owned exception does. That is deliberate (the same rule CI applies to
+  gitleaks), but it means more findings to triage than the tools' defaults.
+- **Two versions of one package.** A finding's ID has no package version, so the same CVE in two
+  versions in one lockfile is counted once. Putting the version in the ID made it change on
+  every upgrade, so we kept the limitation. None of today's findings is affected.
+- **Scanners disagree on line breaks.** Checkov and YAML parsers treat form feeds and `\u2028` as
+  line breaks; Python's parser and Semgrep don't. In a file containing them, an exception can sit
+  one line off its finding. No file in the repository contains them.
+- **Rebaselining from the wrong checkout.** `baseline.py create` fingerprints each flagged line in
+  the checkout it is given. It warns when a line doesn't exist there (#44), but not when lines have
+  only shifted; it must run at the scanned commit.
 
 ---
 
