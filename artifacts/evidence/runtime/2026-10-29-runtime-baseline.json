@@ -1,0 +1,155 @@
+{
+  "captured": "2026-10-29T16:28:56Z",
+  "target": "apps/vulnshop-api (local copy, loopback only)",
+  "python": "3.13.3",
+  "runs": {
+    "default (DEBUG=1, the vulnerable target)": [
+      {
+        "planted": "-",
+        "name": "Health endpoint (control)",
+        "request": "GET /healthz",
+        "observed": "HTTP 200",
+        "exploitable": false,
+        "note": "a working service, not a vulnerability"
+      },
+      {
+        "planted": "PLANT-001/010",
+        "name": "SQL injection (search): reads another table",
+        "request": "GET /api/search/?q=' UNION SELECT ... FROM users --",
+        "observed": "HTTP 200; the users table row came back through the items endpoint: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "PLANT-001",
+        "name": "SQL error leaks the query",
+        "request": "GET /api/search/?q='",
+        "observed": "HTTP 400, body echoes the SQL: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "PLANT-008",
+        "name": "Reflected XSS (username, |safe)",
+        "request": "GET /profile?username=<script>alert(1)</script>",
+        "observed": "HTTP 200, script tag reflected unescaped: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "-",
+        "name": "Escaped field (email) as control",
+        "request": "GET /profile?email=<b>x</b>",
+        "observed": "escaped: True",
+        "exploitable": false,
+        "note": "email is auto-escaped, so only the |safe field is exploitable"
+      },
+      {
+        "planted": "PLANT-004",
+        "name": "Command injection (receipt_id)",
+        "request": "POST /api/pay/process receipt_id='x.log; touch <marker>; #'",
+        "observed": "HTTP 200, marker file created by the injected command: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "PLANT-002",
+        "name": "Negative control: parameterised lookup",
+        "request": "GET /api/user/1 OR 1=1",
+        "observed": "HTTP 404 (injection did not match any row)",
+        "exploitable": false,
+        "note": "parameterised query: not exploitable, as designed"
+      },
+      {
+        "planted": "PLANT-009",
+        "name": "Negative control: X-Frame-Options",
+        "request": "GET /api/user/1",
+        "observed": "X-Frame-Options: DENY",
+        "exploitable": false,
+        "note": "header present: not exploitable, as designed"
+      },
+      {
+        "planted": "PLANT-012",
+        "name": "Werkzeug debug console (DEBUG=1)",
+        "request": "GET /console",
+        "observed": "HTTP 200",
+        "exploitable": true,
+        "note": "reachable only when debug mode is on; the hardened image sets DEBUG=0"
+      }
+    ],
+    "hardened (DEBUG=0)": [
+      {
+        "planted": "-",
+        "name": "Health endpoint (control)",
+        "request": "GET /healthz",
+        "observed": "HTTP 200",
+        "exploitable": false,
+        "note": "a working service, not a vulnerability"
+      },
+      {
+        "planted": "PLANT-001/010",
+        "name": "SQL injection (search): reads another table",
+        "request": "GET /api/search/?q=' UNION SELECT ... FROM users --",
+        "observed": "HTTP 200; the users table row came back through the items endpoint: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "PLANT-001",
+        "name": "SQL error leaks the query",
+        "request": "GET /api/search/?q='",
+        "observed": "HTTP 400, body echoes the SQL: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "PLANT-008",
+        "name": "Reflected XSS (username, |safe)",
+        "request": "GET /profile?username=<script>alert(1)</script>",
+        "observed": "HTTP 200, script tag reflected unescaped: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "-",
+        "name": "Escaped field (email) as control",
+        "request": "GET /profile?email=<b>x</b>",
+        "observed": "escaped: True",
+        "exploitable": false,
+        "note": "email is auto-escaped, so only the |safe field is exploitable"
+      },
+      {
+        "planted": "PLANT-004",
+        "name": "Command injection (receipt_id)",
+        "request": "POST /api/pay/process receipt_id='x.log; touch <marker>; #'",
+        "observed": "HTTP 200, marker file created by the injected command: True",
+        "exploitable": true,
+        "note": ""
+      },
+      {
+        "planted": "PLANT-002",
+        "name": "Negative control: parameterised lookup",
+        "request": "GET /api/user/1 OR 1=1",
+        "observed": "HTTP 404 (injection did not match any row)",
+        "exploitable": false,
+        "note": "parameterised query: not exploitable, as designed"
+      },
+      {
+        "planted": "PLANT-009",
+        "name": "Negative control: X-Frame-Options",
+        "request": "GET /api/user/1",
+        "observed": "X-Frame-Options: DENY",
+        "exploitable": false,
+        "note": "header present: not exploitable, as designed"
+      },
+      {
+        "planted": "PLANT-012",
+        "name": "Werkzeug debug console (DEBUG=0)",
+        "request": "GET /console",
+        "observed": "HTTP 404",
+        "exploitable": false,
+        "note": "reachable only when debug mode is on; the hardened image sets DEBUG=0"
+      }
+    ]
+  }
+}
