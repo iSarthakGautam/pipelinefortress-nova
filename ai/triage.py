@@ -28,6 +28,7 @@ from validate import VALID_VERDICTS, validate_triage_output
 # Only the cluster representative is sent to the model; its verdict is shared by all members of the cluster.
 
 PROMPT_NAME = "triage_v2"
+MAX_FIX_LINES = 5
 
 # Unified finding schema confirmed in ADR-001 (scanners/schema/finding.schema.json).
 # RESOLVED(R1): Live inside stage `30-triage-ai` (.github/workflows/baseline-pipeline.yml), replacing eval/stubs/r1_ci_job_stub.sh.
@@ -46,6 +47,23 @@ def load_prompt(name: str = PROMPT_NAME) -> dict:
         v = re.search(r'version:\s*"([^"]+)"', m.group(1))
         version = v.group(1) if v else version
     return {"text": body, "version": version, "sha256": sha256_text(raw), "name": name}
+
+
+_DICT_FIELDS = ("location", "package", "evidence", "dedupe", "baseline", "enrichment")
+_LIST_FIELDS = ("cwe", "cve")
+
+
+def _coerce_shape(finding: dict) -> dict:
+    """Scanner records are untrusted input too: a field of the wrong type (location as a string, cve as a bare
+    string, evidence as null) must degrade to an empty value, not raise AttributeError and kill the whole run."""
+    out = dict(finding)
+    for key in _DICT_FIELDS:
+        if key in out and not isinstance(out[key], dict):
+            out[key] = {}
+    for key in _LIST_FIELDS:
+        if key in out and not isinstance(out[key], list):
+            out[key] = [str(out[key])] if isinstance(out[key], str) and out[key] else []
+    return out
 
 
 def _strip_raw(finding: dict, safe: dict) -> dict:
@@ -73,6 +91,7 @@ def _coerce(parsed: dict) -> dict:
         confidence = 0.0
     fix = t.get("fix_summary")
     fix = fix if isinstance(fix, str) else "Awaiting human review."
+    fix = "\n".join(fix.strip().splitlines()[:MAX_FIX_LINES])   # brief: the suggested fix is at most 5 lines
     claims = t.get("claims") if isinstance(t.get("claims"), dict) else {}
     return {"verdict": verdict, "confidence": confidence, "fix_summary": fix[:1000], "claims": claims}
 
@@ -194,7 +213,7 @@ def triage_findings(raw_findings: list, model: str = None, format_mode: str = "s
     prompt = load_prompt()
     canary_ok = canary_selftest()
     results, traces = [], []
-    raw_findings = [hydrate(f) for f in raw_findings if isinstance(f, dict)]  # follow evidence.raw_ref into SARIF when the snippet is missing
+    raw_findings = [hydrate(_coerce_shape(f)) for f in raw_findings if isinstance(f, dict)]  # follow evidence.raw_ref into SARIF when the snippet is missing
     clusters = cluster_findings(raw_findings)
     cluster_items = list(clusters.items())
     if max_findings > 0:
@@ -238,7 +257,7 @@ def main():
     elif not isinstance(findings, list):
         findings = []
     # Clean up non-object entries first so non-dict input does not crash .get()
-    findings = [f for f in findings if isinstance(f, dict)]
+    findings = [_coerce_shape(f) for f in findings if isinstance(f, dict)]
 
     if args.only_new:
         findings = [f for f in findings if (f.get("baseline") or {}).get("is_new", True)]

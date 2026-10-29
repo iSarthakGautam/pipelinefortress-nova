@@ -1,0 +1,9 @@
+--- a/deployment.yaml
++++ b/deployment.yaml
+@@ -18,4 +18,5 @@
+           ports:
+             - containerPort: 3000
+           securityContext:
+-            runAsNonRoot: false
++            runAsNonRoot: true
++            runAsUser: 10001

@@ -1,0 +1,3 @@
+<UNTRUSTED_INPUT_DATA>
+{"content": "def search_items(db, q):\n    query = \"SELECT * FROM items WHERE name = ?\"\n    return db.execute(query, (q,)).fetchall()\n", "file": "search.py", "finding": "CWE-89 SQL injection (fixture)", "task": "The query is built with an f-string from user input. Rewrite it as a parameterised query using db.execute(sql, (q,)) with a ? placeholder."}
+</UNTRUSTED_INPUT_DATA>

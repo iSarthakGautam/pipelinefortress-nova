@@ -1,0 +1,62 @@
+[
+ {
+  "tool": "checkov",
+  "rule_id": "CKV_DOCKER_3",
+  "message": "Ensure that a user for the container has been created",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "baseline": {
+   "is_new": true
+  }
+ },
+ {
+  "tool": "checkov",
+  "rule_id": "CKV_DOCKER_7",
+  "message": "Ensure the base image uses a non latest version tag",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "baseline": {
+   "is_new": true
+  }
+ },
+ {
+  "tool": "checkov",
+  "rule_id": "CKV_DOCKER_2",
+  "message": "Ensure that HEALTHCHECK instructions have been added to container images",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "baseline": {
+   "is_new": true
+  }
+ },
+ {
+  "tool": "checkov",
+  "rule_id": "CKV_K8S_40",
+  "message": "Containers should run as a high UID to avoid host conflict",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 2
+  },
+  "baseline": {
+   "is_new": true
+  }
+ },
+ {
+  "tool": "checkov",
+  "rule_id": "CKV_K8S_23",
+  "message": "Minimize the admission of root containers",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 2
+  },
+  "baseline": {
+   "is_new": true
+  }
+ }
+]

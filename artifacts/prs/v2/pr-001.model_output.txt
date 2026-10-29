@@ -1,0 +1,3 @@
+<UNTRUSTED_INPUT_DATA>
+{"content": "FROM node:20.11.1-alpine\nWORKDIR /app\nCOPY package.json .\nRUN npm install\nCOPY . .\nUSER node\nEXPOSE 3000\nCMD [\"node\", \"server.js\"]\n", "file": "Dockerfile", "finding": "CKV_DOCKER_3 / CKV_DOCKER_2", "task": "Base image uses the mutable ':latest' tag and the container runs as root. Pin the base image to 'node:20.11.1-alpine' (a tag, no digest, do not invent one) and add a non-root USER."}
+</UNTRUSTED_INPUT_DATA>

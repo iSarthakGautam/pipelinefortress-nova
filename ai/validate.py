@@ -12,7 +12,7 @@ import re
 #   CVE  -> scanner record for this finding, or the small offline registry below
 #   file/line/package/fixed_version -> must equal the scanner record; if VALIDATE_REPO_ROOT is set the
 #           file must also exist there and the line must be in range (no slack)
-# Limits: the CVE registry is a sample, so a model-claimed CVE the scanner did not report is rejected even if
+# Limits: the CVE registry (7 hand-picked ids plus the CISA KEV catalogue) is not every CVE, so a model-claimed CVE the scanner did not report is rejected even if
 # real. That is deliberate (fail closed). Scanner-supplied identifiers are trusted as scanner input.
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -29,6 +29,18 @@ OFFLINE_KNOWN_CVES = {
 }
 
 _cwe_cache = None
+
+
+def _kev_ids() -> set:
+    """Every CVE in the CISA KEV catalogue is a real, published CVE id: a safe widening of the offline registry."""
+    try:
+        with open(os.path.join(DATA_DIR, "kev_ids.txt"), encoding="utf-8") as f:
+            return {ln.strip() for ln in f if ln.strip() and not ln.startswith("#")}
+    except OSError:
+        return set()
+
+
+OFFLINE_KNOWN_CVES = OFFLINE_KNOWN_CVES | _kev_ids()
 
 
 def load_cwe_catalogue() -> set:

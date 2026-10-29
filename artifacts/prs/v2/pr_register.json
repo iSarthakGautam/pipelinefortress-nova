@@ -1,0 +1,78 @@
+[
+  {
+    "pr_id": "PR-001",
+    "target": "Dockerfile",
+    "finding": "CKV_DOCKER_3 / CKV_DOCKER_2",
+    "ask": "Base image uses the mutable ':latest' tag and the container runs as root. Pin the base image to 'node:20.11.1-alpine' (a tag, no digest, do not invent one) and add a non-root USER.",
+    "model": "llama3:latest@sha256:365c0bd3c000",
+    "prompt_version": "patch_draft_v2",
+    "prompt_sha256": "842bb36c160f",
+    "diff": "--- a/Dockerfile\n+++ b/Dockerfile\n@@ -1,7 +1,8 @@\n-FROM node:latest\n+FROM node:20.11.1-alpine\n WORKDIR /app\n COPY package.json .\n RUN npm install\n COPY . .\n+USER node\n EXPOSE 3000\n CMD [\"node\", \"server.js\"]\n",
+    "applies_cleanly": true,
+    "apply_error": "",
+    "lines_changed": 3,
+    "status": "DRAFT_UNREVIEWED",
+    "human_review_notes": {
+      "reviewer": null,
+      "verdict": "PENDING",
+      "comments": null
+    }
+  },
+  {
+    "pr_id": "PR-002",
+    "target": "deployment.yaml",
+    "finding": "CKV_K8S_40",
+    "ask": "securityContext sets runAsNonRoot: false. Set runAsNonRoot: true and runAsUser: 10001. Change nothing else.",
+    "model": "llama3:latest@sha256:365c0bd3c000",
+    "prompt_version": "patch_draft_v2",
+    "prompt_sha256": "842bb36c160f",
+    "diff": "--- a/deployment.yaml\n+++ b/deployment.yaml\n@@ -18,4 +18,5 @@\n           ports:\n             - containerPort: 3000\n           securityContext:\n-            runAsNonRoot: false\n+            runAsNonRoot: true\n+            runAsUser: 10001\n",
+    "applies_cleanly": true,
+    "apply_error": "",
+    "lines_changed": 3,
+    "status": "DRAFT_UNREVIEWED",
+    "human_review_notes": {
+      "reviewer": null,
+      "verdict": "PENDING",
+      "comments": null
+    }
+  },
+  {
+    "pr_id": "PR-003",
+    "target": "package.json",
+    "finding": "SCA outdated dependency (fixture)",
+    "ask": "Bump the dependency 'lodash' from 4.17.15 to 4.17.21. Change nothing else.",
+    "model": "llama3:latest@sha256:365c0bd3c000",
+    "prompt_version": "patch_draft_v2",
+    "prompt_sha256": "842bb36c160f",
+    "diff": "--- a/package.json\n+++ b/package.json\n@@ -3,6 +3,6 @@\n   \"version\": \"1.0.0\",\n   \"dependencies\": {\n     \"express\": \"4.18.2\",\n-    \"lodash\": \"4.17.15\"\n+    \"lodash\": \"4.17.21\"\n   }\n }\n",
+    "applies_cleanly": true,
+    "apply_error": "",
+    "lines_changed": 2,
+    "status": "DRAFT_UNREVIEWED",
+    "human_review_notes": {
+      "reviewer": null,
+      "verdict": "PENDING",
+      "comments": null
+    }
+  },
+  {
+    "pr_id": "PR-004",
+    "target": "search.py",
+    "finding": "CWE-89 SQL injection (fixture)",
+    "ask": "The query is built with an f-string from user input. Rewrite it as a parameterised query using db.execute(sql, (q,)) with a ? placeholder.",
+    "model": "llama3:latest@sha256:365c0bd3c000",
+    "prompt_version": "patch_draft_v2",
+    "prompt_sha256": "842bb36c160f",
+    "diff": "--- a/search.py\n+++ b/search.py\n@@ -1,3 +1,3 @@\n def search_items(db, q):\n-    query = f\"SELECT * FROM items WHERE name = '{q}'\"\n-    return db.execute(query).fetchall()\n+    query = \"SELECT * FROM items WHERE name = ?\"\n+    return db.execute(query, (q,)).fetchall()\n",
+    "applies_cleanly": true,
+    "apply_error": "",
+    "lines_changed": 4,
+    "status": "DRAFT_UNREVIEWED",
+    "human_review_notes": {
+      "reviewer": null,
+      "verdict": "PENDING",
+      "comments": null
+    }
+  }
+]

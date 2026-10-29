@@ -1,0 +1,3 @@
+<UNTRUSTED_INPUT_DATA>
+{"content": "{\n  \"name\": \"vulnshop-api\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"express\": \"4.18.2\",\n    \"lodash\": \"4.17.21\"\n  }\n}\n", "file": "package.json", "finding": "SCA outdated dependency (fixture)", "task": "Bump the dependency 'lodash' from 4.17.15 to 4.17.21. Change nothing else."}
+</UNTRUSTED_INPUT_DATA>

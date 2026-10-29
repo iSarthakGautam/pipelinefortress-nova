@@ -1,0 +1,14 @@
+## Why these infrastructure checks failed (draft, a human decides)
+
+| Check | Where | Explanation |
+|---|---|---|
+| `CKV_DOCKER_3` | `Dockerfile:1` | This check exists to ensure that a user for the container has been created to prevent potential security issues in production, such as unauthorized access to the container. To satisfy this check, you can create a user for the container by specifying a user and group in the Dockerfile, for example, by using the 'USER' instruction followed by the desired username. |
+| `CKV_DOCKER_7` | `Dockerfile:1` | This check exists to ensure that the base image used in the Dockerfile does not use the latest version tag, which could lead to unexpected changes or vulnerabilities in production if ignored. To satisfy this check, you can specify a specific version tag for the base image, such as "ubuntu:18.04", instead of using "latest". |
+| `CKV_DOCKER_2` | `Dockerfile:1` | This check exists to ensure that Docker images have HEALTHCHECK instructions, which can prevent containers from running indefinitely if they become unresponsive. If this check is ignored, it could lead to issues in production where containers become stuck or unresponsive, potentially causing downtime or data loss. |
+| `CKV_K8S_40` | `deployment.yaml:2` | This check exists to ensure that containers in a Kubernetes environment run with a high User ID (UID) to avoid potential conflicts with the host system, which could lead to unexpected behavior or security issues in production if ignored. To satisfy this check, you can set the "securityContext.runAsUser" to a high UID, such as 10000, in your Kubernetes deployment configuration. |
+| `CKV_K8S_23` | `deployment.yaml:2` | This check exists to prevent potential security vulnerabilities in production by ensuring that root containers are not admitted unnecessarily, which could lead to unauthorized access and data breaches. |
+
+<sub>Explanations by `llama3:latest` (policy_explain_v2); each was checked by code for length and invented identifiers. Advisory only.</sub>
+
+---
+**Reviewer note (Claude Code, 2026-10-29; not a human review).** Real `llama3:latest` output on `eval/fixtures/policy_bot_demo.json` (rule titles typed from the Checkov docs). Read against what the rules actually require: CKV_DOCKER_3, CKV_DOCKER_7 and CKV_K8S_40 are correct and actionable. CKV_DOCKER_2 is vague (a health check lets the orchestrator restart a hung container; the text says "stuck or unresponsive" but gives no fix). **CKV_K8S_23 is wrong**: it invents a `defaultRuntimeSettings` field that does not exist in Kubernetes; the real fix is `runAsNonRoot: true`. The code-side checks catch invented rule/CVE ids and URLs, not invented field names, so this is why the output is a draft and a person decides. An 8B model is usable here only with the scanner's own rule title as input; without a title the bot makes no model call.

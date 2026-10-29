@@ -82,11 +82,11 @@
     {
       "type": "machine-learning-model",
       "name": "llama3.1:8b",
-      "version": "8B",
+      "version": "8.0B",
       "licenses": [
         {
           "license": {
-            "name": "Llama 3.1 Community License (verify before citing)"
+            "name": "Llama 3.1 Community License"
           }
         }
       ],
@@ -99,15 +99,21 @@
       "properties": [
         {
           "name": "quantisation",
-          "value": "unverified"
+          "value": "Q4_K_M"
         },
         {
           "name": "installed",
-          "value": "false"
+          "value": "true"
         },
         {
           "name": "osi_approved",
           "value": "false"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e"
         }
       ]
     },
@@ -140,6 +146,44 @@
         {
           "name": "osi_approved",
           "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "machine-learning-model",
+      "name": "qwen2.5-coder:1.5b",
+      "version": "1.5B",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://ollama.com/library/qwen2.5-coder"
+        }
+      ],
+      "properties": [
+        {
+          "name": "quantisation",
+          "value": "Q4_K_M"
+        },
+        {
+          "name": "installed",
+          "value": "false"
+        },
+        {
+          "name": "osi_approved",
+          "value": "true"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d7372fd828518a4d38b1eb196c673c31a85f2ed302b3d1e406c4c2d1b64a0668"
         }
       ]
     }
