@@ -74,14 +74,19 @@ def line_sha(repo: Path, file: str, line: int, cache: dict):
     re-indents. None when there is no line to read (line 0, missing file, empty line)."""
     if repo is None or not file or line < 1:
         return None
+    lines = _source_lines(repo, file, cache)
+    text = "".join(lines[line - 1].split()) if line <= len(lines) else ""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16] if text else None
+
+
+def _source_lines(repo: Path, file: str, cache: dict) -> list:
+    """Lines of a repo file as scanners number them; [] if it can't be read."""
     if file not in cache:
         try:
             cache[file] = (Path(repo) / file).read_text(encoding="utf-8", errors="replace").split("\n")
-        except OSError:
+        except (OSError, ValueError):
             cache[file] = []
-    lines = cache[file]
-    text = "".join(lines[line - 1].split()) if line <= len(lines) else ""
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16] if text else None
+    return cache[file]
 
 
 def _same_code(entry: dict, sha) -> bool:
@@ -91,22 +96,14 @@ def _same_code(entry: dict, sha) -> bool:
     return "line_sha" not in entry or (sha is not None and entry["line_sha"] == sha)
 
 
-def unreadable_lines(repo: Path, entries: list) -> list:
-    """`file:line` of entries whose flagged line does not exist under `repo`: `create` was run
-    outside the repo root or against a different commit than the one scanned. Their line_sha
-    would be null, and the finding would turn new the first time its line moves."""
-    lines, bad = {}, []
-    for e in entries:
-        if e["line"] < 1:
-            continue
-        if e["file"] not in lines:
-            try:
-                lines[e["file"]] = (Path(repo) / e["file"]).read_text(encoding="utf-8", errors="replace").split("\n")
-            except OSError:
-                lines[e["file"]] = []
-        if e["line"] > len(lines[e["file"]]):
-            bad.append(f"{e['file']}:{e['line']}")
-    return bad
+def missing_lines(repo: Path, entries: list) -> list:
+    """`file:line` of entries whose flagged line does not exist under `repo`. Usually `create` was
+    run outside the repo root or at another commit than the one scanned, and those findings get
+    no line_sha (they turn new the first time their line moves). It can also be legitimate:
+    gitleaks scans history, so a deleted secret's file is gone at HEAD."""
+    cache = {}
+    return [f"{e['file']}:{e['line']}" for e in entries
+            if e["line"] > 0 and e["line"] > len(_source_lines(repo, e["file"], cache))]
 
 
 def load_baseline(path: Path) -> dict:
@@ -380,11 +377,12 @@ def cmd_create(args) -> int:
     findings = json.loads(args.findings.read_text(encoding="utf-8"))
     previous = load_baseline(args.baseline) if args.baseline.exists() else None
     baseline = build_baseline(findings, args.commit, previous, args.repo)
-    bad = unreadable_lines(args.repo, baseline["entries"])
-    if bad:
-        raise ValueError(f"{len(bad)} flagged line(s) not found under --repo {args.repo} (run from the "
-                         f"repo root, at the scanned commit): {', '.join(bad[:5])}"
-                         f"{' ...' if len(bad) > 5 else ''}")
+    missing = missing_lines(args.repo, baseline["entries"])
+    if missing:
+        print(f"baseline: WARNING {len(missing)} flagged line(s) not found under --repo {args.repo}; "
+              f"run create from the repo root at the scanned commit, or check these are deleted "
+              f"files from history: {', '.join(missing[:5])}{' ...' if len(missing) > 5 else ''}",
+              file=sys.stderr)
     _write_json(args.baseline, baseline)
     print(f"baseline: {len(baseline['entries'])} accepted findings -> {args.baseline}")
     return 0

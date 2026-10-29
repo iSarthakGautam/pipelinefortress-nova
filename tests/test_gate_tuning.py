@@ -117,19 +117,20 @@ class TestMovedFindings(unittest.TestCase):
                          "--commit", "c1", "--repo", str(repo)])
         return rc, err.getvalue()
 
-    def test_create_refuses_a_checkout_without_the_flagged_lines(self):
-        """Outside the repo root, or at another commit, every line_sha would be null."""
+    def test_create_warns_about_missing_flagged_lines(self):
+        """Outside the repo root, or at another commit, line_sha would be null. It still writes
+        the baseline: a secret gitleaks found in history may sit in a file deleted since."""
         self.write("x = 1", "db.execute(q)")
         rc, err = self.create([finding("s.py", 2)], self.repo / "elsewhere")
-        assert rc == 2 and "1 flagged line(s) not found" in err and "s.py:2" in err
+        assert rc == 0 and "WARNING 1 flagged line(s) not found" in err and "s.py:2" in err
         rc, err = self.create([finding("s.py", 40)], self.repo)            # older/other commit
-        assert rc == 2 and "s.py:40" in err
-        assert not (self.repo / "base.json").exists()
+        assert rc == 0 and "s.py:40" in err
+        assert (self.repo / "base.json").exists()
 
-    def test_create_accepts_line_zero_and_blank_lines(self):
+    def test_create_is_quiet_for_line_zero_and_blank_lines(self):
         self.write("x = 1", "", "db.execute(q)")
-        rc, _ = self.create([finding("s.py", 0), finding("s.py", 2), finding("s.py", 3)], self.repo)
-        assert rc == 0
+        rc, err = self.create([finding("s.py", 0), finding("s.py", 2), finding("s.py", 3)], self.repo)
+        assert rc == 0 and err == ""
 
 
 class TestSeverityRaised(unittest.TestCase):
