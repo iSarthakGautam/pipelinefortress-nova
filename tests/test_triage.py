@@ -70,7 +70,7 @@ class TestTriage(unittest.TestCase):
         res, _, _ = run([finding()], llm({**GOOD, "model": "gpt-9-ultra", "prompt_version": "evil", "priority": "P1"}))
         t = res[0]["triage"]
         self.assertTrue(t["model"].startswith("m@sha256:"))
-        self.assertEqual(t["prompt_version"], "triage_v2/2.0.0")
+        self.assertEqual(t["prompt_version"], "triage_v2/2.1.0")
         self.assertEqual(t["priority"], "P2")  # HIGH severity, computed in code, not the model's P1
 
     def test_all_cluster_members_are_emitted(self):
@@ -123,6 +123,26 @@ class TestTriage(unittest.TestCase):
         self.assertEqual(set(res[0]["triage"]), {"verdict", "priority", "confidence", "fix_summary", "model",
                                                  "prompt_version", "grounding"})
         self.assertEqual(set(res[0]["triage"]["grounding"]), {"validated", "rejected_claims"})
+
+    def test_validator_rejection_resets_confidence_to_zero(self):
+        bad = {**GOOD, "fix_summary": "Fixes CVE-2031-12345", "confidence": 0.95}
+        res, _, _ = run([finding()], llm(bad))
+        self.assertEqual(res[0]["triage"]["verdict"], "NEEDS_HUMAN_REVIEW")
+        self.assertEqual(res[0]["triage"]["confidence"], 0.0)
+        self.assertIsInstance(res[0]["triage"]["confidence"], float)
+
+    def test_non_dict_inputs_are_tolerated_and_filtered(self):
+        res, tr = triage.triage_findings([1, "garbage", None, finding("ok")], model="m")
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["finding_id"], "ok")
+
+    def test_max_findings_caps_clusters(self):
+        f1 = finding("f1", file="a.py", line=1)
+        f2 = finding("f2", file="a.py", line=2)
+        f3 = finding("f3", file="b.py", line=1)
+        res, tr = triage.triage_findings([f1, f2, f3], model="m", max_findings=1)
+        self.assertEqual(len(tr), 1)
+        self.assertEqual([r["finding_id"] for r in res], ["f1", "f2"])
 
 
 class TestFallbackEndToEnd(unittest.TestCase):

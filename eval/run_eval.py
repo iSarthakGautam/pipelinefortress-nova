@@ -158,7 +158,7 @@ def build_report(models: list) -> str:
            "Differences of one finding are noise. Real scanner output and the planted-vulnerability ground truth are not "
            "available yet (R2/R3 deliverables).\n" % len(records),
            f"Ground truth: `eval/ground_truth.jsonl` (sha256 `{gt_sha}…`). Raw per-finding outputs: `eval/results/*.jsonl`. "
-           "Models: only those installed locally were run; `qwen2.5-coder:14b` and `llama3.1:8b` from the plan were **not** run.\n"]
+           "Models: only those installed locally were run; `llama3.1:8b` was evaluated locally; `qwen2.5-coder:14b` from the plan was **not** run.\n"]
     table = ["| Configuration | Precision | Recall | F1 | Abstain | Confidently wrong | Unusable output | p50 latency (s) | Ungrounded claims produced → reaching a human |",
              "|---|---|---|---|---|---|---|---|---|"]
 
@@ -232,7 +232,7 @@ def smoke_test_metrics_code() -> None:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--models", nargs="+", default=["llama3:latest", "gemma2:latest"])
+    ap.add_argument("--models", nargs="+", default=["llama3.1:8b"])
     ap.add_argument("--report-only", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()

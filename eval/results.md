@@ -2,17 +2,17 @@
 
 > **Read this first.** n = 10 synthetic findings written by the same person who built the pipeline, labelled by one person, with no inter-rater agreement and no time split. This is a **smoke set, not a held-out evaluation**. Differences of one finding are noise. Real scanner output and the planted-vulnerability ground truth are not available yet (R2/R3 deliverables).
 
-Ground truth: `eval/ground_truth.jsonl` (sha256 `7d552c524db6…`). Raw per-finding outputs: `eval/results/*.jsonl`. Models: only those installed locally were run; `qwen2.5-coder:14b` and `llama3.1:8b` from the plan were **not** run.
+Ground truth: `eval/ground_truth.jsonl` (sha256 `55cfb6cf125d…`). Raw per-finding outputs: `eval/results/*.jsonl`. Models: only those installed locally were run; `llama3.1:8b` was evaluated locally; `qwen2.5-coder:14b` from the plan was **not** run.
 
 ## Bake-off and ablations
 
 | Configuration | Precision | Recall | F1 | Abstain | Confidently wrong | Unusable output | p50 latency (s) | Ungrounded claims produced → reaching a human |
 |---|---|---|---|---|---|---|---|---|
 | Heuristic keyword baseline (no LLM) | 0.75 | 0.5 | 0.6 | 0.0 | 4 | 0 | n/a | n/a |
-| llama3.1:8b, full pipeline (schema decoding + validator) | 1.0 | 0.167 | 0.286 | 0.2 | 4 | 0 | 10.22 | 2 → 0 |
-| llama3.1:8b, **no validator** (counterfactual, same run) | 1.0 | 0.333 | 0.5 | 0.0 | 4 | 0 | 10.22 | 2 → 2 |
-| llama3.1:8b, JSON mode, no schema | 1.0 | 0.167 | 0.286 | 0.2 | 4 | 0 | 10.5 | 2 → 0 |
-| llama3.1:8b, no format constraint | 1.0 | 0.167 | 0.286 | 0.2 | 4 | 0 | 10.7 | 2 → 0 |
+| llama3.1:8b, full pipeline (schema decoding + validator) | 1.0 | 0.333 | 0.5 | 0.1 | 4 | 0 | 10.22 | 1 → 0 |
+| llama3.1:8b, **no validator** (counterfactual, same run) | 1.0 | 0.333 | 0.5 | 0.0 | 4 | 0 | 10.22 | 1 → 1 |
+| llama3.1:8b, JSON mode, no schema | 1.0 | 0.333 | 0.5 | 0.1 | 4 | 0 | 10.5 | 1 → 0 |
+| llama3.1:8b, no format constraint | 1.0 | 0.333 | 0.5 | 0.1 | 4 | 0 | 10.7 | 1 → 0 |
 
 Definitions: precision = TP/(TP+FP) over answered findings; **recall = TP / all expected TPs (an abstention on a real TP counts as a miss)**; *confidently wrong* = answered, not abstained, and wrong; *unusable* = the model's output could not be parsed. Abstaining (`NEEDS_HUMAN_REVIEW`) is a reported success outcome, not an error.
 
@@ -28,7 +28,7 @@ Definitions: precision = TP/(TP+FP) over answered findings; **recall = TP / all 
 | gt-002 | FALSE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - |  |
 | gt-003 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |
 | gt-004 | FALSE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - |  |
-| gt-005 | TRUE_POSITIVE | TRUE_POSITIVE | NEEDS_HUMAN_REVIEW | Package claim does not match scanner record: org.apache.logging.log4j:log4j-core | false abstain |
+| gt-005 | TRUE_POSITIVE | TRUE_POSITIVE | TRUE_POSITIVE | - |  |
 | gt-006 | FALSE_POSITIVE | FALSE_POSITIVE | NEEDS_HUMAN_REVIEW | CWE claim not in MITRE catalogue: CWE-99999 | false abstain |
 | gt-007 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |
 | gt-008 | TRUE_POSITIVE | FALSE_POSITIVE | FALSE_POSITIVE | - | **confidently wrong** |

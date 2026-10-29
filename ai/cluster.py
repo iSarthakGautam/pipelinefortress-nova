@@ -13,7 +13,7 @@ def normalise_path(path: str) -> str:
     if not path or not isinstance(path, str):
         return "unknown_file"
     path = path.replace("\\", "/")
-    return posixpath.normpath(path).removeprefix("./") or "unknown_file"
+    return posixpath.normpath(path).lstrip("/") or "unknown_file"
 
 
 # In ADR-001 schema, dedupe block is written by cluster.py (R4).

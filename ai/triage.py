@@ -168,7 +168,7 @@ def triage_cluster(cluster_id, members, prompt, model, format_mode="schema", val
     if t["verdict"] == verdict_model:
         t["confidence"] = confidence_model
     else:
-        t["confidence"] = None  # validator changed verdict; model confidence no longer applies
+        t["confidence"] = 0.0  # validator changed verdict; reset confidence to 0.0 to satisfy schema [0, 1]
 
     trace["verdict_final"] = t["verdict"]
     write_trace(trace, trace_dir)
@@ -188,14 +188,18 @@ def triage_cluster(cluster_id, members, prompt, model, format_mode="schema", val
 
 
 def triage_findings(raw_findings: list, model: str = None, format_mode: str = "schema", validate: bool = True,
-                    defence: bool = True, trace_dir=None) -> tuple:
+                    defence: bool = True, trace_dir=None, max_findings: int = 0) -> tuple:
     """Full pipeline. Returns (all output findings, per-cluster trace records)."""
     model = model or llm_client.DEFAULT_MODEL
     prompt = load_prompt()
     canary_ok = canary_selftest()
     results, traces = [], []
-    raw_findings = [hydrate(f if isinstance(f, dict) else {}) for f in raw_findings]  # follow evidence.raw_ref into SARIF when the snippet is missing
-    for cluster_id, members in cluster_findings(raw_findings).items():
+    raw_findings = [hydrate(f) for f in raw_findings if isinstance(f, dict)]  # follow evidence.raw_ref into SARIF when the snippet is missing
+    clusters = cluster_findings(raw_findings)
+    cluster_items = list(clusters.items())
+    if max_findings > 0:
+        cluster_items = cluster_items[:max_findings]
+    for cluster_id, members in cluster_items:
         out, tr = triage_cluster(cluster_id, members, prompt, model, format_mode, validate, defence, trace_dir, canary_ok)
         results.extend(out)
         traces.append(tr)
@@ -210,7 +214,7 @@ def main():
     ap.add_argument("--no-defence", action="store_true", help="ablation only: disables injection heuristic AND framing")
     ap.add_argument("--trace-dir", default=None)
     ap.add_argument("--max-findings", type=int, default=int(os.getenv("MAX_FINDINGS", "0")),
-                    help="Maximum number of findings to triage (0 = unlimited)")
+                    help="Maximum number of findings/clusters to triage (0 = unlimited)")
     ap.add_argument("--only-new", action="store_true", default=os.getenv("ONLY_NEW", "").lower() in ("1", "true"),
                     help="Only triage net-new findings from baseline diff")
     ap.add_argument("--comment-out", default=None, help="write the PR-comment markdown here (for R1's workflow)")
@@ -231,10 +235,15 @@ def main():
         return 2
     if isinstance(findings, dict):
         findings = [findings]
+    elif not isinstance(findings, list):
+        findings = []
+    # Clean up non-object entries first so non-dict input does not crash .get()
+    findings = [f for f in findings if isinstance(f, dict)]
+
     if args.only_new:
         findings = [f for f in findings if (f.get("baseline") or {}).get("is_new", True)]
         
-    # Sort by severity before applying the maximum findings limit.
+    # Sort by severity before clustering so top-severity clusters get triaged first
     severity_rank = {
         "CRITICAL": 5,
         "HIGH": 4,
@@ -249,12 +258,10 @@ def main():
         severity = str(finding.get("severity_norm") or "UNKNOWN").upper()
         return severity_rank.get(severity, 0)
 
-    findings.sort(key=severity_key, reverse=True)        
-    if args.max_findings > 0:
-        findings = findings[:args.max_findings]
+    findings.sort(key=severity_key, reverse=True)
         
     results, traces = triage_findings(findings, args.model, args.format_mode, not args.no_validate,
-                                      not args.no_defence, args.trace_dir)
+                                      not args.no_defence, args.trace_dir, max_findings=args.max_findings)
     if args.comment_out:
         with open(args.comment_out, "w", encoding="utf-8") as f:
             f.write(pr_comment.render(results))

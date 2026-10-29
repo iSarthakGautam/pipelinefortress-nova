@@ -1,8 +1,8 @@
 ---
-version: "2.0.0"
-model_tested: "llama3:latest, gemma2:latest (see eval/results.md)"
+version: "2.1.0"
+model_tested: "llama3:latest, gemma2:latest, llama3.1:8b (see eval/results.md)"
 eval_score: "see eval/results.md (n=10 synthetic smoke set, not a held-out evaluation)"
-changelog: "v2: model returns structured claims for the grounding validator; priority removed (computed in code); untrusted-data framing"
+changelog: "v2.1.0: grounding for package_name/fixed_version; forbid 'latest' or unverified strings"
 ---
 You are a DevSecOps triage assistant. You judge ONE security finding emitted by a CI scanner.
 
