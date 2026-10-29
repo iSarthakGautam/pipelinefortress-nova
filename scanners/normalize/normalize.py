@@ -61,10 +61,12 @@ def norm_path(uri: str, root: str = None) -> str:
     """Repo-relative, forward-slash path. `root` strips absolute prefixes (OSV reports
     absolute paths); a leading '/' is dropped (Grype reports '/apps/x' for dir: scans)."""
     p = (uri or "").replace("\\", "/")
-    if p.startswith("file:///"):
-        p = p[len("file:///"):]
-    elif p.startswith("file://"):
-        p = p[len("file://"):]
+    if p.startswith("file://localhost/"):
+        p = "file:///" + p[len("file://localhost/"):]
+    if p.startswith("file://"):
+        p = p[len("file://"):]                  # file:///home/x -> /home/x, so `root` still matches
+        if re.match(r"/[A-Za-z]:/", p):
+            p = p[1:]                           # file:///C:/x -> C:/x
     if root:
         r = str(root).replace("\\", "/").rstrip("/") + "/"
         if p.lower().startswith(r.lower()):
@@ -150,13 +152,16 @@ def build_finding(*, tool, rule_id, message, severity_raw, cwe, cve, file, line,
     return finding
 
 
-def parse_sarif(path: Path, tool: str, ref: str = None) -> list:
+def parse_sarif(path: Path, tool: str, ref: str = None, root: str = None) -> list:
     """Generic SARIF 2.1.0 parser (Semgrep, gitleaks, Checkov, hadolint)."""
     doc = json.loads(path.read_text(encoding="utf-8"))
     ref = ref or path.as_posix()
     findings = []
     for ri, run in enumerate(doc.get("runs", [])):
         rules = {r.get("id"): r for r in run.get("tool", {}).get("driver", {}).get("rules", [])}
+        # Results the tool marks as suppressed (SARIF `suppressions`, e.g. an inline nosemgrep or
+        # checkov:skip) are kept on purpose: only a dated security-exception may waive a finding,
+        # the same rule CI applies to gitleaks with --ignore-gitleaks-allow.
         for i, res in enumerate(run.get("results", [])):
             rule_id = res.get("ruleId") or "unknown"
             rule = rules.get(rule_id, {})
@@ -174,7 +179,9 @@ def parse_sarif(path: Path, tool: str, ref: str = None) -> list:
                 severity_raw=level,
                 cwe=extract_cwes(tags),
                 cve=[],
-                file=norm_path(phys.get("artifactLocation", {}).get("uri", "")),
+                # Not percent-decoded: these tools write raw paths, so a file literally named
+                # apps%2Fx.py must not turn into apps/x.py and collide with a real finding
+                file=norm_path(phys.get("artifactLocation", {}).get("uri", ""), root),
                 line=int(region.get("startLine", 0)),
                 package=None,
                 snippet=snippet,
@@ -337,7 +344,10 @@ def parse_osv(path: Path, ref: str = None, root: str = None) -> list:
 
 
 def dedupe_exact(findings: list) -> list:
-    """Drop exact duplicates (same finding_id); keep first, sort for deterministic output."""
+    """Drop exact duplicates (same finding_id); keep first, sort for deterministic output.
+    Known limitation: finding_id has no package version, so the same vulnerability in two
+    versions of one package in one file is kept once. Adding the version to the ID makes it
+    change on every upgrade (and with OSV's unpinned transitive dependencies, between runs)."""
     seen, out = set(), []
     for f in findings:
         if f["finding_id"] in seen:
@@ -385,7 +395,7 @@ def main(argv=None) -> int:
     findings = []
     for t in SARIF_TOOLS:
         for p in getattr(args, t):
-            findings += parse_sarif(p, t, ref=ref(p))
+            findings += parse_sarif(p, t, ref=ref(p), root=args.root)
     for p in args.bandit:
         findings += parse_bandit(p, ref=ref(p))
     for p in args.trivy:
@@ -398,7 +408,8 @@ def main(argv=None) -> int:
     findings = dedupe_exact(findings)
     validate(findings)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(findings, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # bytes, not text: write_text turns \n into \r\n on Windows
+    args.output.write_bytes((json.dumps(findings, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     print(f"normalized {len(findings)} findings -> {args.output}")
     return 0
 

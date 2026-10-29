@@ -59,6 +59,14 @@ ANNOTATION_MARKER = "security-exception:"
 COMMENT_LEADER_RE = re.compile(r"(?:^|\s)(?:#|//|--|;|/\*|<!--)\s*security-exception:")
 ANNOTATION_RE = re.compile(
     r"security-exception:\s*(?P<id>\S+)\s+expires:(?P<expires>\S+)\s+owner:(?P<owner>\S+)")
+ISO_DATE_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+
+
+def iso_date(text: str) -> dt.date:
+    """YYYY-MM-DD only. date.fromisoformat alone also takes 20261130 and 2026-W48-1 (3.11+)."""
+    if not ISO_DATE_RE.fullmatch(text):
+        raise ValueError(f"not YYYY-MM-DD: {text!r}")
+    return dt.date.fromisoformat(text)
 
 
 # --------------------------------------------------------------------------- matching
@@ -250,6 +258,10 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
             continue
         if ANNOTATION_MARKER not in text:
             continue
+        # Known limitation: scanners disagree on what ends a line. splitlines() matches checkov
+        # (Dockerfiles) and YAML parsers, which also break on form feeds, \x85 and \u2028; Python's
+        # ast and semgrep don't. In a file containing those characters an exception below them can
+        # sit one line off its finding. No tracked file contains them.
         for lineno, line in enumerate(text.splitlines(), start=1):
             if ANNOTATION_MARKER not in line or not COMMENT_LEADER_RE.search(line):
                 continue
@@ -261,7 +273,7 @@ def scan_annotations(repo: Path, today: dt.date, max_days: int) -> list:
                 continue
             ann.update(id=m["id"], owner=m["owner"], expires=m["expires"])
             try:
-                expires = dt.date.fromisoformat(m["expires"])
+                expires = iso_date(m["expires"])
             except ValueError:
                 ann.update(status="malformed", problem=f"invalid date {m['expires']!r}")
                 found.append(ann)
@@ -377,7 +389,9 @@ def format_summary(report: dict) -> str:
 
 def _write_json(path: Path, obj) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # bytes, not text: write_text turns \n into \r\n on Windows and the next Linux rebaseline
+    # would rewrite every line of security-baseline.json
+    path.write_bytes((json.dumps(obj, indent=2, sort_keys=True) + "\n").encode("utf-8"))
 
 
 def cmd_create(args) -> int:
@@ -398,7 +412,7 @@ def cmd_create(args) -> int:
 def cmd_check(args) -> int:
     findings = json.loads(args.findings.read_text(encoding="utf-8"))
     baseline = load_baseline(args.baseline)
-    today = dt.date.fromisoformat(args.today) if args.today else dt.date.today()
+    today = iso_date(args.today) if args.today else dt.date.today()
 
     stats = apply_baseline(findings, baseline, args.commit, args.repo)
     annotations = scan_annotations(args.repo, today, args.max_exception_days)

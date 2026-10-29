@@ -151,6 +151,20 @@ class TestExceptions(TmpRepo):
         _, rep = run_check([], self.no_baseline(), self.tmp)
         assert rep["result"] == "fail" and rep["counts"]["exceptions_invalid"] == 3
 
+    def test_only_yyyy_mm_dd_dates_are_valid(self):
+        write(self.tmp, "a.py", "# security-exception: r.sqli expires:20261130 owner:r2\n"
+                                "# security-exception: r.sqli expires:2026-W48-1 owner:r2\n"
+                                "# security-exception: r.sqli expires:2026-11-30 owner:r2\n")
+        assert [a["status"] for a in b.scan_annotations(self.tmp, TODAY, 90)] == \
+            ["malformed", "malformed", "valid"]
+
+    def test_crlf_files_still_parse(self):
+        (self.tmp / "app").mkdir()
+        (self.tmp / "app/search.py").write_bytes(
+            b"x = 1\r\n# security-exception: r.sqli expires:2026-12-31 owner:r2\r\ndb.execute(q)\r\n")
+        fs, rep = run_check([finding(line=3)], self.no_baseline(), self.tmp)
+        assert fs[0]["baseline"]["exception"] == {"id": "r.sqli", "expires": "2026-12-31", "owner": "r2"}
+
     def test_manifest_exception_applies_anywhere_in_file(self):
         write(self.tmp, "requirements.txt",
               "flask==2.2.2\n# security-exception: CVE-2023-30861 expires:2026-11-15 owner:r2\n")
@@ -186,6 +200,22 @@ class TestCli(TmpRepo):
         n.validate(diffed)                           # still valid against the shared schema
         assert [f["baseline"]["is_new"] for f in diffed] == [False, True]
         assert json.loads(report.read_text())["blocking"][0]["rule_id"] == "r.new"
+
+    def test_cli_writes_lf_line_endings(self):
+        fpath = self.tmp / "f.json"
+        fpath.write_text(json.dumps([finding(line=0)]), encoding="utf-8")
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            assert b.main(["create", "--findings", str(fpath), "--baseline", str(self.tmp / "base.json"),
+                           "--commit", "c1", "--repo", str(self.tmp)]) == 0
+        assert b"\r\n" not in (self.tmp / "base.json").read_bytes()
+
+    def test_cli_rejects_a_compact_today(self):
+        (self.tmp / "f.json").write_text("[]", encoding="utf-8")
+        args = ["check", "--findings", str(self.tmp / "f.json"), "--baseline", str(self.tmp / "b.json"),
+                "--repo", str(self.tmp)]
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            assert b.main(args + ["--today", "2026-10-22"]) == 0
+            assert b.main(args + ["--today", "20261022"]) == 2
 
     def test_cli_bad_input_exits_2(self):
         with redirect_stderr(io.StringIO()):

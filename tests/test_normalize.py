@@ -96,6 +96,45 @@ class TestNormalize(unittest.TestCase):
         assert n.normalize_severity("checkov", "error", "CKV_K8S_16") == "HIGH"
         assert n.normalize_severity("hadolint", "warning", "CKV_K8S_16") == "MEDIUM"
 
+    def sarif(self, uri):
+        doc = {"runs": [{"tool": {"driver": {"rules": []}}, "results": [
+            {"ruleId": "r", "level": "error", "message": {"text": "m"},
+             "suppressions": [{"kind": "inSource"}],
+             "locations": [{"physicalLocation": {"artifactLocation": {"uri": uri},
+                                                 "region": {"startLine": 3}}}]}]}]}
+        p = self.tmp / "s.sarif"
+        p.write_text(json.dumps(doc), encoding="utf-8")
+        return p
+
+    def test_sarif_file_uris_become_repo_paths(self):
+        root = "/home/runner/work/pf/pf"
+        cases = {"file:///home/runner/work/pf/pf/apps/x.py": "apps/x.py",
+                 "file://localhost/home/runner/work/pf/pf/apps/x.py": "apps/x.py",
+                 "apps/x.py": "apps/x.py",
+                 "apps%2Fsearch.py": "apps%2Fsearch.py"}      # raw path, not decoded
+        for uri, want in cases.items():
+            assert n.parse_sarif(self.sarif(uri), "semgrep", root=root)[0]["location"]["file"] == want, uri
+        assert n.norm_path("file:///C:/src/pf/apps/x.py", "C:/src/pf") == "apps/x.py"
+        assert n.norm_path("/apps/x.py") == "apps/x.py"                 # grype dir: scans
+
+    def test_cli_passes_root_to_sarif(self):
+        root = self.tmp.resolve()
+        p = self.sarif("file:///" + root.as_posix().lstrip("/") + "/apps/x.py")
+        out = self.tmp / "f.json"
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            n.main(["--semgrep", str(p), "--root", str(root), "-o", str(out)])
+        assert json.loads(out.read_text(encoding="utf-8"))[0]["location"]["file"] == "apps/x.py"
+
+    def test_suppressed_sarif_results_are_kept(self):
+        """Only a dated security-exception waives a finding, not an inline nosemgrep."""
+        assert len(n.parse_sarif(self.sarif("a.py"), "semgrep")) == 1
+
+    def test_output_has_lf_line_endings(self):
+        out = self.tmp / "f.json"
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            n.main(["--semgrep", str(FIX / "semgrep.sarif"), "-o", str(out)])
+        assert b"\r\n" not in out.read_bytes()
+
     def test_finding_id_is_stable_and_16_hex(self):
         a = n.make_finding_id("semgrep", "r", "a.py", 1, None)
         assert a == n.make_finding_id("semgrep", "r", "a.py", 1, None)
