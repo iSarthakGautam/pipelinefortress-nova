@@ -1,11 +1,11 @@
 services:
   pushgateway:
     image: prom/pushgateway:v1.11.1
-    ports: ["9091:9091"]
+    ports: ["19091:9091"]
     restart: unless-stopped
   prometheus:
     image: prom/prometheus:v3.5.0
-    ports: ["9090:9090"]
+    ports: ["19090:9090"]
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on: [pushgateway]
