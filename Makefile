@@ -108,7 +108,7 @@ test test-ai:
 	$(PY) -m unittest discover -s tests -v
 
 triage:
-	LLM_TRACE_DIR=$(TRACE_DIR) EGRESS_LOG=$(EGRESS_LOG) ARTIFACTS_BASE=$(dir $(FINDINGS)) $(PY) ai/triage.py < $(FINDINGS)
+	LLM_TRACE_DIR=$(TRACE_DIR) EGRESS_LOG=$(EGRESS_LOG) ARTIFACTS_BASE=. $(PY) ai/triage.py < $(FINDINGS)
 
 eval:
 	LLM_TRACE_DIR=$(TRACE_DIR) EGRESS_LOG=$(EGRESS_LOG) $(PY) eval/run_eval.py

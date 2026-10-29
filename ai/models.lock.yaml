@@ -32,16 +32,16 @@ models:
 
   - tag: "llama3.1:8b"
     family: "llama3.1"
-    parameters: "8B"
-    quantisation: "unverified"
-    digest: "unpinned (not installed)"
+    parameters: "8.0B"
+    quantisation: "Q4_K_M"
+    digest: "sha256:46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e"
     provider: "ollama"
-    installed: false
+    installed: true
     is_default: false
-    license: "Llama 3.1 Community License (verify before citing)"
+    license: "Llama 3.1 Community License"
     license_osi_approved: false
     source_url: "https://ollama.com/library/llama3.1"
-    rationale: "Planned bake-off candidate. Pull it, then pin the digest."
+    rationale: "Installed locally; evaluation results recorded in eval/results/."
 
   - tag: "qwen2.5-coder:14b"
     family: "qwen2.5-coder"

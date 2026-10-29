@@ -32,7 +32,7 @@ planted_vulnerabilities:
     location:
       file: "apps/vulnshop-api/routes/user.py"
       line: 18
-    snippet: "cursor.execute('SELECT * FROM users WHERE id = %s', (uid,))"
+    snippet: "cursor.execute('SELECT * FROM users WHERE id = ?', (uid,))"
     ground_truth: "FALSE_POSITIVE"
     expected_priority: "UNASSIGNED"
     remediation: "None required (False Positive control)"

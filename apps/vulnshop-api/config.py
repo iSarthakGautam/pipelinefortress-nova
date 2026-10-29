@@ -5,7 +5,7 @@ WARNING: Planted security vulnerabilities for DevSecOps testing.
 import os
 
 DEBUG = True
-APP_PORT = 3000
+APP_PORT = int(os.getenv("APP_PORT", "3000"))
 DATABASE_PATH = os.getenv("DB_PATH", "/tmp/vulnshop.db")
 SECRET_KEY = "dev-insecure-flask-secret-key"
 # [PLANTED VULN: CWE-798] Hardcoded AWS key

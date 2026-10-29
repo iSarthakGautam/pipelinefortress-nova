@@ -1,5 +1,6 @@
 import json
 import os
+import posixpath
 import re
 
 # validate.py
@@ -39,7 +40,7 @@ def load_cwe_catalogue() -> set:
 
 
 def _norm_path(p: str) -> str:
-    return os.path.normpath(str(p).replace("\\", "/")).removeprefix("./") if p else ""
+    return posixpath.normpath(str(p).replace("\\", "/")).lstrip("/") if p else ""
 
 
 def extract_claims(triage: dict) -> dict:
@@ -83,10 +84,23 @@ def check_claims(scanner: dict, claims: dict, repo_root=None) -> list:
         if cwe not in catalogue:
             rejected.append(f"CWE claim not in MITRE catalogue: {cwe}")
 
-    if claims.get("package") and pkg.get("name") != claims["package"]:
-        rejected.append(f"Package claim does not match scanner record: {claims['package']}")
-    if claims.get("fixed_version") and pkg.get("fixed_version") != claims["fixed_version"]:
-        rejected.append(f"Unproven fixed_version claim: {claims['fixed_version']}")
+    if claims.get("package"):
+        if pkg.get("name"):
+            if pkg.get("name") != claims["package"]:
+                rejected.append(f"Package claim does not match scanner record: {claims['package']}")
+        else:
+            snippet = str((scanner.get("evidence") or {}).get("snippet_raw") or (scanner.get("evidence") or {}).get("snippet") or "")
+            if claims["package"] not in snippet:
+                rejected.append(f"Package claim does not match scanner record: {claims['package']}")
+
+    if claims.get("fixed_version"):
+        if pkg.get("fixed_version"):
+            if pkg.get("fixed_version") != claims["fixed_version"]:
+                rejected.append(f"Unproven fixed_version claim: {claims['fixed_version']}")
+        else:
+            snippet = str((scanner.get("evidence") or {}).get("snippet_raw") or (scanner.get("evidence") or {}).get("snippet") or "")
+            if claims["fixed_version"] not in snippet:
+                rejected.append(f"Unproven fixed_version claim: {claims['fixed_version']}")
 
     claimed_refs = []
     if claims.get("file"):

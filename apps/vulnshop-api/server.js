@@ -30,7 +30,13 @@ app.use((req, res) => {
     port: FLASK_PORT,
     path: req.url,
     method: req.method,
-    headers: { ...req.headers, host: `127.0.0.1:${FLASK_PORT}` }
+    headers: {
+      ...req.headers,
+      host: req.headers.host || `127.0.0.1:${PORT}`,
+      'x-forwarded-host': req.headers.host || `127.0.0.1:${PORT}`,
+      'x-forwarded-proto': 'http',
+      'x-forwarded-for': req.socket.remoteAddress
+    }
   };
 
   const proxyReq = http.request(options, (proxyRes) => {
@@ -42,8 +48,8 @@ app.use((req, res) => {
   });
 
   proxyReq.on('error', (err) => {
-    if (req.url === '/healthz') {
-      return res.status(200).json({ status: 'HEALTHY', service: 'vulnshop-api-gateway' });
+    if (res.headersSent) {
+      return res.destroy();
     }
     res.status(502).json({ error: 'Backend service unavailable', detail: err.message });
   });

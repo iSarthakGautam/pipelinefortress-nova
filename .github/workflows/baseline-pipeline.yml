@@ -305,7 +305,7 @@ jobs:
   # =========================================================================
   triage-ai:
     name: 30-triage-ai
-    needs: normalize-and-baseline
+    needs: [normalize-and-baseline, security-scanners]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Scoped read-only access for private repo checkout; credentials stripped immediately after
@@ -352,6 +352,14 @@ jobs:
         with:
           name: normalized-findings
           path: artifacts/
+
+      - name: Download Raw Scanner Artifacts
+        continue-on-error: true
+        # actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: raw-scans
+          path: artifacts/scans/
 
       - name: Run Zero-Egress AI Triage
         env:
@@ -402,6 +410,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Download Triage Artifacts
+        continue-on-error: true
         # actions/download-artifact@v4.1.8
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
         with:
