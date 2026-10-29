@@ -238,7 +238,7 @@ def parse_trivy(path: Path, ref: str = None) -> list:
     doc = json.loads(path.read_text(encoding="utf-8"))
     ref = ref or path.as_posix()
     findings = []
-    for ri, result in enumerate(doc.get("Results", [])):
+    for ri, result in enumerate(doc.get("Results") or []):
         target = norm_path(result.get("Target", ""))
         for i, v in enumerate(result.get("Vulnerabilities") or []):
             vid = v.get("VulnerabilityID", "unknown")
@@ -310,11 +310,7 @@ def _osv_fixed_versions(vulns: list, pkg_name: str) -> list:
     fixed = []
     for v in vulns:
         for aff in v.get("affected") or []:
-<<<<<<< Updated upstream
-            if (aff.get("package") or {}).get("name", "").lower() != pkg_name.lower():
-=======
             if _pep503((aff.get("package") or {}).get("name")) != _pep503(pkg_name):
->>>>>>> Stashed changes
                 continue
             for rng in aff.get("ranges") or []:
                 for ev in rng.get("events") or []:

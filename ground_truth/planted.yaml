@@ -61,7 +61,7 @@ planted_vulnerabilities:
     cve: []
     location:
       file: "apps/vulnshop-api/routes/pay.py"
-      line: 20
+      line: 22
     snippet: "proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
     ground_truth: "TRUE_POSITIVE"
     expected_priority: "P1"
@@ -78,7 +78,7 @@ planted_vulnerabilities:
       - "CVE-2020-8203"
     location:
       file: "apps/vulnshop-api/package.json"
-      line: 12
+      line: 13
     snippet: "\"lodash\": \"4.17.15\""
     ground_truth: "TRUE_POSITIVE"
     expected_priority: "P2"
