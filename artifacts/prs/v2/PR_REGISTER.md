@@ -4,7 +4,7 @@ Drafted by `ai/pr_bot.py` with model `llama3:latest` (prompt `patch_draft_v2`). 
 
 | PR | Target | Finding | Model | applies cleanly | lines changed | Review | Reviewer |
 |---|---|---|---|---|---|---|---|
-| PR-001 | `Dockerfile` | CKV_DOCKER_3 / CKV_DOCKER_2 | `llama3:latest@sha256:365c0bd3c000` | yes | 3 | **PENDING** | None |
-| PR-002 | `deployment.yaml` | CKV_K8S_40 | `llama3:latest@sha256:365c0bd3c000` | yes | 3 | **PENDING** | None |
-| PR-003 | `package.json` | SCA outdated dependency (fixture) | `llama3:latest@sha256:365c0bd3c000` | yes | 2 | **PENDING** | None |
-| PR-004 | `search.py` | CWE-89 SQL injection (fixture) | `llama3:latest@sha256:365c0bd3c000` | yes | 4 | **PENDING** | None |
+| PR-001 | `Dockerfile` | CKV_DOCKER_3 / CKV_DOCKER_2 | `llama3:latest@sha256:365c0bd3c000` | yes | 3 | **ACCEPT WITH DUAL-RUNTIME QUALIFICATIONS** ([review](../reviews/PR-001-review-R3.md)) | R3 |
+| PR-002 | `deployment.yaml` | CKV_K8S_40 | `llama3:latest@sha256:365c0bd3c000` | yes | 3 | **ACCEPT WITH VALIDATION LIMITS** ([review](../reviews/PR-002-review-R1.md)) | R1 |
+| PR-003 | `package.json` | SCA outdated dependency (fixture) | `llama3:latest@sha256:365c0bd3c000` | yes | 2 | **REJECT** ([review](../reviews/PR-003-review-R2.md)) | R2 |
+| PR-004 | `search.py` | CWE-89 SQL injection (fixture) | `llama3:latest@sha256:365c0bd3c000` | yes | 4 | **REJECT** ([review](../reviews/PR-004-review-R2.md)) | R2 |
