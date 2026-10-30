@@ -1,8 +1,6 @@
-# Capstone Report Contribution — R2 (Scanners and Policy)
+# 5. Pipeline implementation and baseline diffing
 
-Draft text for **Section 5** (pipeline implementation and why baseline diffing, 2 pages; plan §12)
-and R2's rows for **Section 3** (threat model, pipeline side). R1 owns the pipeline YAML and should
-review 5.1; R5 integrates. Every number comes from a committed file:
+Written by R2 (scanners and policy). Every number comes from a committed file:
 
 - `docs/metrics/GATE_TUNING.md`: gate run history and threshold simulation (PR #30).
 - `docs/metrics/DETECTOR_OVERLAP.md`: detector overlap and planted-vuln coverage (PR #28).
@@ -10,11 +8,7 @@ review 5.1; R5 integrates. Every number comes from a committed file:
 
 Measured on main at `1bb3381` (2026-10-27) unless stated otherwise.
 
----
-
-## Section 5: Pipeline Implementation and Baseline Diffing
-
-### 5.1 Stages
+## 5.1 Stages
 One workflow, seven jobs. Each scanner writes raw output; everything downstream reads one schema.
 
 | Job | What it does | Fails the build? |
@@ -48,7 +42,7 @@ Two design rules govern this stage:
 The gate does not wait for the AI stage. The security verdict is deterministic code; the model's
 output informs the human reviewer, and nothing the model says can turn the gate red or green.
 
-### 5.2 One schema for seven tools
+## 5.2 One schema for seven tools
 `scanners/normalize/normalize.py` maps SARIF and native JSON into the schema agreed with R4 in
 ADR-001 (`scanners/schema/finding.schema.json`). Every finding is validated against the schema,
 gets a stable 16-hex `finding_id`, and the output is byte-identical for the same input. The schema
@@ -68,7 +62,7 @@ reported.
 - A vulnerability with no score yet (`UNKNOWN`, often a CVE published days ago) is HIGH, so it
   needs a decision. It used to be INFO, which meant it could never block (#30).
 
-### 5.3 Why baseline diffing
+## 5.3 Why baseline diffing
 Main carries **162 findings, 56 of them HIGH or CRITICAL**: the planted vulnerabilities in
 vulnshop-api, plus real CVEs in dependencies we pin. A gate that fails on any HIGH finding would fail
 every PR, regardless of its content. Developers then learn to ignore it. The plan named this
@@ -94,7 +88,7 @@ risk ("noise drowns the gate") and gave R2 the counter: the gate fails only on w
 Baseline diffing does **not** hide the debt. All 162 findings are still in `findings.json`, still
 triaged by §7, and still on the dashboard. It only decides what may block a merge.
 
-### 5.4 Tuning the gate from real data
+## 5.4 Tuning the gate from real data
 After three weeks, we labelled all 71 CI runs (`GATE_TUNING.md` §2). Of the 49 runs that reached a
 verdict:
 
@@ -130,7 +124,7 @@ all three SCA tools) is detected as well, so **HIGH now blocks 7/7**. #42 also r
 mistake. It surfaced 112 new dependency findings, 32 of them blocking, and merged with the gate
 red, so main stayed red until #30 accepted them as target-app debt.
 
-### 5.5 Detector overlap
+## 5.5 Detector overlap
 On the SCA side, three tools found 29 distinct vulnerabilities, and 19 of those were found by all three
 (`DETECTOR_OVERLAP.md`, measured 2026-10-26, before the app had a lockfile). Every disagreement had a mechanical cause, not a data-quality one:
 
@@ -148,7 +142,7 @@ from 4/7 to 6/7. They are the only detector for the hard-coded AWS key (gitleaks
 the Jinja XSS. The seventh, PLANT-005, needed a lockfile rather than a rule: once #42 committed
 one, all three SCA tools found it, so static detection is 7/7. Each rule has a `semgrep --test` fixture that runs in CI.
 
-### 5.6 Limitations
+## 5.6 Limitations
 - **No branch protection.** A red gate does not stop a merge; reviewers do. It happened twice:
   #17 merged through a skipped gate, and #42 merged with the gate red. Both left main red for
   every PR that followed. Protection needs a public repository or a paid plan.
@@ -157,7 +151,10 @@ one, all three SCA tools found it, so static detection is 7/7. Each rule has a `
   stage has not yet caught a planted vulnerability (see §6).
 - **Matching by line text has edge cases.** A known finding that is moved *and* edited in the same
   change counts as new, which is a false fail. A new finding whose line is an exact copy of a fixed
-  one takes the fixed one's slot. A renamed file makes all its findings new.
+  one takes the fixed one's slot. A renamed file makes all its findings new. An exact `finding_id`
+  match is not re-checked against the line text, so a known line rewritten in place (same rule,
+  same line number) keeps its slot. A dependency finding's ID changes when its database adds a CVE
+  to a GHSA-only advisory, so it counts as new once: a false fail.
 - **Database drift.** A new advisory against an unchanged dependency fails the next PR, whatever it
   changes. We first saw it on 2026-10-29: 6 findings (3 new `mcp` advisories, each from two
   tools) against Semgrep's own dependencies. They did not block only because they are MEDIUM.
@@ -178,21 +175,19 @@ one, all three SCA tools found it, so static detection is 7/7. Each rule has a `
   the checkout it is given. It warns when a line doesn't exist there (#44), but not when lines have
   only shifted; it must run at the scanned commit.
 
----
+## 5.7 Threats to the pipeline itself
 
-## Section 3 (threat model): R2's pipeline rows
-
-Threats to the scanning and gating stage itself. R5 owns the threat model and may merge these
-into the overall table.
+The full pipeline rows behind the threat model's summary (§3.2): threats to the scanning and gating
+stage itself.
 
 | Threat | Example | Control | Evidence | Residual risk |
 |---|---|---|---|---|
 | Gate silently fails open | a scanner crashes or is skipped; the gate passes on fewer findings | every scanner output is required; gate runs `!cancelled()` and fails unless exit 0 | #24; the #17 false pass in `GATE_TUNING.md` §2 | no branch protection, so a red gate is advisory |
 | Tampered scanner | a compromised release runs with the CI token | SHA-256-pinned binaries, hash-locked Python installs, Actions pinned by commit SHA in the scan and gate jobs | workflow install step; `requirements-*.txt` | the pins themselves must be reviewed when bumped |
 | Stale detector | an old vulnerability database misses new CVEs | Grype refuses a database older than 5 days | #29; `DETECTOR_OVERLAP.md` §1 | Trivy and OSV have no equivalent age check |
-| Risk accepted forever | an exception with no owner or end date | exceptions need an owner and an expiry at most 90 days out; expired or malformed fails the gate; 14-day warning (#30) | `baseline.py`; `tests/test_gate_tuning.py` | all 6 current exceptions expire on one day |
+| Risk accepted forever | an exception with no owner or end date | exceptions need an owner and an expiry at most 90 days out; expired or malformed fails the gate; 14-day warning (#30) | `baseline.py`; `tests/test_gate_tuning.py` | all 9 current exceptions expire on one day (2027-01-15) |
 | Debt laundered into the baseline | a PR rebaselines to hide a new finding | baseline changes only in a reviewed PR; its diff shows every accepted finding | `security-baseline.json` history | relies on the reviewer reading the diff |
-| New finding hidden as old | fix one known finding and add another of the same rule in the same file; or a known CVE re-rated from LOW to CRITICAL | a moved finding must keep its line text (`line_sha`); a known finding re-rated across the threshold blocks again; an unscored CVE is HIGH | #30; `tests/test_gate_tuning.py` | an exact copy of a fixed line still inherits its slot |
+| New finding hidden as old | fix one known finding and add another of the same rule in the same file; or a known CVE re-rated from LOW to CRITICAL | a moved finding must keep its line text (`line_sha`); a known finding re-rated across the threshold blocks again; an unscored CVE is HIGH | #30; `tests/test_gate_tuning.py` | an exact copy of a fixed line still inherits its slot; a line rewritten in place keeps its slot (§5.6) |
 | Secret committed | a developer commits a key | gitleaks pre-commit hook (staged changes) and gitleaks in CI | `scripts/install_hooks.py`, `.gitleaks.toml` | the hook is opt-in per clone; the custom Semgrep rule is the only detector for the planted AWS key |
 | Scanner input evaluates code | a PR adds a Terraform file that Checkov evaluates with `asteval` | Checkov limited to Dockerfile, Kubernetes and GitHub Actions | workflow comment; exception rationale in `requirements-scanners.txt` | re-enable other frameworks only after an `asteval` fix |
 | Model alters the verdict | prompt injection makes the model clear a finding | the gate reads only `baseline.py`'s exit code; the model writes only `triage` | ADR-001; gate job `needs` | none known for the gate; see §7 for the comment |
