@@ -155,7 +155,7 @@ class TestR1CommentAndCiJob(StubCase):
 
     def test_ci_job_with_model_down_exits_zero_and_still_comments(self):
         out = os.path.join(self.tmp.name, "out")
-        env = dict(os.environ, OLLAMA_BASE_URL="http://localhost:1/v1", HTTPS_PROXY="http://evil.example:3128")
+        env = dict(os.environ, OLLAMA_BASE_URL="http://localhost:1/v1", HTTPS_PROXY="http://evil.example:3128", PYTHON=sys.executable)
         p = subprocess.run([os.path.join(ROOT, "eval/stubs/r1_ci_job_stub.sh"), self.findings_path, out], capture_output=True, text=True, env=env)
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         triaged = json.load(open(os.path.join(out, "findings.triaged.json")))
