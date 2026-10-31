@@ -1,0 +1,12 @@
+# HELP pipelinefortress_planted_caught_total Planted vulnerabilities with a matching finding
+# TYPE pipelinefortress_planted_caught_total gauge
+pipelinefortress_planted_caught_total 8
+# HELP pipelinefortress_planted_planted_total Planted true-positive vulnerabilities
+# TYPE pipelinefortress_planted_planted_total gauge
+pipelinefortress_planted_planted_total 10
+# HELP pipelinefortress_planted_blocking_total Planted vulnerabilities rated HIGH or above (the gate would block)
+# TYPE pipelinefortress_planted_blocking_total gauge
+pipelinefortress_planted_blocking_total 7
+# HELP pipelinefortress_planted_false_alarms_total Negative controls that a scanner flagged
+# TYPE pipelinefortress_planted_false_alarms_total gauge
+pipelinefortress_planted_false_alarms_total 0

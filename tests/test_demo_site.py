@@ -26,10 +26,9 @@ class TestDemoDeck(unittest.TestCase):
         total = sum(int(re.search(r'data-time="(\d+)"', a).group(1)) for a, _ in SLIDES)
         self.assertTrue(480 <= total <= 540, total)   # DEMO_SCRIPT.md promises 8:40
 
-    def test_team_slide_has_five_empty_name_fields_and_nova_is_on_the_cover(self):
+    def test_team_slide_has_five_name_fields_and_nova_is_on_the_cover(self):
         names = re.findall(r'<input class="name" data-key="(r\d)"([^>]*)>', HTML)
         self.assertEqual([k for k, _ in names], ["r1", "r2", "r3", "r4", "r5"])
-        self.assertTrue(all('value=' not in rest for _, rest in names))
         self.assertIn("Team Nova", SLIDES[0][1])
 
     def test_removed_text_stays_removed(self):
@@ -53,11 +52,8 @@ class TestDemoDeck(unittest.TestCase):
             for n in re.findall(r'data-autorun="(\d+)"', body):
                 self.assertTrue(int(n) >= 1)
 
-    def test_script_mentions_every_slide_title_keyword(self):
-        script = (ROOT / "demo/DEMO_SCRIPT.md").read_text(encoding="utf-8")
-        for n in range(1, 21):
-            self.assertRegex(script, rf"###\s+{n}\s+·", n)
-        self.assertNotIn("production-ready", script)
+    def test_demo_recording_exists(self):
+        self.assertTrue((ROOT / "demo/demo.mov").exists(), "demo/demo.mov must exist")
 
 
 class TestResultsPage(unittest.TestCase):

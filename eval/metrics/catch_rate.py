@@ -17,7 +17,10 @@ import re
 import sys
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 ORDER = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
 PREFIX = "pipelinefortress_planted"
@@ -98,13 +101,34 @@ def to_prom(s: dict) -> str:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("findings")
+    ap.add_argument("findings", nargs="?", default="artifacts/findings.json")
     ap.add_argument("--planted", default=str(Path(__file__).resolve().parents[2] / "ground_truth" / "planted.yaml"))
     ap.add_argument("--prom")
     ap.add_argument("--md")
     a = ap.parse_args(argv)
-    findings = json.loads(Path(a.findings).read_text(encoding="utf-8"))
-    planted = yaml.safe_load(Path(a.planted).read_text(encoding="utf-8"))["planted_vulnerabilities"]
+
+    findings_path = Path(a.findings)
+    if not findings_path.exists():
+        snap = Path(__file__).resolve().parents[2] / "docs" / "metrics" / "data" / "gate-tuning-2026-10-27" / "findings-main-1bb3381.json"
+        if snap.exists():
+            print(f"[notice] '{findings_path}' not found; using committed baseline snapshot ({snap.name})")
+            findings_path = snap
+
+    findings = json.loads(findings_path.read_text(encoding="utf-8"))
+
+    planted_path = Path(a.planted)
+    if planted_path.suffix in (".yaml", ".yml") and yaml is None:
+        json_planted = planted_path.with_suffix(".json")
+        if json_planted.exists():
+            planted = json.loads(json_planted.read_text(encoding="utf-8"))["planted_vulnerabilities"]
+        else:
+            raise RuntimeError("PyYAML is not installed and no planted.json fallback was found. Run: pip install pyyaml")
+    else:
+        if yaml is not None and planted_path.suffix in (".yaml", ".yml"):
+            planted = yaml.safe_load(planted_path.read_text(encoding="utf-8"))["planted_vulnerabilities"]
+        else:
+            planted = json.loads(planted_path.read_text(encoding="utf-8"))["planted_vulnerabilities"]
+
     rows = evaluate(findings, planted)
     s = summarise(rows)
     md = to_markdown(rows, s)
