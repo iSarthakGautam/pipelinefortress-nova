@@ -313,10 +313,10 @@
       </div>
     </div>
     <div class="row" style="margin-top:12px" data-step="4">
-      <div class="card good" style="flex:1"><h3>v2 batch · 4 patches apply cleanly</h3><p>Draft PRs · label <span class="mono">ai-drafted</span> · review: <b class="am">pending a human</b>. Nothing merges on "applies".</p></div>
+      <div class="card good" style="flex:1"><h3>v2 batch · 4 patches apply cleanly</h3><p>Draft PRs · label <span class="mono">ai-drafted</span> · review: <b class="gr">4 of 4 reviewed by human</b> (2 accepted w/ limits, 2 rejected). Nothing merges on "applies".</p></div>
       <div class="card bad" style="flex:1"><h3>v1 · PR-003 · lodash → 4.17.21</h3><p><b class="rd">Rejected by a human (R2)</b>: patch didn't apply, and that version still has open advisories; target ≥ 4.18.0.</p></div>
     </div>
-    <aside class="notes"><div class="say">"A fix arrives. Our bot can draft these, but with a rule: it's a draft pull request that a human decides on. We had a real failure here: the model wrote the diff and none of the four patches applied, because models can't count hunk lines. So now the model returns the whole file and code computes the diff. All four apply. But applying isn't correct, so people review them, and we show a rejection on purpose: the lodash bump the model was asked for still has open advisories. A rejected AI PR with a sharp reason is stronger evidence than four accepted ones."</div><ul><li>Be precise: the v2 batch is awaiting human review unless the review notes exist in <span class="mono">artifacts/prs/reviews/</span>. Say what's true on the day.</li></ul></aside>
+    <aside class="notes"><div class="say">"A fix arrives. Our bot can draft these, but with a rule: it's a draft pull request that a human decides on. We had a real failure here: the model wrote the diff and none of the four patches applied, because models can't count hunk lines. So now the model returns the whole file and code computes the diff. All four apply. But applying isn't correct, so people review them, and we show a rejection on purpose: the lodash bump the model was asked for still has open advisories. A rejected AI PR with a sharp reason is stronger evidence than four accepted ones."</div><ul><li>All 4 v2 patches apply cleanly, and all 4 have human reviews in <span class="mono">artifacts/prs/reviews/</span>: 2 accepted with qualifications/limits, 2 rejected. Say what is true on the day.</li></ul></aside>
   </section>
 
   <!-- 15. SHIP -->
@@ -362,12 +362,12 @@
       <tr data-step="2"><td class="gr">✓</td><td><b>Policy-as-code</b> (Checkov / OPA)</td><td class="dim mono">infra/policy/k8s.rego · CIS-mapped · passes 10/10, bad manifest fails 6</td></tr>
       <tr data-step="3"><td class="gr">✓</td><td><b>Hardened image + SBOM</b></td><td class="dim mono">docker/Dockerfile.hardened · Syft CycloneDX + SPDX · Trivy image</td></tr>
       <tr data-step="4"><td class="gr">✓</td><td><b>LLM triage + redaction + prompt library</b></td><td class="dim mono">ai/ · 4 redaction layers · validator · 9 versioned prompts</td></tr>
-      <tr data-step="5"><td class="gr">✓</td><td><b>Auto-generated remediation PRs</b> (4 drafts)</td><td class="dim mono">artifacts/prs/ · 4 of 4 apply · <span class="am">human review notes: tomorrow</span></td></tr>
+      <tr data-step="5"><td class="gr">✓</td><td><b>Auto-generated remediation PRs</b> (4 drafts)</td><td class="dim mono">artifacts/prs/ · 4 of 4 apply · <span class="gr">4/4 human reviewed (2 accept w/ limits, 2 reject)</span></td></tr>
       <tr data-step="6"><td class="gr">✓</td><td><b>Metrics dashboard</b></td><td class="dim mono">dashboards/ (Grafana) · demo/results.html · catch rate, funnel, AI quality</td></tr>
       <tr data-step="7"><td class="gr">✓</td><td><b>Final report</b> with maturity self-assessment</td><td class="dim mono">make report · docs/report/ · DSOMM level 2–3 · AI-use disclosure</td></tr>
     </table>
     <p class="dim" style="margin-top:12px;font-size:15px" data-step="8">Also shipped: baseline vulnerability report (static + runtime) · evidence index · 237 tests · this deck and its script.</p>
-    <aside class="notes"><div class="say">"The brief lists seven deliverables. Here is each one and where it lives in the repo: the pipeline, the policy as code, the hardened image with its bill of materials, the triage tool with redaction and a versioned prompt library, the remediation pull requests, the dashboard, and the report. Everything is built; what remains is the human sign-off, such as the reviewers' notes on the AI-drafted pull requests."</div><ul><li>Reveal one row per press; the sentence "all built" is true for the artifacts, and the human review notes are the only amber item.</li><li>Cut to the repo (editor window) for 15 s: show the folder tree so they see it is real.</li></ul></aside>
+    <aside class="notes"><div class="say">"The brief lists seven deliverables. Here is each one and where it lives in the repo: the pipeline, the policy as code, the hardened image with its bill of materials, the triage tool with redaction and a versioned prompt library, the remediation pull requests with human reviews, the dashboard, and the report. Everything is built, tested, and accounted for in the repo."</div><ul><li>Reveal one row per press; all seven deliverables are complete in the repo.</li><li>Cut to the repo (editor window) for 15 s: show the folder tree so they see it is real.</li></ul></aside>
   </section>
 
   <!-- 18. LIMITS -->
@@ -376,7 +376,7 @@
     <h2>Scope, limits and <span class="cy">what comes next</span></h2>
     <div class="row">
       <div class="col" style="flex:1">
-        <div class="card" data-step="1"><h3>Evaluation</h3><p>Smoke set of 10 rows today. The real <b>98-issue set is frozen</b> and goes to two independent reviewers next (tools and sheets are ready).</p></div>
+        <div class="card" data-step="1"><h3>Evaluation</h3><p>Ground truth v1 frozen at <b>98 consensus issues</b> (87 TP, 11 FP) with dual-annotator adjudication. Initial bake-off used 10 smoke fixtures; full offline re-scoring across all 98 is held-out for test.</p></div>
         <div class="card" data-step="2"><h3>The model</h3><p>Confidently wrong twice on 10. The validator catches unproven <i>claims</i>, not wrong <i>judgement</i>.</p></div>
       </div>
       <div class="col" style="flex:1">
@@ -384,7 +384,7 @@
         <div class="card" data-step="4"><h3>Bias</h3><p>We knew what we planted and tuned rules against it. Lab, not production.</p></div>
       </div>
     </div>
-    <aside class="notes"><div class="say">"Four honest limits. Our evaluation set is small and I labelled my own synthetic rows; the real set is frozen but needs two independent labellers. The model is confidently wrong sometimes, and a validator can't catch bad judgement. Some stages are advisory and haven't had their first green run. And we planted the bugs, so the catch rate is recall on known plants. We say this in the report because it's what makes the rest believable."</div></aside>
+    <aside class="notes"><div class="say">"Four honest limits. Our initial automated bake-off used 10 smoke fixtures; the full ground truth v1 is now frozen at 98 consensus issues with dual-annotator adjudication. The model is confidently wrong sometimes, and a validator can't catch bad judgement. Some stages are advisory and haven't had their first green run. And we planted the bugs, so the catch rate is recall on known plants. We say this in the report because it's what makes the rest believable."</div></aside>
   </section>
 
   <!-- 19. TEAM -->
@@ -398,7 +398,7 @@
       <div class="card tm ai" data-step="4"><div class="rl vi">R4</div><div class="rn">AI &amp; GenAI<small>triage, redaction, validator</small></div><input class="name" data-key="r4" placeholder="Name" aria-label="R4 name"><div class="ow">Triage, validator, PR bot, eval</div><div class="df">Defends: container &amp; supply chain</div></div>
       <div class="card tm good" data-step="5"><div class="rl gr">R5</div><div class="rn">Data, Metrics &amp; Report<small>evidence and QA</small></div><input class="name" data-key="r5" placeholder="Name" aria-label="R5 name"><div class="ow">Ground truth, dashboard, report</div><div class="df">Defends: pipeline gates</div></div>
     </div>
-    <p class="dim" style="margin-top:16px;font-size:15px" data-step="6">Names are typed here and remembered in this browser. To fix them in the file, edit the <span class="mono">value=""</span> of each <span class="mono">input.name</span> in <span class="mono">demo/index.html</span>.</p>
+    <p class="dim" style="margin-top:16px;font-size:15px" data-step="6">Cross-defense model: each role presents their own deliverable and defends a peer's component during Q&amp;A.</p>
     <aside class="notes"><div class="say">"Five of us, one shared grade. Each person owns one slice and has to be able to defend someone else's: the lead defends the AI flow, the scanner owner defends redaction, the container owner defends the evaluation method, the AI lead defends supply chain, and the metrics owner defends the gates. Introduce each person by name and one sentence about what they built."</div><ul><li>Click a name box and type; it is saved in this browser. Typing there does not trigger the deck's shortcuts.</li><li>Fill the names before the first rehearsal, then print the PDF so the names are baked in.</li></ul></aside>
   </section>
 
