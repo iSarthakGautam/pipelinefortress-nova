@@ -31,5 +31,7 @@
 | `artifacts/evidence/prometheus-llm-latency-query.png` | Prometheus PromQL evaluation for `pipelinefortress_triage_latency_seconds` histogram metrics | `7bedd18` (#69) | Prometheus query console evidence, 2026-10-31 |
 | `artifacts/evidence/grafana-pipelinefortress-dashboard.png` | PipelineFortress Grafana Dashboard (Executive view): scan status, gate decisions, vulnerability catch rate, triage throughput | `abac10b` (#70) | Grafana monitoring evidence, 2026-10-31 |
 | `artifacts/evidence/grafana-pipelinefortress-dashboard 2.png` | PipelineFortress Grafana Dashboard (Operational view): LLM latency distribution, model drift metrics, token and cost analysis | `79ee1ed` (#71) | Grafana monitoring evidence, 2026-10-31 |
+| `artifacts/evidence/github-actions-ci-pipeline-run.png` | GitHub Actions CI/CD Pipeline execution on PR #81 showing all 7 jobs green (`00-build-and-test`, `10-security-scanners`, `60-staging-smoke-test`, `20-normalize-and-baseline`, `30-triage-ai`, `50-security-gate`, `40-pr-comment`) | `9e53066` (#81) | GitHub Actions CI run #191 evidence, 2026-10-31 |
 
 | `demo/` | The animated demo deck (open `demo/index.html`) with the word-for-word script in `demo/DEMO_SCRIPT.md`; numbers on the slides trace to `eval/results.md`, `docs/BASELINE_VULNERABILITY_REPORT.md`, `docs/metrics/` and `artifacts/` | uncommitted at capture | Claude Code session for R5, 2026-10-29 |
+

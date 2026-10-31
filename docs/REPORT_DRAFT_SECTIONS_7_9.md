@@ -1,16 +1,11 @@
-# Capstone Report Contribution — R4 (AI & GenAI Lead)
-
-Draft text for **Sections 7, 8 and 9**. Every number below comes from a committed run (`eval/results/*.jsonl`, `eval/results.md`, `eval/redaction_results.md`, `eval/injection_demo_results.md`). Regenerate them with the commands in `CLAUDE.md`. Revised 2026-10-21 after the R4 audit; see `docs/R4_AUDIT_2026-10-21.md`.
-
----
-
-## Section 7: AI Triage Subsystem
+# 7. AI Triage Subsystem
 
 ### 7.1 Design principle
 *The LLM is a component, not the system. The safety is in the plumbing, not the prompt.* The model returns JSON only. It has no tools, no credentials, and cannot merge anything. A human merges.
 
-Pipeline (`ai/triage.py`):
-1. **Cluster (deterministic):** findings are grouped by `tool :: rule_id :: full path` (`ai/cluster.py`), one model call per cluster. We have not yet measured a reduction ratio on real scanner output, so none is claimed. Embedding-based clustering is not implemented.
+**Pipeline (`ai/triage.py`):**
+
+1. **Cluster (deterministic):** findings are grouped by `tool :: rule_id :: full path` (`ai/cluster.py`), one model call per cluster. We have not yet measured a reduction ratio on real scanner output, so none is claimed. Embedding-based clustering is deliberately not used (no embedding calls, one cheap key); on 264 real findings that key gives 1.03x.
 2. **Protect (deterministic):** four-layer redaction before any prompt is built (§8), then an injection check on every attacker-controllable string (`ai/injection.py`).
 3. **Generate (stochastic, bounded):** a local open-weight model via Ollama, `temperature=0`, `seed=42`, decoding constrained to a JSON Schema (`ai/schemas/triage_output.schema.json`). The model proposes a verdict, a short fix, and a structured list of the identifiers it relies on (`claims`).
 4. **Verify (deterministic):** the grounding validator (`ai/validate.py`) checks the model's claims, not the scanner's input. CWE IDs must exist in the MITRE catalogue (v4.20, 1,391 IDs, committed offline). CVEs, packages, fixed versions and file:line must match the scanner record (or a small offline CVE registry). CVE/CWE/file:line mentioned in the free-text `fix_summary` are extracted and checked too. Unproven claims are dropped, logged to `artifacts/llm_trace/rejections.jsonl`, and the finding becomes `NEEDS_HUMAN_REVIEW`. No retry.
@@ -23,7 +18,7 @@ Local inference means no source code, secret or infrastructure detail leaves the
 
 ---
 
-## Section 8: The Redaction Layer as a Security Control
+# 8. The Redaction Layer as a Security Control
 
 ### 8.1 Layers (`ai/redaction/redactor.py`)
 * **L1 structural allowlist:** only tool, rule id, severity, CWE/CVE, file *name*, line and snippet reach the model. Runner IDs, emails, full paths and commit data are dropped. `rule_id` and file names are attacker-chosen, so they are scrubbed and length-capped too.
@@ -39,7 +34,7 @@ Local inference means no source code, secret or infrastructure detail leaves the
 
 ---
 
-## Section 9: Evaluation, Bake-Off and Ablations
+# 9. Evaluation, Bake-Off and Ablations
 
 ### 9.1 Method and its limits
 The ground truth is **10 synthetic findings** (`eval/ground_truth.jsonl`) written and labelled by one person: no inter-rater agreement, no time split, no planted-vulnerability data (R3's `planted.yaml` is empty), no real scanner output (R2's normaliser is missing). This is a **smoke set, not a held-out evaluation**, and a one-finding difference is noise. Prompts were not tuned on these rows. Models are called through the real pipeline; outputs are frozen in `eval/results/`.

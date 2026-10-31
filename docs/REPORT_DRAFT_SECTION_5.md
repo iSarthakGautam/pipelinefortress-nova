@@ -1,6 +1,6 @@
 # 5. Pipeline implementation and baseline diffing
 
-Written by R2 (scanners and policy). Every number comes from a committed file:
+Every metric and evaluation result in this section comes directly from committed repository evidence:
 
 - `docs/metrics/GATE_TUNING.md`: gate run history and threshold simulation (PR #30).
 - `docs/metrics/DETECTOR_OVERLAP.md`: detector overlap and planted-vuln coverage (PR #28).
