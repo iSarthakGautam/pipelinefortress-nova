@@ -1,0 +1,15 @@
+{
+  "source_file": "data\\ground_truth_v1.jsonl",
+  "source_sha256": "fc0dd50cb01e0d1b7ae804c0147fa041ccea29509b3165b35f9255926fb964e6",
+  "timestamp_field": "first_seen_utc",
+  "cutoff_utc": "2026-10-25T00:00:00+00:00",
+  "rule": "development < cutoff; test >= cutoff",
+  "group_field": "duplicate_group",
+  "n_total": 98,
+  "n_development": 63,
+  "n_test": 35,
+  "development_sha256": "f45417d44a4a8cfdc6f479f41ecd95f986054a63b5a98fe1fe49fb2234a5f01e",
+  "test_sha256": "5b51e68aadf0a786a468607c52a73e8afd054d357ff82ba3ada7a1a0c29198ca",
+  "created_utc": "2026-10-31T09:24:35.876471+00:00",
+  "warning": "Freeze this manifest with the dataset and record approval. Timestamp chronology alone does not prove independence; check duplicates and prompt-tuning leakage."
+}
