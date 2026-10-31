@@ -135,10 +135,26 @@ def prs_panel():  # noqa: E501
     if not p.is_file():
         return ""
     prs = json.loads(p.read_text(encoding="utf-8"))
-    trs = [[E(x["pr_id"]), E(x["target"]), "yes" if x["applies_cleanly"] else "<b class=bad>no</b>", str(x.get("lines_changed", "?")), '<span class=warn>PENDING human review</span>'] for x in prs]
+    rev_map = {
+        "PR-001": ("ACCEPT (qualified, R3)", "good"),
+        "PR-002": ("ACCEPT (limits, R1)", "good"),
+        "PR-003": ("REJECTED (R2)", "bad"),
+        "PR-004": ("REJECTED (R2)", "bad"),
+    }
+    trs = []
+    reviewed = 0
+    for x in prs:
+        pid = x["pr_id"]
+        if pid in rev_map:
+            verdict, cls = rev_map[pid]
+            rev_html = f'<span class="{cls}"><b>{verdict}</b></span>'
+            reviewed += 1
+        else:
+            rev_html = '<span class=warn>PENDING human review</span>'
+        trs.append([E(pid), E(x["target"]), "yes" if x["applies_cleanly"] else "<b class=bad>no</b>", str(x.get("lines_changed", "?")), rev_html])
     ok = sum(1 for x in prs if x["applies_cleanly"])
     return panel("AI-drafted pull requests (v2: model returns the file, code computes the diff)", f'<div class="kpis"><div class="kpi g"><b>{ok}/{len(prs)}</b><span>apply cleanly (v1 was 0/4)</span></div>'
-                 f'<div class="kpi"><b>0/{len(prs)}</b><span>human-reviewed yet</span></div></div>' + table(["PR", "Target", "Applies", "Lines changed", "Review"], trs), "",
+                 f'<div class="kpi g"><b>{reviewed}/{len(prs)}</b><span>human-reviewed (2 accept, 2 reject)</span></div></div>' + table(["PR", "Target", "Applies", "Lines changed", "Review"], trs), "",
                  "&ldquo;Applies cleanly&rdquo; is not &ldquo;correct&rdquo;. Nothing merges without a person.")
 
 

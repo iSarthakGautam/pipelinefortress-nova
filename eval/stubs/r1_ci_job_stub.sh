@@ -8,17 +8,18 @@ set -u
 FINDINGS="${1:?findings.json}"; OUT="${2:?out dir}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 mkdir -p "$OUT"
-env -i PATH="$PATH" HOME="$HOME" \
+PYTHON="${PYTHON:-python3}"
+env -i PATH="$PATH" HOME="$HOME" PYTHON="$PYTHON" \
   ARTIFACTS_BASE="$(cd "$(dirname "$FINDINGS")" && pwd)" \
   LLM_MODEL="${LLM_MODEL:-llama3:latest}" \
   FORMAT_MODE="${FORMAT_MODE:-schema}" \
   OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434/v1}" \
   LLM_TRACE_DIR="$OUT/llm_trace" EGRESS_LOG="$OUT/egress.log" \
-  python3 "$ROOT/ai/triage.py" --comment-out "$OUT/pr_comment.md" --metrics-out "$OUT/metrics.prom" \
+  "$PYTHON" "$ROOT/ai/triage.py" --comment-out "$OUT/pr_comment.md" --metrics-out "$OUT/metrics.prom" \
   < "$FINDINGS" > "$OUT/findings.triaged.json"
 CODE=$?
 STUBS="$(dirname "$0")"
-[ -f "$OUT/pr_comment.md" ] && python3 "$STUBS/r1_post_comment_stub.py" "$OUT/pr_comment.md" "$OUT"
-[ -f "$OUT/metrics.prom" ] && python3 "$STUBS/r5_metrics_push_stub.py" "$OUT/metrics.prom" "$OUT"
+[ -f "$OUT/pr_comment.md" ] && "$PYTHON" "$STUBS/r1_post_comment_stub.py" "$OUT/pr_comment.md" "$OUT"
+[ -f "$OUT/metrics.prom" ] && "$PYTHON" "$STUBS/r5_metrics_push_stub.py" "$OUT/metrics.prom" "$OUT"
 echo "triage step exit code: $CODE  (the job must never fail the pipeline because the model is down)"
 exit $CODE
