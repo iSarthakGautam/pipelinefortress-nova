@@ -1,6 +1,6 @@
 # 3. Threat model
 
-Two models: the application we protect (and deliberately weaken), and the pipeline that protects it. R2's full pipeline rows are in §5.7; §3.2 summarises them, and this section adds the application, the AI path and the residual risk.
+Two models: the application we protect (and deliberately weaken), and the pipeline that protects it. The full pipeline rows are in §5.7; §3.2 summarizes them, and this section adds the application, the AI path and the residual risk.
 
 ## 3.1 Application: `vulnshop-api` and Juice Shop
 Both are intentionally vulnerable and run only in our lab (rules of engagement: no real-world targets). The planted vulnerabilities (`ground_truth/planted.yaml`) are the threats we model and measure against:
