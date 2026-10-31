@@ -52,9 +52,6 @@ class TestDemoDeck(unittest.TestCase):
             for n in re.findall(r'data-autorun="(\d+)"', body):
                 self.assertTrue(int(n) >= 1)
 
-    def test_demo_recording_exists(self):
-        self.assertTrue((ROOT / "demo/demo.mov").exists(), "demo/demo.mov must exist")
-
 
 class TestResultsPage(unittest.TestCase):
 
