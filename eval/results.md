@@ -2,7 +2,9 @@
 
 > **Read this first.** n = 10 synthetic findings written by the same person who built the pipeline, labelled by one person, with no inter-rater agreement and no time split. This is a **smoke set, not a held-out evaluation**. Differences of one finding are noise. Real scanner output and the planted-vulnerability ground truth are not available yet (R2/R3 deliverables).
 
-Ground truth: `eval/ground_truth.jsonl` (sha256 `55cfb6cf125d…`). Raw per-finding outputs: `eval/results/*.jsonl`. Models with frozen results: `llama3:latest`, `gemma2:latest`. `qwen2.5-coder:14b` from the plan was **not** run.
+Ground truth: `eval/ground_truth.jsonl` (sha256 `55cfb6cf125d…`). Raw per-finding outputs: `eval/results/*.jsonl`. Models with frozen results: `llama3:latest`, `gemma2:latest`, `llama3.1:8b`. `qwen2.5-coder:14b` from the plan was **not** run.
+
+> **STALE RESULTS.** `llama3.1:8b` were run against an older `eval/ground_truth.jsonl` (the file changed afterwards: `gt-002` snippet, `package` blocks on `gt-005`/`gt-006`). Re-run `make eval` on a machine with Ollama before quoting these numbers in the report.
 
 ## Bake-off and ablations
 
@@ -12,6 +14,7 @@ Ground truth: `eval/ground_truth.jsonl` (sha256 `55cfb6cf125d…`). Raw per-find
 | llama3:latest, full pipeline (schema decoding + validator) | 0.667 | 0.667 | 0.667 | 0.3 | 2 | 0 | 1.62 | 1 → 0 |
 | llama3:latest, **no validator** (counterfactual, same run) | 0.667 | 0.667 | 0.667 | 0.2 | 2 | 0 | 1.62 | 1 → 1 |
 | gemma2:latest, full pipeline (schema decoding + validator) | 0.667 | 0.333 | 0.444 | 0.6 | 1 | 0 | 2.8 | 2 → 0 |
+| llama3.1:8b, full pipeline (schema decoding + validator) | 1.0 | 0.333 | 0.5 | 0.1 | 4 | 0 | 10.22 | 1 → 0 |
 | llama3:latest, JSON mode, no schema | 0.667 | 0.333 | 0.444 | 0.5 | 2 | 0 | 1.43 | 2 → 0 |
 | llama3:latest, no format constraint | 0.667 | 0.333 | 0.444 | 0.5 | 2 | 0 | 1.46 | 2 → 0 |
 
@@ -21,6 +24,7 @@ Definitions: precision = TP/(TP+FP) over answered findings; **recall = TP / all 
 
 - `llama3:latest`: 100% of findings identical (verdict + fix text) across two runs
 - `gemma2:latest`: 100% of findings identical (verdict + fix text) across two runs
+- `llama3.1:8b`: 100% of findings identical (verdict + fix text) across two runs
 
 ## Per-finding results: llama3:latest, full pipeline
 

@@ -1,0 +1,4012 @@
+[
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-353",
+   "CWE-1357"
+  ],
+  "finding_id": "c001a3a582218305",
+  "location": {
+   "file": ".github/workflows/baseline-pipeline.yml",
+   "line": 508
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-605"
+  ],
+  "finding_id": "5b779ab1aed1573e",
+  "location": {
+   "file": "apps/vulnshop-api/app.py",
+   "line": 36
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B104",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-668"
+  ],
+  "finding_id": "77f19ad178c47ec0",
+  "location": {
+   "file": "apps/vulnshop-api/app.py",
+   "line": 36
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-377"
+  ],
+  "finding_id": "4749aa68174c145c",
+  "location": {
+   "file": "apps/vulnshop-api/config.py",
+   "line": 9
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B108",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-259"
+  ],
+  "finding_id": "0c5e91e53031e326",
+  "location": {
+   "file": "apps/vulnshop-api/config.py",
+   "line": 10
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B105",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-798"
+  ],
+  "finding_id": "e0d3038a59695afc",
+  "location": {
+   "file": "apps/vulnshop-api/config.py",
+   "line": 10
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-python-hardcoded-credential",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-798"
+  ],
+  "finding_id": "f784acaf3ff96df4",
+  "location": {
+   "file": "apps/vulnshop-api/config.py",
+   "line": 12
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-python-hardcoded-credential",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-259"
+  ],
+  "finding_id": "5c174cea93210fb3",
+  "location": {
+   "file": "apps/vulnshop-api/config.py",
+   "line": 13
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B105",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-798"
+  ],
+  "finding_id": "42b2e412c7dcd110",
+  "location": {
+   "file": "apps/vulnshop-api/config.py",
+   "line": 13
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-python-hardcoded-credential",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2020-14343"
+  ],
+  "cwe": [
+   "CWE-20"
+  ],
+  "finding_id": "5e0bae5a0ceb1a65",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "5.4",
+   "name": "pyyaml",
+   "version": "5.3.1"
+  },
+  "rule_id": "CVE-2020-14343",
+  "severity_norm": "CRITICAL",
+  "severity_raw": "Critical",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2021-33503"
+  ],
+  "cwe": [
+   "CWE-400"
+  ],
+  "finding_id": "8735549d085544be",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.5",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2021-33503",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-30861"
+  ],
+  "cwe": [
+   "CWE-539"
+  ],
+  "finding_id": "da79200db5d01c15",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.2.5",
+   "name": "flask",
+   "version": "2.0.1"
+  },
+  "rule_id": "CVE-2023-30861",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-32681"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "1ba9e52e8ca42e18",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.31.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2023-32681",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-43804"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "5e4e47b9987cd59c",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.17",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2023-43804",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-45803"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "e01c7f188eb7fb43",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.18",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2023-45803",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-22195"
+  ],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "d289bdab44f32f2f",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.3",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-22195",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-34064"
+  ],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "5e5bca889060c3a9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.4",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-34064",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-35195"
+  ],
+  "cwe": [
+   "CWE-670"
+  ],
+  "finding_id": "b70809e5a62c21e9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.32.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2024-35195",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-37891"
+  ],
+  "cwe": [
+   "CWE-669"
+  ],
+  "finding_id": "9c45f9a17877557d",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.19",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2024-37891",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-47081"
+  ],
+  "cwe": [
+   "CWE-522"
+  ],
+  "finding_id": "e2e024c1706efb4a",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.32.4",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2024-47081",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-56201"
+  ],
+  "cwe": [
+   "CWE-150"
+  ],
+  "finding_id": "01ee579d8dbab8a7",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.5",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-56201",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-56326"
+  ],
+  "cwe": [
+   "CWE-693",
+   "CWE-1336"
+  ],
+  "finding_id": "ea9f192105a273a0",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.5",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-56326",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-27516"
+  ],
+  "cwe": [
+   "CWE-1336"
+  ],
+  "finding_id": "d6d58d8b0457f374",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.6",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2025-27516",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-50181"
+  ],
+  "cwe": [
+   "CWE-601"
+  ],
+  "finding_id": "95f4060044dc6496",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.5.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-50181",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-66418"
+  ],
+  "cwe": [
+   "CWE-770"
+  ],
+  "finding_id": "3ae4f9960b6de354",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-66418",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-66471"
+  ],
+  "cwe": [
+   "CWE-409"
+  ],
+  "finding_id": "84c3bc00b7102f62",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-66471",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-21441"
+  ],
+  "cwe": [
+   "CWE-409"
+  ],
+  "finding_id": "0a3b722b79f189e9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.3",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-21441",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-25645"
+  ],
+  "cwe": [
+   "CWE-377"
+  ],
+  "finding_id": "9c6ff6a26228a583",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.33.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2026-25645",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-27205"
+  ],
+  "cwe": [
+   "CWE-524"
+  ],
+  "finding_id": "2a591d5dd757d082",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.3",
+   "name": "flask",
+   "version": "2.0.1"
+  },
+  "rule_id": "CVE-2026-27205",
+  "severity_norm": "LOW",
+  "severity_raw": "Low",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-44431"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "fdc9746b2926b8dd",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.7.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-44431",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-97687"
+  ],
+  "cwe": [
+   "CWE-295",
+   "CWE-440"
+  ],
+  "finding_id": "d7c22c3e99143c95",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.8.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-97687",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-97689"
+  ],
+  "cwe": [
+   "CWE-770"
+  ],
+  "finding_id": "25833a2c92a586f0",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.8.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-97689",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2020-14343"
+  ],
+  "cwe": [
+   "CWE-20"
+  ],
+  "finding_id": "ed453a15b681bccc",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "5.4",
+   "name": "pyyaml",
+   "version": "5.3.1"
+  },
+  "rule_id": "CVE-2020-14343",
+  "severity_norm": "CRITICAL",
+  "severity_raw": "9.8",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2021-33503"
+  ],
+  "cwe": [
+   "CWE-400"
+  ],
+  "finding_id": "f03ef17a8c0bf156",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2d4a3fee6de2fa45eb82169361918f759269b4ec, 1.26.5",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2021-33503",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.7",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-30861"
+  ],
+  "cwe": [
+   "CWE-539"
+  ],
+  "finding_id": "44214bb7c99c1ef0",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "70f906c51ce49c485f1d355703e9cc3386b1cc2b, afd63b16170b7c047f5758eb910c416511e9c965, 2.2.5, 2.3.2",
+   "name": "flask",
+   "version": "2.0.1"
+  },
+  "rule_id": "CVE-2023-30861",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.7",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-32681"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "0457d56ab901cd83",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "74ea7cf7a6a27a4eeb2ae24e162bcc942a6706d5, 2.31.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2023-32681",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "6.1",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-43804"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "ff82cfcb458c68d2",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "644124ecd0b6e417c527191f866daa05a5a2056d, 01220354d389cd05474713f8c982d05c9b17aafb, 2.0.6, 1.26.17",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2023-43804",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.1",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-45803"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "65e271c31006dfdd",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "4e98d57809dacab1cbe625fddeec1a290c478ea9, 2.0.7, 1.26.18",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2023-45803",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.7",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-22195"
+  ],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "4fb1c747c0de49a9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.3",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-22195",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.4",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-34064"
+  ],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "bf5067a0bed992f9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.4",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-34064",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.4",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-35195"
+  ],
+  "cwe": [
+   "CWE-670"
+  ],
+  "finding_id": "1efec74257d18cb1",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.32.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2024-35195",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.6",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-3651"
+  ],
+  "cwe": [
+   "CWE-400",
+   "CWE-1333"
+  ],
+  "finding_id": "6731b6b3940adce4",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1d365e17e10d72d0b7876316fc7b9ca0eebdd38d, 3.7",
+   "name": "idna",
+   "version": "2.9.0"
+  },
+  "rule_id": "CVE-2024-3651",
+  "severity_norm": "HIGH",
+  "severity_raw": "7.5",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-37891"
+  ],
+  "cwe": [
+   "CWE-669"
+  ],
+  "finding_id": "1520444938b398e2",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.19, 2.2.2",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2024-37891",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "4.4",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-47081"
+  ],
+  "cwe": [
+   "CWE-522"
+  ],
+  "finding_id": "80b61dde42563ee6",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.32.4",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2024-47081",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.3",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-56201"
+  ],
+  "cwe": [
+   "CWE-150"
+  ],
+  "finding_id": "5ff98b7aaf2cc6aa",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.5",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-56201",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.8",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-56326"
+  ],
+  "cwe": [
+   "CWE-693"
+  ],
+  "finding_id": "a43e053da3ed33d8",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.5",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-56326",
+  "severity_norm": "HIGH",
+  "severity_raw": "7.8",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-27516"
+  ],
+  "cwe": [
+   "CWE-1336"
+  ],
+  "finding_id": "58a3a35fd11d8a1b",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.6",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2025-27516",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.4",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-50181"
+  ],
+  "cwe": [
+   "CWE-601"
+  ],
+  "finding_id": "49276b1f99912d7d",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.5.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-50181",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.3",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-66418"
+  ],
+  "cwe": [
+   "CWE-770"
+  ],
+  "finding_id": "e063aca69f1f73de",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-66418",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.9",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-66471"
+  ],
+  "cwe": [
+   "CWE-409"
+  ],
+  "finding_id": "9cffabbd7aec082f",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-66471",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.9",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-21441"
+  ],
+  "cwe": [
+   "CWE-409"
+  ],
+  "finding_id": "ae47d612441c5fee",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.3",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-21441",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.9",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-25645"
+  ],
+  "cwe": [
+   "CWE-377"
+  ],
+  "finding_id": "fbf11ef1f31e169d",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.33.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2026-25645",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.5",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-27205"
+  ],
+  "cwe": [
+   "CWE-524"
+  ],
+  "finding_id": "663068cca6f72cae",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.3",
+   "name": "flask",
+   "version": "2.0.1"
+  },
+  "rule_id": "CVE-2026-27205",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "4.3",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-44431"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "3e80b520502f057f",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.7.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-44431",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.2",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-45409"
+  ],
+  "cwe": [
+   "CWE-1333"
+  ],
+  "finding_id": "19d85e7ad074a84e",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.15",
+   "name": "idna",
+   "version": "2.9.0"
+  },
+  "rule_id": "CVE-2026-45409",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "6.9",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-97687"
+  ],
+  "cwe": [
+   "CWE-295",
+   "CWE-440"
+  ],
+  "finding_id": "8549705d65305f3b",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.8.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-97687",
+  "severity_norm": "HIGH",
+  "severity_raw": "7.6",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-97689"
+  ],
+  "cwe": [
+   "CWE-770"
+  ],
+  "finding_id": "2052be088bfece71",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.8.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-97689",
+  "severity_norm": "HIGH",
+  "severity_raw": "8.9",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-295"
+  ],
+  "finding_id": "029626aaf18893fd",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2026.10.19",
+   "name": "certifi",
+   "version": "2026.7.22"
+  },
+  "rule_id": "GHSA-6q48-6c7w-9gw2",
+  "severity_norm": "CRITICAL",
+  "severity_raw": "9.1",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2020-14343"
+  ],
+  "cwe": [
+   "CWE-20"
+  ],
+  "finding_id": "5caca70736c37bd9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "5.4",
+   "name": "pyyaml",
+   "version": "5.3.1"
+  },
+  "rule_id": "CVE-2020-14343",
+  "severity_norm": "CRITICAL",
+  "severity_raw": "CRITICAL",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2021-33503"
+  ],
+  "cwe": [
+   "CWE-400"
+  ],
+  "finding_id": "c1a9aa1baea0de8a",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.5",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2021-33503",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-30861"
+  ],
+  "cwe": [
+   "CWE-539"
+  ],
+  "finding_id": "a31118ab382522e7",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.3.2, 2.2.5",
+   "name": "flask",
+   "version": "2.0.1"
+  },
+  "rule_id": "CVE-2023-30861",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-32681"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "ff545167b6a22d1f",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.31.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2023-32681",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-43804"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "63bf0c6b2e43b7a7",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.0.6, 1.26.17",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2023-43804",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2023-45803"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "89f04d9f83ce286d",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.0.7, 1.26.18",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2023-45803",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-22195"
+  ],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "4b6056be22f9329e",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.3",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-22195",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-34064"
+  ],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "b626b20fa4ba7c20",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.4",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-34064",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-35195"
+  ],
+  "cwe": [
+   "CWE-670"
+  ],
+  "finding_id": "2982ff11aaa2b665",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.32.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2024-35195",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-37891"
+  ],
+  "cwe": [
+   "CWE-669"
+  ],
+  "finding_id": "08ca47e3df962622",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.26.19, 2.2.2",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2024-37891",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-47081"
+  ],
+  "cwe": [
+   "CWE-522"
+  ],
+  "finding_id": "06a1c5832748e22b",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.32.4",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2024-47081",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-56201"
+  ],
+  "cwe": [
+   "CWE-150"
+  ],
+  "finding_id": "e3a66590a8049817",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.5",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-56201",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2024-56326"
+  ],
+  "cwe": [
+   "CWE-693",
+   "CWE-1336"
+  ],
+  "finding_id": "989054423b5ac354",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.5",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2024-56326",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-27516"
+  ],
+  "cwe": [
+   "CWE-1336"
+  ],
+  "finding_id": "7eee00ea5829787f",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.6",
+   "name": "jinja2",
+   "version": "3.0.1"
+  },
+  "rule_id": "CVE-2025-27516",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-50181"
+  ],
+  "cwe": [
+   "CWE-601"
+  ],
+  "finding_id": "c07f5753c06042c4",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.5.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-50181",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-66418"
+  ],
+  "cwe": [
+   "CWE-770"
+  ],
+  "finding_id": "dd93d0e4046a50a9",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-66418",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2025-66471"
+  ],
+  "cwe": [
+   "CWE-409"
+  ],
+  "finding_id": "7c652790aa3f2abe",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2025-66471",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-21441"
+  ],
+  "cwe": [
+   "CWE-409"
+  ],
+  "finding_id": "c4e72c04141400ac",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.6.3",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-21441",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-25645"
+  ],
+  "cwe": [
+   "CWE-377"
+  ],
+  "finding_id": "cb71511e521c3c8f",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.33.0",
+   "name": "requests",
+   "version": "2.25.1"
+  },
+  "rule_id": "CVE-2026-25645",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-27205"
+  ],
+  "cwe": [
+   "CWE-524"
+  ],
+  "finding_id": "770ac6a3ecd1cf7b",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "3.1.3",
+   "name": "flask",
+   "version": "2.0.1"
+  },
+  "rule_id": "CVE-2026-27205",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-44431"
+  ],
+  "cwe": [
+   "CWE-200"
+  ],
+  "finding_id": "7a34038a311c73a7",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.7.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-44431",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-97687"
+  ],
+  "cwe": [
+   "CWE-295",
+   "CWE-440"
+  ],
+  "finding_id": "9e43b8a755e77f57",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.8.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-97687",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [
+   "CVE-2026-97689"
+  ],
+  "cwe": [
+   "CWE-770"
+  ],
+  "finding_id": "21124ec2fc2b91f3",
+  "location": {
+   "file": "apps/vulnshop-api/requirements.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "2.8.0",
+   "name": "urllib3",
+   "version": "1.26.4"
+  },
+  "rule_id": "CVE-2026-97689",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-78"
+  ],
+  "finding_id": "e8370cc52841d389",
+  "location": {
+   "file": "apps/vulnshop-api/routes/pay.py",
+   "line": 6
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B404",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-78"
+  ],
+  "finding_id": "bb1523cfcf9c803a",
+  "location": {
+   "file": "apps/vulnshop-api/routes/pay.py",
+   "line": 22
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B602",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-78"
+  ],
+  "finding_id": "d89a8e07231217d1",
+  "location": {
+   "file": "apps/vulnshop-api/routes/pay.py",
+   "line": 22
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.flask.security.injection.subprocess-injection.subprocess-injection",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-78"
+  ],
+  "finding_id": "4c9da38a79137465",
+  "location": {
+   "file": "apps/vulnshop-api/routes/pay.py",
+   "line": 22
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-78"
+  ],
+  "finding_id": "38cf8dc6256147f5",
+  "location": {
+   "file": "apps/vulnshop-api/routes/pay.py",
+   "line": 22
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.lang.security.dangerous-subprocess-use.dangerous-subprocess-use",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-78"
+  ],
+  "finding_id": "cbf5f6a447404a92",
+  "location": {
+   "file": "apps/vulnshop-api/routes/pay.py",
+   "line": 22
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-python-flask-shell-injection",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-377"
+  ],
+  "finding_id": "e0ffdd7fd32e5d31",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 12
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B108",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "d3c0a1316fb666fc",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 34
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B608",
+  "severity_norm": "LOW",
+  "severity_raw": "MEDIUM",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "98291f33567cd132",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 34
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-python-sqli-formatted-query",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "d6cd121a3e9c8ae1",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 35
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.lang.security.audit.formatted-sql-query.formatted-sql-query",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "17a439fbe5c91f72",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 35
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "2128a2868176d25c",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 40
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "27e162b7e98a3456",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 42
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B608",
+  "severity_norm": "LOW",
+  "severity_raw": "MEDIUM",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-915"
+  ],
+  "finding_id": "31e678877358e3d8",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 42
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.django.security.injection.tainted-sql-string.tainted-sql-string",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-704"
+  ],
+  "finding_id": "4e550c8c8fc06eb2",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 42
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.flask.security.injection.tainted-sql-string.tainted-sql-string",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "f9807247eee6df36",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 42
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-python-sqli-formatted-query",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "8927252fefa1e12f",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 44
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.lang.security.audit.formatted-sql-query.formatted-sql-query",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-89"
+  ],
+  "finding_id": "bd2c37274b57be9b",
+  "location": {
+   "file": "apps/vulnshop-api/routes/search.py",
+   "line": 44
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-377"
+  ],
+  "finding_id": "310b626e09832948",
+  "location": {
+   "file": "apps/vulnshop-api/routes/user.py",
+   "line": 12
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "B108",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "bandit"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-352"
+  ],
+  "finding_id": "64c9949c975119da",
+  "location": {
+   "file": "apps/vulnshop-api/server.js",
+   "line": 3
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
+  "severity_norm": "LOW",
+  "severity_raw": "note",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-79"
+  ],
+  "finding_id": "cffbb5b231d9660c",
+  "location": {
+   "file": "apps/vulnshop-api/views/profile.html",
+   "line": 15
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "scanners.semgrep.rules.pf-jinja-autoescape-bypass",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "3dbfcc8726ca92e9",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "DS-0002",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "51e617bea884bcf2",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "DS-0026",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "19921567a0ba7a4f",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_DOCKER_2",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "5d00d2e641ae6a10",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_DOCKER_3",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "1a256229ccbb35be",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_DOCKER_7",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "f8a91c0bc9a5b050",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "DS-0001",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-250"
+  ],
+  "finding_id": "334cefea72ab3661",
+  "location": {
+   "file": "docker/Dockerfile",
+   "line": 7
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "dockerfile.security.missing-user.missing-user",
+  "severity_norm": "HIGH",
+  "severity_raw": "error",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "6111a034abc5af71",
+  "location": {
+   "file": "infra/k8s/deployment.hardened.yaml",
+   "line": 2
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV2_K8S_6",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "d9c54b406c64436a",
+  "location": {
+   "file": "infra/k8s/deployment.hardened.yaml",
+   "line": 2
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_15",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "892fbddb61401ed0",
+  "location": {
+   "file": "infra/k8s/deployment.hardened.yaml",
+   "line": 2
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_21",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "c48ad946a4d8a077",
+  "location": {
+   "file": "infra/k8s/deployment.hardened.yaml",
+   "line": 2
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_38",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "7c4647d6d5dc69ac",
+  "location": {
+   "file": "infra/k8s/deployment.hardened.yaml",
+   "line": 2
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_43",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "ba60b723a56e6968",
+  "location": {
+   "file": "infra/k8s/deployment.hardened.yaml",
+   "line": 4
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0110",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "3d38ca3c331aa734",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV2_K8S_6",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "e3151e3c44354154",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_10",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "b66dd1e32adb659e",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_11",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "208017cbec605f21",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_12",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "250b84cba4ed1384",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_13",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "a1e6c4522a271dd4",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_15",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "0fd2055651a5f39d",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_20",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "31962f2e69d024f7",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_21",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "6c3799ed1cc62844",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_22",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "297a5de98e3f1250",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_23",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "d44d71b24b176b76",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_28",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "a852b622e71a3065",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_29",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "65e0e1ec135fb912",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_31",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "c39d65527bbce3d0",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_37",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "4d84ab87141f2b26",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_38",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "3ded14e37f0a60d4",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_40",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "cdc3d008188b0029",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_43",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "c12c1db77613acfe",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_8",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "61f54e688cf50644",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 1
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "CKV_K8S_9",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "error",
+  "tool": "checkov"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "c2ed8a2b533f23a2",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 3
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0110",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "e67ffa790bd92812",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 14
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0118",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "d284bef6fa2d901b",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0001",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "8e584335f19124c0",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0003",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "9701dacc66dff10e",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0004",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "09a8adc627d9b759",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0011",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "8fe29faa8ef1abb0",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0012",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "0d418c79ae557823",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0014",
+  "severity_norm": "HIGH",
+  "severity_raw": "HIGH",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "d3f2096a92145380",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0015",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "6e54257e1b8abf0d",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0016",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "b32c61f4a9acd1b0",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0018",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "2cd47307cdc8621c",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0020",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "e11dc6628d767a28",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0021",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "1dda8a50b3bc65aa",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0030",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "7a818d29affa35cb",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0104",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "MEDIUM",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "7dd584459e613bb4",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 16
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "KSV-0106",
+  "severity_norm": "LOW",
+  "severity_raw": "LOW",
+  "tool": "trivy"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-732"
+  ],
+  "finding_id": "045726bfc4b033fd",
+  "location": {
+   "file": "infra/k8s/deployment.yaml",
+   "line": 20
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "yaml.kubernetes.security.allow-privilege-escalation.allow-privilege-escalation",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2024-23342",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2024-23342"
+  ],
+  "cwe": [
+   "CWE-203",
+   "CWE-208",
+   "CWE-385"
+  ],
+  "finding_id": "84cac65d228806e2",
+  "location": {
+   "file": "requirements-scanners.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": null,
+   "name": "ecdsa",
+   "version": "0.19.2"
+  },
+  "rule_id": "CVE-2024-23342",
+  "severity_norm": "HIGH",
+  "severity_raw": "High",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-55244",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-55244"
+  ],
+  "cwe": [
+   "CWE-248"
+  ],
+  "finding_id": "2cc2d02e21d408bb",
+  "location": {
+   "file": "requirements-scanners.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.0.9",
+   "name": "asteval",
+   "version": "1.0.6"
+  },
+  "rule_id": "CVE-2026-55244",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "GHSA-9w56-46f6-3qhx",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [],
+  "cwe": [],
+  "finding_id": "3a95b3165ea3d8f1",
+  "location": {
+   "file": "requirements-scanners.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.0.9",
+   "name": "asteval",
+   "version": "1.0.6"
+  },
+  "rule_id": "GHSA-9w56-46f6-3qhx",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2024-23342",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2024-23342"
+  ],
+  "cwe": [
+   "CWE-203",
+   "CWE-208",
+   "CWE-385"
+  ],
+  "finding_id": "455673f09b737409",
+  "location": {
+   "file": "requirements-scanners.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": null,
+   "name": "ecdsa",
+   "version": "0.19.2"
+  },
+  "rule_id": "CVE-2024-23342",
+  "severity_norm": "HIGH",
+  "severity_raw": "7.4",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-102734",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-102734"
+  ],
+  "cwe": [
+   "CWE-693",
+   "CWE-749",
+   "CWE-913"
+  ],
+  "finding_id": "733d94ef239353ce",
+  "location": {
+   "file": "requirements-scanners.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.0.9",
+   "name": "asteval",
+   "version": "1.0.6"
+  },
+  "rule_id": "CVE-2026-102734",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.5",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-55244",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-55244"
+  ],
+  "cwe": [
+   "CWE-248"
+  ],
+  "finding_id": "7cfb930a3077f874",
+  "location": {
+   "file": "requirements-scanners.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.0.9",
+   "name": "asteval",
+   "version": "1.0.6"
+  },
+  "rule_id": "CVE-2026-55244",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.0",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-114603",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-114603"
+  ],
+  "cwe": [
+   "CWE-400",
+   "CWE-1333"
+  ],
+  "finding_id": "ec2cac5efe6bba6c",
+  "location": {
+   "file": "requirements-semgrep.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.45.1",
+   "name": "opentelemetry-api",
+   "version": "1.37.0"
+  },
+  "rule_id": "CVE-2026-114603",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-59951",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-59951"
+  ],
+  "cwe": [
+   "CWE-400",
+   "CWE-772"
+  ],
+  "finding_id": "ed19f371bfb9439c",
+  "location": {
+   "file": "requirements-semgrep.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.30.0",
+   "name": "mcp",
+   "version": "1.29.0"
+  },
+  "rule_id": "CVE-2026-59951",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "Medium",
+  "tool": "grype"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-114603",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-114603"
+  ],
+  "cwe": [
+   "CWE-400",
+   "CWE-1333"
+  ],
+  "finding_id": "77546455418cdd21",
+  "location": {
+   "file": "requirements-semgrep.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.45.1",
+   "name": "opentelemetry-api",
+   "version": "1.37.0"
+  },
+  "rule_id": "CVE-2026-114603",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "5.3",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": {
+    "expires": "2027-01-15",
+    "id": "CVE-2026-59951",
+    "owner": "AmirdeshSU"
+   },
+   "is_new": true
+  },
+  "cve": [
+   "CVE-2026-59951"
+  ],
+  "cwe": [
+   "CWE-400",
+   "CWE-770",
+   "CWE-772"
+  ],
+  "finding_id": "5fcfb2b410e2b3ce",
+  "location": {
+   "file": "requirements-semgrep.txt",
+   "line": 0
+  },
+  "package": {
+   "fixed_version": "1.30.0, 2.2.0",
+   "name": "mcp",
+   "version": "1.29.0"
+  },
+  "rule_id": "CVE-2026-59951",
+  "severity_norm": "HIGH",
+  "severity_raw": "7.5",
+  "tool": "osv"
+ },
+ {
+  "baseline": {
+   "exception": null,
+   "is_new": false
+  },
+  "cve": [],
+  "cwe": [
+   "CWE-939"
+  ],
+  "finding_id": "86291a68875cc3d1",
+  "location": {
+   "file": "scripts/install_hooks.py",
+   "line": 130
+  },
+  "package": {
+   "fixed_version": null,
+   "name": null,
+   "version": null
+  },
+  "rule_id": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+  "severity_norm": "MEDIUM",
+  "severity_raw": "warning",
+  "tool": "semgrep"
+ }
+]
